@@ -1,0 +1,33 @@
+[packages]
+django = "==3.2.4"
+django-cors-headers = "==3.13.0"
+psycopg2 = "==2.9.3"
+psycopg2-binary = "==2.9.3"
+djangorestframework = "==3.13.1"  # License: BSD
+django-filter = "==2.2.0"
+djangorestframework-simplejwt = "==5.2.0"
+django-countries = "==7.3.2"  # License: MIT
+django-phonenumber-field = "==6.1.0"
+phonenumbers = "==8.12.49"
+django-extensions = "==3.1.5"
+celery = "==5.2.7"
+redis = "==4.3.3"
+django-celery-beat = "==2.3.0"
+requests = "==2.27.1"
+twilio = "==7.9.2"
+django-environ = "==0.8.1"
+django-js-reverse = "==0.9.1"
+numpy = "==1.22.2"
+gunicorn = "*"
+django-cryptography = "*"
+django-sendgrid-v5 = "*"
+paystackapi = "*"
+iso4217 = "*"
+django-redis = "*"
+sentry-sdk = {extras = ["django"], version = "*"}
+
+[requires]
+python_version = "3.9"
+
+[dev-packages]
+pylint = "*"

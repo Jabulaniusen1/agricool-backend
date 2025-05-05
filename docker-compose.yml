@@ -1,0 +1,163 @@
+# Initial docker-compose config file which contains the common settings for all environments
+services:
+  ##
+  # Dependencies
+  ##
+  db:
+    image: postgis/postgis:12-3.3-alpine
+    restart: always
+    volumes:
+      - base_postgres_data:/var/lib/postgresql/data
+    networks:
+      - base_network
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_DB: base
+      POSTGRES_USER: base
+      POSTGRES_PASSWORD: base
+    ports:
+      - 54321:5432
+    healthcheck:
+      test:
+        ["CMD-SHELL", "sh -c 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB'"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  valkey:
+    restart: always
+    image: "valkey/valkey:7-alpine"
+    networks:
+      - base_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+
+  ##
+  # Gateway / reverse proxy for the underlaying services
+  ##
+  gateway:
+    restart: always
+    networks:
+      - base_network
+    links:
+      - web:base_api
+      - vcca_air_service:air_api
+      - farmer_web:farmer_api
+      - impact_dashboard_web:impact_api
+    volumes:
+      - caddy_data:/data
+      - base_api_media_data:/app/base/media
+    ports:
+      - 80:80
+      - 443:443
+
+  ##
+  # Web Services
+  ##
+  web:
+    restart: always
+    volumes:
+      - base_api_media_data:/app/base/media
+    links:
+      - db
+      - valkey
+      - scraping_india
+      - scraping_nigeria
+    networks:
+      - base_network
+    environment:
+      DJANGO_SETTINGS_MODULE: "base.settings"
+      PGHOST: db
+      REDIS_HOST: valkey
+      PRICE_PREDICTION_URL_INDIA: http://scraping_india:5000/prediction
+      PRICE_PREDICTION_URL_NIGERIA: http://scraping_nigeria:5000/prediction
+
+  celery:
+    command: bash -c 'pipenv run celery -A base worker -B --scheduler django -l info'
+    restart: always
+    environment:
+      DJANGO_SETTINGS_MODULE: "base.settings"
+      PYTHONUNBUFFERED: 1
+      DISPLAY: :1
+      PGHOST: db
+      REDIS_HOST: valkey
+    links:
+      - db
+      - valkey
+    networks:
+      - base_network
+
+  impact_dashboard_web:
+    restart: always
+    networks:
+      - base_network
+    links:
+      - db
+
+  impact_dashboard_scheduler:
+    restart: always
+    networks:
+      - base_network
+    links:
+      - db
+
+  vcca_air_service:
+    restart: always
+    networks:
+      - base_network
+    links:
+      - db
+
+  farmer_web:
+    restart: always
+    networks:
+      - base_network
+    links:
+      - db
+
+  farmer_scheduler:
+    restart: always
+    networks:
+      - base_network
+    links:
+      - db
+
+  scraping_india:
+    restart: always
+    volumes:
+      - ml4_india_data:/Scraping-module/data
+    expose:
+      - 5000
+    networks:
+      - base_network
+    links:
+      - valkey
+    environment:
+      FLASK_CACHE_TYPE: RedisCache
+      FLASK_CACHE_REDIS_HOST: valkey
+    command: pipenv run gunicorn prediction:app --workers 1 --bind 0.0.0.0:5000 --log-level=warning
+
+  scraping_nigeria:
+    restart: always
+    volumes:
+      - ml4_nigeria_data:/Scraping-module/data
+    expose:
+      - 5000
+    networks:
+      - base_network
+    links:
+      - valkey
+    environment:
+      FLASK_CACHE_TYPE: RedisCache
+      FLASK_CACHE_REDIS_HOST: valkey
+    command: pipenv run gunicorn prediction:app --workers 1 --bind 0.0.0.0:5000 --log-level=warning
+
+volumes:
+  caddy_data:
+  base_postgres_data:
+  ml4_india_data:
+  ml4_nigeria_data:
+  base_api_media_data:
+
+networks:
+  base_network:

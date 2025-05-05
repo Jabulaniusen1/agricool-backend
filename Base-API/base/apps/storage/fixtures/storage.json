@@ -1,0 +1,2273 @@
+[
+  {
+    "model": "storage.location",
+    "pk": 1,
+    "fields": {
+      "name": "Location A",
+      "state": "",
+      "city": "",
+      "street": "",
+      "street_number": 0,
+      "zip_code": "",
+      "point": [0.0, 0.0],
+      "company": 1
+    }
+  },
+  {
+    "model": "storage.location",
+    "pk": 2,
+    "fields": {
+      "name": "Location B",
+      "state": "",
+      "city": "",
+      "street": "",
+      "street_number": 0,
+      "zip_code": "",
+      "point": [5.0, 3.0],
+      "company": 1
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 1,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 5.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 2,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 5.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 3,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 5.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 4,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 5,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 6,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 7,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 8,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 9,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 10,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 11,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 12,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 13,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 14,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 15,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 16,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 17,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 18,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 19,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 20,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 21,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 22,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 23,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 24,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 25,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 26,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 27,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 28,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 29,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 30,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 31,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 32,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 33,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 34,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 35,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 36,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 37,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 38,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 39,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 40,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 41,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 42,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 43,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 44,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 45,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 46,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 47,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 48,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 49,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 50,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 51,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 52,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 53,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 54,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 55,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 56,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 57,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 58,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 59,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.pricing",
+    "pk": 60,
+    "fields": {
+      "pricing_type": "PERIODICITY",
+      "fixed_rate": 0.0,
+      "daily_rate": 10.0
+    }
+  },
+  {
+    "model": "storage.coolingunit",
+    "pk": 1,
+    "fields": {
+      "location": 1,
+      "name": "Colling Unit A",
+      "food_capacity_in_metric_tons": 13.5,
+      "capacity_in_metric_tons": 15.0,
+      "capacity_in_number_crates": 20,
+      "metric": "CRATES",
+      "sensor": false,
+      "cooling_unit_type": "MARKET_STORAGE_ROOM",
+      "time_pickup_to_customer": 2.0,
+      "crate_length": 55.88,
+      "crate_width": 40.64,
+      "crate_height": 24.13,
+      "public": false,
+      "operators": [3]
+    }
+  },
+  {
+    "model": "storage.coolingunit",
+    "pk": 2,
+    "fields": {
+      "location": 2,
+      "name": "Cooling Unit B",
+      "food_capacity_in_metric_tons": 4.0,
+      "capacity_in_metric_tons": 5.0,
+      "capacity_in_number_crates": 5,
+      "metric": "CRATES",
+      "sensor": false,
+      "cooling_unit_type": "FARM_GATE_STORAGE_ROOM",
+      "time_pickup_to_customer": 2.0,
+      "crate_length": 55.88,
+      "crate_width": 40.64,
+      "crate_height": 24.13,
+      "public": false,
+      "operators": [4]
+    }
+  },
+  {
+    "model": "storage.croptype",
+    "pk": 1,
+    "fields": {
+      "name": "Fruits"
+    }
+  },
+  {
+    "model": "storage.croptype",
+    "pk": 2,
+    "fields": {
+      "name": "Vegetables"
+    }
+  },
+  {
+    "model": "storage.croptype",
+    "pk": 3,
+    "fields": {
+      "name": "Root Vegetables"
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 1,
+    "fields": {
+      "crop_type": 1,
+      "name": "Apple",
+      "image": "crop_images/apple.png",
+      "optimal_storage_temperature": "-1",
+      "approximate_shelf_life": "3-6 months",
+      "harvested_today": 100,
+      "harvested_yesterday": 79,
+      "harvested_day_before_yesterday": 62,
+      "harvested_before": 48,
+      "size_selection_1": "size 50 mm",
+      "size_selection_2": "size 70 mm",
+      "size_selection_3": "size 90 mm"
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 2,
+    "fields": {
+      "crop_type": 1,
+      "name": "Banana",
+      "image": "crop_images/banana.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "1-4 weeks",
+      "harvested_today": 100,
+      "harvested_yesterday": 66,
+      "harvested_day_before_yesterday": 44,
+      "harvested_before": 29,
+      "size_selection_1": null,
+      "size_selection_2": null,
+      "size_selection_3": null
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 3,
+    "fields": {
+      "crop_type": 2,
+      "name": "Beans",
+      "image": "crop_images/beans.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "7-10 days",
+      "harvested_today": 100,
+      "harvested_yesterday": null,
+      "harvested_day_before_yesterday": null,
+      "harvested_before": null,
+      "size_selection_1": null,
+      "size_selection_2": null,
+      "size_selection_3": null
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 4,
+    "fields": {
+      "crop_type": 3,
+      "name": "Beetroot",
+      "image": "crop_images/beetroot.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "4 month",
+      "harvested_today": 100,
+      "harvested_yesterday": null,
+      "harvested_day_before_yesterday": null,
+      "harvested_before": null,
+      "size_selection_1": null,
+      "size_selection_2": null,
+      "size_selection_3": null
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 5,
+    "fields": {
+      "crop_type": 2,
+      "name": "Capsicum (Bell Pepper)",
+      "image": "crop_images/bellPepper.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "2-3 weeks",
+      "harvested_today": 100,
+      "harvested_yesterday": 60,
+      "harvested_day_before_yesterday": 36,
+      "harvested_before": 21,
+      "size_selection_1": null,
+      "size_selection_2": null,
+      "size_selection_3": null
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 6,
+    "fields": {
+      "crop_type": 2,
+      "name": "Bitter Gourd",
+      "image": "crop_images/bitterGourd.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "2-3 weeks",
+      "harvested_today": 100,
+      "harvested_yesterday": null,
+      "harvested_day_before_yesterday": null,
+      "harvested_before": null,
+      "size_selection_1": "Size Above 150 to 200 mm",
+      "size_selection_2": "Size Above 100 to 150 mm",
+      "size_selection_3": "Size 60 to 100 mm"
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 7,
+    "fields": {
+      "crop_type": 2,
+      "name": "Bottle Gourd",
+      "image": "crop_images/bottleGourd.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "N/A",
+      "harvested_today": 100,
+      "harvested_yesterday": null,
+      "harvested_day_before_yesterday": null,
+      "harvested_before": null,
+      "size_selection_1": null,
+      "size_selection_2": null,
+      "size_selection_3": null
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 8,
+    "fields": {
+      "crop_type": 2,
+      "name": "Broccoli",
+      "image": "crop_images/broccoli1.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "10-14 days",
+      "harvested_today": 100,
+      "harvested_yesterday": null,
+      "harvested_day_before_yesterday": null,
+      "harvested_before": null,
+      "size_selection_1": null,
+      "size_selection_2": null,
+      "size_selection_3": null
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 9,
+    "fields": {
+      "crop_type": 2,
+      "name": "Cabbage",
+      "image": "crop_images/cabbage.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "3-6 weeks",
+      "harvested_today": 100,
+      "harvested_yesterday": null,
+      "harvested_day_before_yesterday": null,
+      "harvested_before": null,
+      "size_selection_1": null,
+      "size_selection_2": null,
+      "size_selection_3": null
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 10,
+    "fields": {
+      "crop_type": 3,
+      "name": "Carrot",
+      "image": "crop_images/carrot.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "3-6 months",
+      "harvested_today": 100,
+      "harvested_yesterday": 33,
+      "harvested_day_before_yesterday": 11,
+      "harvested_before": 4,
+      "size_selection_1": "Size 150 to 200 mm",
+      "size_selection_2": "Size Above 200to 275 mm",
+      "size_selection_3": "Size Below 150 & above 275 mm"
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 11,
+    "fields": {
+      "crop_type": 3,
+      "name": "Tapioca (Cassava)",
+      "image": "crop_images/cassava.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "1-2 months",
+      "harvested_today": 100,
+      "harvested_yesterday": 81,
+      "harvested_day_before_yesterday": 65,
+      "harvested_before": 52,
+      "size_selection_1": null,
+      "size_selection_2": null,
+      "size_selection_3": null
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 12,
+    "fields": {
+      "crop_type": 2,
+      "name": "Cauliflower",
+      "image": "",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "3-4 weeks",
+      "harvested_today": 100,
+      "harvested_yesterday": null,
+      "harvested_day_before_yesterday": null,
+      "harvested_before": null,
+      "size_selection_1": null,
+      "size_selection_2": null,
+      "size_selection_3": null
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 13,
+    "fields": {
+      "crop_type": 2,
+      "name": "Bathua (Chenopodium)",
+      "image": "",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "1-2 weeks",
+      "harvested_today": 100,
+      "harvested_yesterday": null,
+      "harvested_day_before_yesterday": null,
+      "harvested_before": null,
+      "size_selection_1": null,
+      "size_selection_2": null,
+      "size_selection_3": null
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 14,
+    "fields": {
+      "crop_type": 3,
+      "name": "Colacasia",
+      "image": "crop_images/cocoyam.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "4 months",
+      "harvested_today": 100,
+      "harvested_yesterday": null,
+      "harvested_day_before_yesterday": null,
+      "harvested_before": null,
+      "size_selection_1": null,
+      "size_selection_2": null,
+      "size_selection_3": null
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 15,
+    "fields": {
+      "crop_type": 2,
+      "name": "Coriander",
+      "image": "crop_images/coriander.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "2 weeks",
+      "harvested_today": 100,
+      "harvested_yesterday": null,
+      "harvested_day_before_yesterday": null,
+      "harvested_before": null,
+      "size_selection_1": null,
+      "size_selection_2": null,
+      "size_selection_3": null
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 16,
+    "fields": {
+      "crop_type": 2,
+      "name": "Cucumber",
+      "image": "crop_images/cucumber.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "7 days",
+      "harvested_today": 100,
+      "harvested_yesterday": 54,
+      "harvested_day_before_yesterday": 29,
+      "harvested_before": 16,
+      "size_selection_1": null,
+      "size_selection_2": null,
+      "size_selection_3": null
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 17,
+    "fields": {
+      "crop_type": 2,
+      "name": "Drum stick",
+      "image": "crop_images/drumStick.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "N/A",
+      "harvested_today": 100,
+      "harvested_yesterday": null,
+      "harvested_day_before_yesterday": null,
+      "harvested_before": null,
+      "size_selection_1": null,
+      "size_selection_2": null,
+      "size_selection_3": null
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 18,
+    "fields": {
+      "crop_type": 2,
+      "name": "Brinjal (Aubergine)",
+      "image": "crop_images/eggplant.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "1-2 weeks",
+      "harvested_today": 100,
+      "harvested_yesterday": 59,
+      "harvested_day_before_yesterday": 35,
+      "harvested_before": 21,
+      "size_selection_1": null,
+      "size_selection_2": null,
+      "size_selection_3": null
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 19,
+    "fields": {
+      "crop_type": 2,
+      "name": "Flat Beans",
+      "image": "crop_images/flatBeans.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "N/A",
+      "harvested_today": 100,
+      "harvested_yesterday": null,
+      "harvested_day_before_yesterday": null,
+      "harvested_before": null,
+      "size_selection_1": null,
+      "size_selection_2": null,
+      "size_selection_3": null
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 20,
+    "fields": {
+      "crop_type": 3,
+      "name": "Garlic",
+      "image": "crop_images/garlic.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "6-7 months",
+      "harvested_today": 100,
+      "harvested_yesterday": null,
+      "harvested_day_before_yesterday": null,
+      "harvested_before": null,
+      "size_selection_1": null,
+      "size_selection_2": null,
+      "size_selection_3": null
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 21,
+    "fields": {
+      "crop_type": 3,
+      "name": "Ginger",
+      "image": "crop_images/ginger.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "6 months",
+      "harvested_today": 100,
+      "harvested_yesterday": null,
+      "harvested_day_before_yesterday": null,
+      "harvested_before": null,
+      "size_selection_1": null,
+      "size_selection_2": null,
+      "size_selection_3": null
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 22,
+    "fields": {
+      "crop_type": 1,
+      "name": "Grapes",
+      "image": "crop_images/grapes.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "1-6 months",
+      "harvested_today": 100,
+      "harvested_yesterday": 78,
+      "harvested_day_before_yesterday": 61,
+      "harvested_before": 47,
+      "size_selection_1": null,
+      "size_selection_2": null,
+      "size_selection_3": null
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 23,
+    "fields": {
+      "crop_type": 2,
+      "name": "Green Chilli",
+      "image": "crop_images/greenChilli.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "2-3 weeks",
+      "harvested_today": 100,
+      "harvested_yesterday": null,
+      "harvested_day_before_yesterday": null,
+      "harvested_before": null,
+      "size_selection_1": null,
+      "size_selection_2": null,
+      "size_selection_3": null
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 24,
+    "fields": {
+      "crop_type": 2,
+      "name": "Green Gram",
+      "image": "crop_images/greenGram.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "N/A",
+      "harvested_today": 100,
+      "harvested_yesterday": null,
+      "harvested_day_before_yesterday": null,
+      "harvested_before": null,
+      "size_selection_1": null,
+      "size_selection_2": null,
+      "size_selection_3": null
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 25,
+    "fields": {
+      "crop_type": 1,
+      "name": "Guava",
+      "image": "crop_images/guava.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "2-3 weeks",
+      "harvested_today": 100,
+      "harvested_yesterday": 59,
+      "harvested_day_before_yesterday": 35,
+      "harvested_before": 21,
+      "size_selection_1": "Size 50 to 90 mm",
+      "size_selection_2": "Size Below 50 and more than 90 mm",
+      "size_selection_3": "Size Below 50 and more than 90 mm"
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 26,
+    "fields": {
+      "crop_type": 2,
+      "name": "Ivy Gourd",
+      "image": "crop_images/ivy-Gourd.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "N/A",
+      "harvested_today": 100,
+      "harvested_yesterday": null,
+      "harvested_day_before_yesterday": null,
+      "harvested_before": null,
+      "size_selection_1": null,
+      "size_selection_2": null,
+      "size_selection_3": null
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 27,
+    "fields": {
+      "crop_type": 1,
+      "name": "Jackfruit",
+      "image": "",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "2-4 weeks",
+      "harvested_today": 100,
+      "harvested_yesterday": null,
+      "harvested_day_before_yesterday": null,
+      "harvested_before": null,
+      "size_selection_1": null,
+      "size_selection_2": null,
+      "size_selection_3": null
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 28,
+    "fields": {
+      "crop_type": 1,
+      "name": "Lemon",
+      "image": "crop_images/lemon.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "1-6 months",
+      "harvested_today": 100,
+      "harvested_yesterday": null,
+      "harvested_day_before_yesterday": null,
+      "harvested_before": null,
+      "size_selection_1": "Size Above 30 mm",
+      "size_selection_2": "Size 20 to 30 mm",
+      "size_selection_3": "Size Below 20 mm"
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 29,
+    "fields": {
+      "crop_type": 2,
+      "name": "Lettuce",
+      "image": "crop_images/lettuce.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "2-3 weeks",
+      "harvested_today": 100,
+      "harvested_yesterday": null,
+      "harvested_day_before_yesterday": null,
+      "harvested_before": null,
+      "size_selection_1": null,
+      "size_selection_2": null,
+      "size_selection_3": null
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 30,
+    "fields": {
+      "crop_type": 1,
+      "name": "Litchi",
+      "image": "crop_images/litchi.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "3-5 weeks",
+      "harvested_today": 100,
+      "harvested_yesterday": null,
+      "harvested_day_before_yesterday": null,
+      "harvested_before": null,
+      "size_selection_1": "Size 33 mm",
+      "size_selection_2": "Size 28 mm",
+      "size_selection_3": "Size 23 mm"
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 31,
+    "fields": {
+      "crop_type": 1,
+      "name": "Mango",
+      "image": "crop_images/mango.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "2-3 weeks",
+      "harvested_today": 100,
+      "harvested_yesterday": 57,
+      "harvested_day_before_yesterday": 32,
+      "harvested_before": 18,
+      "size_selection_1": null,
+      "size_selection_2": null,
+      "size_selection_3": null
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 32,
+    "fields": {
+      "crop_type": 1,
+      "name": "Musk Melon",
+      "image": "crop_images/melon.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "3-4 weeks",
+      "harvested_today": 100,
+      "harvested_yesterday": 48,
+      "harvested_day_before_yesterday": 24,
+      "harvested_before": 11,
+      "size_selection_1": null,
+      "size_selection_2": null,
+      "size_selection_3": null
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 33,
+    "fields": {
+      "crop_type": 2,
+      "name": "Mint leaves",
+      "image": "crop_images/mint.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "2-3 weeks",
+      "harvested_today": 100,
+      "harvested_yesterday": null,
+      "harvested_day_before_yesterday": null,
+      "harvested_before": null,
+      "size_selection_1": null,
+      "size_selection_2": null,
+      "size_selection_3": null
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 34,
+    "fields": {
+      "crop_type": 2,
+      "name": "Methi",
+      "image": "crop_images/moringa-leaves.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "N/A",
+      "harvested_today": 100,
+      "harvested_yesterday": null,
+      "harvested_day_before_yesterday": null,
+      "harvested_before": null,
+      "size_selection_1": null,
+      "size_selection_2": null,
+      "size_selection_3": null
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 35,
+    "fields": {
+      "crop_type": 2,
+      "name": "Mushroom",
+      "image": "crop_images/mushroom.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "7-14 days",
+      "harvested_today": 100,
+      "harvested_yesterday": null,
+      "harvested_day_before_yesterday": null,
+      "harvested_before": null,
+      "size_selection_1": "Size  5 cm and above",
+      "size_selection_2": "Size  upto 5 cm",
+      "size_selection_3": "Size below 3 cm"
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 36,
+    "fields": {
+      "crop_type": 2,
+      "name": "Ladyfinger",
+      "image": "crop_images/okra.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "7-10 days",
+      "harvested_today": 100,
+      "harvested_yesterday": null,
+      "harvested_day_before_yesterday": null,
+      "harvested_before": null,
+      "size_selection_1": "Size 30 to 110 mm",
+      "size_selection_2": "Size 110 to 135 mm",
+      "size_selection_3": "Size Below 30 & above 135 mm"
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 37,
+    "fields": {
+      "crop_type": 3,
+      "name": "Onion",
+      "image": "crop_images/onion.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "1-8 months",
+      "harvested_today": 100,
+      "harvested_yesterday": null,
+      "harvested_day_before_yesterday": null,
+      "harvested_before": null,
+      "size_selection_1": "Size Up to 65 mm",
+      "size_selection_2": "Size Up to 45mm",
+      "size_selection_3": "Size Up to 25 mm"
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 38,
+    "fields": {
+      "crop_type": 1,
+      "name": "Orange",
+      "image": "crop_images/orange.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "3-8 weeks",
+      "harvested_today": 100,
+      "harvested_yesterday": 82,
+      "harvested_day_before_yesterday": 67,
+      "harvested_before": 55,
+      "size_selection_1": "Size Upto 1500 mm",
+      "size_selection_2": "Size Upto 1000 mm",
+      "size_selection_3": "Size Upto 500 mm"
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 39,
+    "fields": {
+      "crop_type": 1,
+      "name": "Papaya",
+      "image": "crop_images/papaya.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "1-3 weeks",
+      "harvested_today": 100,
+      "harvested_yesterday": null,
+      "harvested_day_before_yesterday": null,
+      "harvested_before": null,
+      "size_selection_1": null,
+      "size_selection_2": null,
+      "size_selection_3": null
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 40,
+    "fields": {
+      "crop_type": 1,
+      "name": "Peach",
+      "image": "",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "2-4 weeks",
+      "harvested_today": 100,
+      "harvested_yesterday": 27,
+      "harvested_day_before_yesterday": 7,
+      "harvested_before": 2,
+      "size_selection_1": "Size Above 45 mm",
+      "size_selection_2": "Size 35 to 45 mm",
+      "size_selection_3": "Size Below 35 mm"
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 41,
+    "fields": {
+      "crop_type": 1,
+      "name": "Pear",
+      "image": "crop_images/pear.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "2-7 months",
+      "harvested_today": 100,
+      "harvested_yesterday": 85,
+      "harvested_day_before_yesterday": 72,
+      "harvested_before": 62,
+      "size_selection_1": "Size Upto 65mm",
+      "size_selection_2": "Size Upto 55mm",
+      "size_selection_3": "Size Upto 45 mm"
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 42,
+    "fields": {
+      "crop_type": 2,
+      "name": "Peas",
+      "image": "crop_images/peas.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "1-2 weeks",
+      "harvested_today": 100,
+      "harvested_yesterday": null,
+      "harvested_day_before_yesterday": null,
+      "harvested_before": null,
+      "size_selection_1": "Length Upto 65mm",
+      "size_selection_2": "Length Upto 55mm",
+      "size_selection_3": "Length Upto 45 mm"
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 43,
+    "fields": {
+      "crop_type": 1,
+      "name": "Pineapple",
+      "image": "crop_images/pineapple.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "2-4 weeks",
+      "harvested_today": 100,
+      "harvested_yesterday": null,
+      "harvested_day_before_yesterday": null,
+      "harvested_before": null,
+      "size_selection_1": null,
+      "size_selection_2": null,
+      "size_selection_3": null
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 44,
+    "fields": {
+      "crop_type": 1,
+      "name": "Raw Banana",
+      "image": "crop_images/plantains.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "1-5 weeks",
+      "harvested_today": 100,
+      "harvested_yesterday": 72,
+      "harvested_day_before_yesterday": 53,
+      "harvested_before": 38,
+      "size_selection_1": null,
+      "size_selection_2": null,
+      "size_selection_3": null
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 45,
+    "fields": {
+      "crop_type": 2,
+      "name": "Pointed Gourd",
+      "image": "",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "N/A",
+      "harvested_today": 100,
+      "harvested_yesterday": null,
+      "harvested_day_before_yesterday": null,
+      "harvested_before": null,
+      "size_selection_1": null,
+      "size_selection_2": null,
+      "size_selection_3": null
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 46,
+    "fields": {
+      "crop_type": 1,
+      "name": "Pomegranate",
+      "image": "crop_images/pomegranate.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "2-3 months",
+      "harvested_today": 100,
+      "harvested_yesterday": null,
+      "harvested_day_before_yesterday": null,
+      "harvested_before": null,
+      "size_selection_1": "Size Upto 90 mm",
+      "size_selection_2": "Size Upto 75 mm",
+      "size_selection_3": "Size Upto 65 mm"
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 47,
+    "fields": {
+      "crop_type": 2,
+      "name": "Potato",
+      "image": "crop_images/potato.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "5-10 months",
+      "harvested_today": 100,
+      "harvested_yesterday": 95,
+      "harvested_day_before_yesterday": 90,
+      "harvested_before": 85,
+      "size_selection_1": "Size  Up to 70",
+      "size_selection_2": "Size  Up to 55",
+      "size_selection_3": "Size  Up to 25"
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 48,
+    "fields": {
+      "crop_type": 1,
+      "name": "Pumpkin",
+      "image": "",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "2-3 months",
+      "harvested_today": 100,
+      "harvested_yesterday": null,
+      "harvested_day_before_yesterday": null,
+      "harvested_before": null,
+      "size_selection_1": null,
+      "size_selection_2": null,
+      "size_selection_3": null
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 49,
+    "fields": {
+      "crop_type": 3,
+      "name": "Radish",
+      "image": "crop_images/radish.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "1-2 months",
+      "harvested_today": 100,
+      "harvested_yesterday": null,
+      "harvested_day_before_yesterday": null,
+      "harvested_before": null,
+      "size_selection_1": null,
+      "size_selection_2": null,
+      "size_selection_3": null
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 50,
+    "fields": {
+      "crop_type": 1,
+      "name": "Ridge Gourd",
+      "image": "crop_images/ridgeGourd.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "N/A",
+      "harvested_today": 100,
+      "harvested_yesterday": null,
+      "harvested_day_before_yesterday": null,
+      "harvested_before": null,
+      "size_selection_1": null,
+      "size_selection_2": null,
+      "size_selection_3": null
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 51,
+    "fields": {
+      "crop_type": 2,
+      "name": "Spinach",
+      "image": "crop_images/spinach.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "10-14 days",
+      "harvested_today": 100,
+      "harvested_yesterday": null,
+      "harvested_day_before_yesterday": null,
+      "harvested_before": null,
+      "size_selection_1": null,
+      "size_selection_2": null,
+      "size_selection_3": null
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 52,
+    "fields": {
+      "crop_type": 3,
+      "name": "Spring onion",
+      "image": "crop_images/springOnion.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "3 weeks",
+      "harvested_today": 100,
+      "harvested_yesterday": null,
+      "harvested_day_before_yesterday": null,
+      "harvested_before": null,
+      "size_selection_1": "diameter 10-15 mm",
+      "size_selection_2": "diameter 15-18 mm",
+      "size_selection_3": "diameter more than 18 mm"
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 53,
+    "fields": {
+      "crop_type": 1,
+      "name": "Strawberry",
+      "image": "crop_images/strawberry.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "7-10 days",
+      "harvested_today": 100,
+      "harvested_yesterday": 16,
+      "harvested_day_before_yesterday": 3,
+      "harvested_before": 0,
+      "size_selection_1": "Size Above 25 mm",
+      "size_selection_2": "Size Above 18 mm",
+      "size_selection_3": null
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 54,
+    "fields": {
+      "crop_type": 1,
+      "name": "Sweet Lime",
+      "image": "crop_images/SweetLime.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "1-6 months",
+      "harvested_today": 100,
+      "harvested_yesterday": null,
+      "harvested_day_before_yesterday": null,
+      "harvested_before": null,
+      "size_selection_1": null,
+      "size_selection_2": null,
+      "size_selection_3": null
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 55,
+    "fields": {
+      "crop_type": 3,
+      "name": "Taro root",
+      "image": "crop_images/taro-root.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "4 months",
+      "harvested_today": 100,
+      "harvested_yesterday": null,
+      "harvested_day_before_yesterday": null,
+      "harvested_before": null,
+      "size_selection_1": null,
+      "size_selection_2": null,
+      "size_selection_3": null
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 56,
+    "fields": {
+      "crop_type": 2,
+      "name": "Tomato",
+      "image": "crop_images/tomato.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "1-3 weeks",
+      "harvested_today": 100,
+      "harvested_yesterday": 51,
+      "harvested_day_before_yesterday": 26,
+      "harvested_before": 13,
+      "size_selection_1": "Size Upto 65 mm",
+      "size_selection_2": "Size Upto 55 mm",
+      "size_selection_3": "Size Upto 45 mm"
+    }
+  },
+  {
+    "model": "storage.crop",
+    "pk": 57,
+    "fields": {
+      "crop_type": 1,
+      "name": "Water Melon",
+      "image": "crop_images/waterMelon2.png",
+      "optimal_storage_temperature": null,
+      "approximate_shelf_life": "2-3 weeks",
+      "harvested_today": 100,
+      "harvested_yesterday": null,
+      "harvested_day_before_yesterday": null,
+      "harvested_before": null,
+      "size_selection_1": null,
+      "size_selection_2": null,
+      "size_selection_3": null
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 1,
+    "fields": {
+      "crop": 1,
+      "cooling_unit": 1,
+      "pricing": 1
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 2,
+    "fields": {
+      "crop": 2,
+      "cooling_unit": 1,
+      "pricing": 2
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 3,
+    "fields": {
+      "crop": 3,
+      "cooling_unit": 1,
+      "pricing": 3
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 4,
+    "fields": {
+      "crop": 1,
+      "cooling_unit": 2,
+      "pricing": 4
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 5,
+    "fields": {
+      "crop": 2,
+      "cooling_unit": 2,
+      "pricing": 5
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 6,
+    "fields": {
+      "crop": 3,
+      "cooling_unit": 2,
+      "pricing": 6
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 7,
+    "fields": {
+      "crop": 4,
+      "cooling_unit": 2,
+      "pricing": 7
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 8,
+    "fields": {
+      "crop": 5,
+      "cooling_unit": 2,
+      "pricing": 8
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 9,
+    "fields": {
+      "crop": 6,
+      "cooling_unit": 2,
+      "pricing": 9
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 10,
+    "fields": {
+      "crop": 7,
+      "cooling_unit": 2,
+      "pricing": 10
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 11,
+    "fields": {
+      "crop": 8,
+      "cooling_unit": 2,
+      "pricing": 11
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 12,
+    "fields": {
+      "crop": 9,
+      "cooling_unit": 2,
+      "pricing": 12
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 13,
+    "fields": {
+      "crop": 10,
+      "cooling_unit": 2,
+      "pricing": 13
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 14,
+    "fields": {
+      "crop": 11,
+      "cooling_unit": 2,
+      "pricing": 14
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 15,
+    "fields": {
+      "crop": 12,
+      "cooling_unit": 2,
+      "pricing": 15
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 16,
+    "fields": {
+      "crop": 13,
+      "cooling_unit": 2,
+      "pricing": 16
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 17,
+    "fields": {
+      "crop": 14,
+      "cooling_unit": 2,
+      "pricing": 17
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 18,
+    "fields": {
+      "crop": 15,
+      "cooling_unit": 2,
+      "pricing": 18
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 19,
+    "fields": {
+      "crop": 16,
+      "cooling_unit": 2,
+      "pricing": 19
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 20,
+    "fields": {
+      "crop": 17,
+      "cooling_unit": 2,
+      "pricing": 20
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 21,
+    "fields": {
+      "crop": 18,
+      "cooling_unit": 2,
+      "pricing": 21
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 22,
+    "fields": {
+      "crop": 19,
+      "cooling_unit": 2,
+      "pricing": 22
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 23,
+    "fields": {
+      "crop": 20,
+      "cooling_unit": 2,
+      "pricing": 23
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 24,
+    "fields": {
+      "crop": 21,
+      "cooling_unit": 2,
+      "pricing": 24
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 25,
+    "fields": {
+      "crop": 22,
+      "cooling_unit": 2,
+      "pricing": 25
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 26,
+    "fields": {
+      "crop": 23,
+      "cooling_unit": 2,
+      "pricing": 26
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 27,
+    "fields": {
+      "crop": 24,
+      "cooling_unit": 2,
+      "pricing": 27
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 28,
+    "fields": {
+      "crop": 25,
+      "cooling_unit": 2,
+      "pricing": 28
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 29,
+    "fields": {
+      "crop": 26,
+      "cooling_unit": 2,
+      "pricing": 29
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 30,
+    "fields": {
+      "crop": 27,
+      "cooling_unit": 2,
+      "pricing": 30
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 31,
+    "fields": {
+      "crop": 28,
+      "cooling_unit": 2,
+      "pricing": 31
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 32,
+    "fields": {
+      "crop": 29,
+      "cooling_unit": 2,
+      "pricing": 32
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 33,
+    "fields": {
+      "crop": 30,
+      "cooling_unit": 2,
+      "pricing": 33
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 34,
+    "fields": {
+      "crop": 31,
+      "cooling_unit": 2,
+      "pricing": 34
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 35,
+    "fields": {
+      "crop": 32,
+      "cooling_unit": 2,
+      "pricing": 35
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 36,
+    "fields": {
+      "crop": 33,
+      "cooling_unit": 2,
+      "pricing": 36
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 37,
+    "fields": {
+      "crop": 34,
+      "cooling_unit": 2,
+      "pricing": 37
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 38,
+    "fields": {
+      "crop": 35,
+      "cooling_unit": 2,
+      "pricing": 38
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 39,
+    "fields": {
+      "crop": 36,
+      "cooling_unit": 2,
+      "pricing": 39
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 40,
+    "fields": {
+      "crop": 37,
+      "cooling_unit": 2,
+      "pricing": 40
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 41,
+    "fields": {
+      "crop": 38,
+      "cooling_unit": 2,
+      "pricing": 41
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 42,
+    "fields": {
+      "crop": 39,
+      "cooling_unit": 2,
+      "pricing": 42
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 43,
+    "fields": {
+      "crop": 40,
+      "cooling_unit": 2,
+      "pricing": 43
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 44,
+    "fields": {
+      "crop": 41,
+      "cooling_unit": 2,
+      "pricing": 44
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 45,
+    "fields": {
+      "crop": 42,
+      "cooling_unit": 2,
+      "pricing": 45
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 46,
+    "fields": {
+      "crop": 43,
+      "cooling_unit": 2,
+      "pricing": 46
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 47,
+    "fields": {
+      "crop": 44,
+      "cooling_unit": 2,
+      "pricing": 47
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 48,
+    "fields": {
+      "crop": 45,
+      "cooling_unit": 2,
+      "pricing": 48
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 49,
+    "fields": {
+      "crop": 46,
+      "cooling_unit": 2,
+      "pricing": 49
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 50,
+    "fields": {
+      "crop": 47,
+      "cooling_unit": 2,
+      "pricing": 50
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 51,
+    "fields": {
+      "crop": 48,
+      "cooling_unit": 2,
+      "pricing": 51
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 52,
+    "fields": {
+      "crop": 49,
+      "cooling_unit": 2,
+      "pricing": 52
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 53,
+    "fields": {
+      "crop": 50,
+      "cooling_unit": 2,
+      "pricing": 53
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 54,
+    "fields": {
+      "crop": 51,
+      "cooling_unit": 2,
+      "pricing": 54
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 55,
+    "fields": {
+      "crop": 52,
+      "cooling_unit": 2,
+      "pricing": 55
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 56,
+    "fields": {
+      "crop": 53,
+      "cooling_unit": 2,
+      "pricing": 56
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 57,
+    "fields": {
+      "crop": 54,
+      "cooling_unit": 2,
+      "pricing": 57
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 58,
+    "fields": {
+      "crop": 55,
+      "cooling_unit": 2,
+      "pricing": 58
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 59,
+    "fields": {
+      "crop": 56,
+      "cooling_unit": 2,
+      "pricing": 59
+    }
+  },
+  {
+    "model": "storage.coolingunitcrop",
+    "pk": 60,
+    "fields": {
+      "crop": 57,
+      "cooling_unit": 2,
+      "pricing": 60
+    }
+  },
+  {
+    "model": "storage.produce",
+    "pk": 1,
+    "fields": {
+      "crop": 1,
+      "check_in": 1,
+      "harvest_date": 62,
+      "initial_grade": null,
+      "size": 2,
+      "cmp_checkout_completed": false
+    }
+  },
+  {
+    "model": "storage.produce",
+    "pk": 2,
+    "fields": {
+      "crop": 3,
+      "check_in": 1,
+      "harvest_date": 100,
+      "initial_grade": null,
+      "size": null,
+      "cmp_checkout_completed": false
+    }
+  },
+  {
+    "model": "storage.crate",
+    "pk": 1,
+    "fields": {
+      "produce": 1,
+      "cooling_unit": 1,
+      "weight": 25.0,
+      "remaining_shelf_life": 2,
+      "planned_days": 5,
+      "check_out": 1,
+      "price_per_crate_per_pricing_type": 25.0
+    }
+  },
+  {
+    "model": "storage.crate",
+    "pk": 2,
+    "fields": {
+      "produce": 1,
+      "cooling_unit": 1,
+      "weight": 25.0,
+      "remaining_shelf_life": 2,
+      "planned_days": 5,
+      "check_out": null,
+      "price_per_crate_per_pricing_type": 25.0
+    }
+  },
+  {
+    "model": "storage.crate",
+    "pk": 3,
+    "fields": {
+      "produce": 2,
+      "cooling_unit": 1,
+      "weight": 30.0,
+      "remaining_shelf_life": 2,
+      "planned_days": 5,
+      "check_out": 2,
+      "price_per_crate_per_pricing_type": 25.0
+    }
+  },
+  {
+    "model": "storage.crate",
+    "pk": 4,
+    "fields": {
+      "produce": 2,
+      "cooling_unit": 1,
+      "weight": 100.0,
+      "remaining_shelf_life": 2,
+      "planned_days": 5,
+      "check_out": null,
+      "price_per_crate_per_pricing_type": 25.0
+    }
+  }
+]

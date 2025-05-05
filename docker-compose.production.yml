@@ -1,0 +1,50 @@
+# Docker-compose config file which defines the settings of the production environment
+services:
+  db:
+    scale: 0 # INFO: Comment out in case you're using a database within the same machine
+
+  gateway:
+    image: ${CI_REGISTRY_IMAGE}/gateway:${CI_COMMIT_REF_SLUG:-latest}
+    environment:
+      URL_BASE_API: https://api.coldtivate.org
+      URL_AIR_VCCA: https://air-prod.coldtivate.org
+      URL_FARMER_API: https://farmer-prod.coldtivate.org
+      URL_IMPACT_API: https://impact-prod.coldtivate.org
+      ACME_SERVER: https://acme-v02.api.letsencrypt.org/directory
+      FRONTEND_ORIGINS: app.coldtivate.org
+
+  web:
+    image: ${CI_REGISTRY_IMAGE}/base-api:${CI_COMMIT_REF_SLUG:-latest}
+    env_file: ${DOT_ENV_PATH:-.env.production}
+    command: pipenv run gunicorn base.wsgi:application --workers 5 --bind 0.0.0.0:8000 --log-level=warning
+
+  celery:
+    image: ${CI_REGISTRY_IMAGE}/base-api:${CI_COMMIT_REF_SLUG:-latest}
+    env_file: ${DOT_ENV_PATH:-.env.production}
+    command: pipenv run celery -A base worker -B --scheduler django -l info --without-gossip --without-mingle
+
+  impact_dashboard_web:
+    image: ${CI_REGISTRY_IMAGE}/impact-dashboard-backend:${CI_COMMIT_REF_SLUG:-latest}
+    env_file: ${DOT_ENV_PATH:-.env.production}
+
+  impact_dashboard_scheduler:
+    image: ${CI_REGISTRY_IMAGE}/impact-dashboard-backend-scheduler:${CI_COMMIT_REF_SLUG:-latest}
+    env_file: ${DOT_ENV_PATH:-.env.production}
+
+  vcca_air_service:
+    image: ${CI_REGISTRY_IMAGE}/app-impact-reporting:${CI_COMMIT_REF_SLUG:-latest}
+    env_file: ${DOT_ENV_PATH:-.env.production}
+
+  farmer_web:
+    image: ${CI_REGISTRY_IMAGE}/farmers-dashboard-backend:${CI_COMMIT_REF_SLUG:-latest}
+    env_file: ${DOT_ENV_PATH:-.env.production}
+
+  farmer_scheduler:
+    image: ${CI_REGISTRY_IMAGE}/farmers-dashboard-backend-scheduler:${CI_COMMIT_REF_SLUG:-latest}
+    env_file: ${DOT_ENV_PATH:-.env.production}
+
+  scraping_india:
+    image: ${CI_REGISTRY_IMAGE}/ml4-india:${CI_COMMIT_REF_SLUG:-latest}
+
+  scraping_nigeria:
+    image: ${CI_REGISTRY_IMAGE}/ml4-nigeria:${CI_COMMIT_REF_SLUG:-latest}

@@ -1,0 +1,62 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: ha\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.5\n"
+
+msgid "sms_ttpu_2_days_left"
+msgstr "Kawai saura kwanaki 2 don ɗaukar da siyar da akwatunan ku na {crop_name}! (kwanan wata na duba ciki: {checkin_date}, na'urar sanyaya ID: {cooling_unit}, ID na duba ciki: {checkin_code})"
+
+msgid "sms_invite_operator_with_code"
+msgstr "Don shiga cikin manhajar Coldtivate a matsayin Mai Gudanarwa, je: {link}"
+
+msgid "sms_invite_service_provider_with_code"
+msgstr "Don shiga cikin manhajar Coldtivate a matsayin Ma'aikaci mai rijista, je zuwa: {link}"
+
+msgid "sms_auth_reset_password"
+msgstr "Danna wannan mahaɗin don sake saita kalmar wucewa: {link}"
+
+msgid "sms_marketplace_order_seller_notice"
+msgstr ""
+"An sayar da kayanku a cikin oda #{order_id}:\n"
+"{details}"
+
+msgid "sms_marketplace_order_seller_notice_details"
+msgstr "{crop_name}: {weight_in_kg}kg don {amount} {currency}"
+
+msgid "sms_history_sms_report"
+msgstr ""
+"{company_name} - {movement_type} Takardar Shaidar:\n"
+"Lambar Motsi: {code}\n"
+"Amfanin Gona: {crops}\n"
+"Jimillar Nauyi: {weight} Kg\n"
+"{movement_type_for_date}: {date}\n"
+"Farashi: {price}\n"
+"Biya daga: {farmers_name}"
+
+msgid "movement_type_check_out"
+msgstr "Fita"
+
+msgid "movement_type_checkin"
+msgstr "Shiga"
+
+msgid "movement_type_checked_out"
+msgstr "An fita"
+
+msgid "movement_type_checked_in"
+msgstr "An shiga"
+
+msgid "sms_marketplace_seller_market_listed_crates_price_changed"
+msgstr ""
+"An sabunta farashin jerin akwatunan da ke ajiye '{crop_name}' a '{cooling_unit_name}':\n"
+"{details}"
+
+msgid "sms_marketplace_seller_market_listed_crates_price_changed_details"
+msgstr "{crate_id}: {produce_price_in_kg} {currency} kowanne kg"

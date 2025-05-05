@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Interface</title>
+</head>
+<body>
+    <h1>Test Interface</h1>
+
+    <form action="/company-slice/" method="post">
+        <h2>Company view</h2>
+        <label for="company_id">Company ID:</label>
+        <input type="number" id="company_id" name="company_id"><br><br>
+        <input type="submit" value="Submit">
+    </form>
+
+    <br>
+
+    <form action="/coolingunit-slice/" method="post">
+        <h2>Cooling unit view</h2>
+        <label for="unit_ids">Unit IDs (comma-separated):</label>
+        <input type="text" id="unit_ids" name="unit_ids"><br><br>
+
+        <label for="start_date">Start Date:</label>
+        <input type="date" id="start_date" name="start_date"><br><br>
+
+        <label for="end_date">End Date:</label>
+        <input type="date" id="end_date" name="end_date"><br><br>
+
+        <input type="submit" value="Submit">
+    </form>
+
+
+
+    <form action="/impact-slice/" method="post">
+        <h2>Impact view</h2>
+
+        <label for="company_id">Company ID:</label>
+        <input type="number" id="company_id" name="company_id"><br><br>
+
+        <label for="cooling_unit_id">Cooling Unit IDs:</label>
+        <input type="text" id="cooling_unit_id" name="cooling_unit_id"><br><br>
+
+        <label for="start_date">Start Date:</label>
+        <input type="date" id="start_date" name="start_date"><br><br>
+
+        <label for="end_date">End Date:</label>
+        <input type="date" id="end_date" name="end_date"><br><br>
+
+        <label>Mode:</label><br>
+        <input type="radio" id="mode_company" name="mode" value="company">
+        <label for="mode_company">Company</label><br>
+        <input type="radio" id="mode_cooling_unit" name="mode" value="cooling_unit">
+        <label for="mode_cooling_unit">Cooling Unit</label><br><br>
+
+        <label>View:</label><br>
+        <input type="radio" id="view_comparison" name="view" value="comparison">
+        <label for="view_comparison">Comparison</label><br>
+        <input type="radio" id="view_aggregated" name="view" value="aggregated">
+        <label for="view_aggregated">Aggregated</label><br><br>
+
+        <input type="submit" value="Submit">
+    </form>
+
+    <div id="result">
+        <!-- Results will be displayed here -->
+    </div>
+</body>
+</html>

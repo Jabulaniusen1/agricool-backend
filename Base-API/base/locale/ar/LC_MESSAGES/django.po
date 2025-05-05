@@ -1,0 +1,52 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-04-23 16:01+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: ar\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
+
+msgid "sms_ttpu_2_days_left"
+msgstr "تبقّى يومان فقط لاستلام وبيع صناديق {crop_name}! (تاريخ الوصول: {checkin_date}، معرف وحدة التبريد: {cooling_unit}، معرف الوصول: {checkin_code})"
+
+msgid "sms_invite_operator_with_code"
+msgstr "للانضمام إلى تطبيق Coldtivate كمشغّل، انتقل إلى: {link}"
+
+msgid "sms_invite_service_provider_with_code"
+msgstr "للانضمام إلى تطبيق Coldtivate كموظف مسجل، انتقل إلى: {link}"
+
+msgid "sms_auth_reset_password"
+msgstr "انقر على هذا الرابط لإعادة تعيين كلمة المرور الخاصة بك: {link}"
+
+msgid "sms_marketplace_order_seller_notice"
+msgstr "لقد تم بيع منتجك بالطلب رقم #{order_id}:\n{details}"
+
+msgid "sms_marketplace_order_seller_notice_details"
+msgstr "{crop_name}: {weight_in_kg} كجم لـ {amount} {currency}"
+
+msgid "sms_history_sms_report"
+msgstr "{company_name} - إيصال {movement_type}:\nرمز الحركة: {code}\nالمحاصيل: {crops}\nالوزن الإجمالي: {weight} كجم\n{movement_type_for_date}: {date}\nالسعر: {price}\nتم الدفع بواسطة: {farmers_name}"
+
+msgid "movement_type_check_out"
+msgstr "تسجيل خروج"
+
+msgid "movement_type_checkin"
+msgstr "تسجيل دخول"
+
+msgid "movement_type_checked_out"
+msgstr "تم تسجيل الخروج"
+
+msgid "movement_type_checked_in"
+msgstr "تم تسجيل الدخول"
+
+msgid "sms_marketplace_seller_market_listed_crates_price_changed"
+msgstr "تم تحديث أسعار القوائم الخاصة بالصناديق التي تخزن '{crop_name}' في '{cooling_unit_name}':\n{details}"
+
+msgid "sms_marketplace_seller_market_listed_crates_price_changed_details"
+msgstr "{crate_id}: {produce_price_in_kg} {currency} لكل كيلوغرام"

@@ -1,0 +1,329 @@
+[
+  {
+    "model": "prediction.StateNg",
+    "pk": 1,
+    "fields": {
+      "name": "Abia",
+      "country": 2,
+      "added_by_user": false
+    }
+  },
+  {
+    "model": "prediction.StateNg",
+    "pk": 2,
+    "fields": {
+      "name": "Adamawa",
+      "country": 2,
+      "added_by_user": false
+    }
+  },
+  {
+    "model": "prediction.StateNg",
+    "pk": 3,
+    "fields": {
+      "name": "Akwa-Ibom",
+      "country": 2,
+      "added_by_user": false
+    }
+  },
+  {
+    "model": "prediction.StateNg",
+    "pk": 4,
+    "fields": {
+      "name": "Anambra",
+      "country": 2,
+      "added_by_user": false
+    }},
+  {
+    "model": "prediction.StateNg",
+    "pk": 5,
+    "fields": {
+      "name": "Bauchi",
+      "country": 2,
+      "added_by_user": false
+    }},
+  {
+    "model": "prediction.StateNg",
+    "pk": 6,
+    "fields": {
+      "name": "Bayelsa",
+      "country": 2,
+      "added_by_user": false
+    }},
+  {
+    "model": "prediction.StateNg",
+    "pk": 7,
+    "fields": {
+      "name": "Benue",
+      "country": 2,
+      "added_by_user": false
+    }},
+  {
+    "model": "prediction.StateNg",
+    "pk": 8,
+    "fields": {
+      "name": "Borno",
+      "country": 2,
+      "added_by_user": false
+    }},
+  {
+    "model": "prediction.StateNg",
+    "pk": 9,
+    "fields": {
+      "name": "Cross River",
+      "country": 2,
+      "added_by_user": false
+    }},
+  {
+    "model": "prediction.StateNg",
+    "pk": 10,
+    "fields": {
+      "name": "Delta",
+      "country": 2,
+      "added_by_user": false
+    }
+  },
+  {
+    "model": "prediction.StateNg",
+    "pk": 11,
+    "fields": {
+      "name": "Ebonyi",
+      "country": 2,
+      "added_by_user": false
+    }
+  },
+  {
+    "model": "prediction.StateNg",
+    "pk": 12,
+    "fields": {
+      "name": "Edo",
+      "country": 2,
+      "added_by_user": false
+    }
+  },
+  {
+    "model": "prediction.StateNg",
+    "pk": 13,
+    "fields": {
+      "name": "Ekiti",
+      "country": 2,
+      "added_by_user": false
+    }
+  },
+  {
+    "model": "prediction.StateNg",
+    "pk": 14,
+    "fields": {
+      "name": "Enugu",
+      "country": 2,
+      "added_by_user": false
+    }
+  },
+    {
+    "model": "prediction.StateNg",
+    "pk": 15,
+    "fields": {
+      "name": "Fct Abuja",
+      "country": 2,
+      "added_by_user": false
+    }
+  },
+  {
+    "model": "prediction.StateNg",
+    "pk": 16,
+    "fields": {
+      "name": "Gombe",
+      "country": 2,
+      "added_by_user": false
+    }
+  },
+  {
+    "model": "prediction.StateNg",
+    "pk": 17,
+    "fields": {
+      "name": "Imo",
+      "country": 2,
+      "added_by_user": false
+    }
+  },
+  {
+    "model": "prediction.StateNg",
+    "pk": 18,
+    "fields": {
+      "name": "Jigawa",
+      "country": 2,
+      "added_by_user": false
+    }
+  },
+  {
+    "model": "prediction.StateNg",
+    "pk": 19,
+    "fields": {
+      "name": "Kaduna",
+      "country": 2,
+      "added_by_user": false
+    }
+  },
+  {
+    "model": "prediction.StateNg",
+    "pk": 20,
+    "fields": {
+      "name": "Kano",
+      "country": 2,
+      "added_by_user": false
+    }
+  },
+  {
+    "model": "prediction.StateNg",
+    "pk": 21,
+    "fields": {
+      "name": "Katsina",
+      "country": 2,
+      "added_by_user": false
+    }
+  },
+  {
+    "model": "prediction.StateNg",
+    "pk": 22,
+    "fields": {
+      "name": "Kebbi",
+      "country": 2,
+      "added_by_user": false
+    }
+  },
+  {
+    "model": "prediction.StateNg",
+    "pk": 23,
+    "fields": {
+      "name": "Kogi",
+      "country": 2,
+      "added_by_user": false
+    }
+  },
+  {
+    "model": "prediction.StateNg",
+    "pk": 24,
+    "fields": {
+      "name": "Kwara",
+      "country": 2,
+      "added_by_user": false
+    }
+  },
+  {
+    "model": "prediction.StateNg",
+    "pk": 25,
+    "fields": {
+      "name": "Lagos",
+      "country": 2,
+      "added_by_user": false
+    }
+  },
+  {
+    "model": "prediction.StateNg",
+    "pk": 26,
+    "fields": {
+      "name": "Nassarawa",
+      "country": 2,
+      "added_by_user": false
+    }
+  },
+  {
+    "model": "prediction.StateNg",
+    "pk": 27,
+    "fields": {
+      "name": "Niger",
+      "country": 2,
+      "added_by_user": false
+    }
+  },
+  {
+    "model": "prediction.StateNg",
+    "pk": 28,
+    "fields": {
+      "name": "Ogun",
+      "country": 2,
+      "added_by_user": false
+    }
+  },
+  {
+    "model": "prediction.StateNg",
+    "pk": 29,
+    "fields": {
+      "name": "Ondo",
+      "country": 2,
+      "added_by_user": false
+    }
+  },
+  {
+    "model": "prediction.StateNg",
+    "pk": 30,
+    "fields": {
+      "name": "Osun",
+      "country": 2,
+      "added_by_user": false
+    }
+  },
+  {
+    "model": "prediction.StateNg",
+    "pk": 31,
+    "fields": {
+      "name": "Oyo",
+      "country": 2,
+      "added_by_user": false
+    }
+  },
+  {
+    "model": "prediction.StateNg",
+    "pk": 32,
+    "fields": {
+      "name": "Plateau",
+      "country": 2,
+      "added_by_user": false
+    }
+  },
+  {
+    "model": "prediction.StateNg",
+    "pk": 33,
+    "fields": {
+      "name": "Rivers",
+      "country": 2,
+      "added_by_user": false
+    }
+  },
+  {
+    "model": "prediction.StateNg",
+    "pk": 34,
+    "fields": {
+      "name": "Sokoto",
+      "country": 2,
+      "added_by_user": false
+    }
+  },
+  {
+    "model": "prediction.StateNg",
+    "pk": 35,
+    "fields": {
+      "name": "Taraba",
+      "country": 2,
+      "added_by_user": false
+    }
+  },
+  {
+    "model": "prediction.StateNg",
+    "pk": 36,
+    "fields": {
+      "name": "Yobe",
+      "country": 2,
+      "added_by_user": false
+    }
+  },
+  {
+    "model": "prediction.StateNg",
+    "pk": 37,
+    "fields": {
+      "name": "Zamfara",
+      "country": 2,
+      "added_by_user": false
+    }
+  }
+]

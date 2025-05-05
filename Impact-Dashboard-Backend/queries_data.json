@@ -1,0 +1,25 @@
+{
+    "zero_na_columns" : [
+        "active_users", "active_users_female", "crates_checked_in_room",
+        "check_in_operations_room", "crates_checked_out_room", "check_out_operations_room",
+        "occupancy_room", "revenue_room_usd", "revenue_room", "sellingprice_increase_room",
+        "survey_filled_room"
+    ],
+        "companies_view": [
+        { "name": "occupancy_company", "on": "company_id" },
+        { "name": "crates_movement", "on": "company_id" }
+    ],
+       "aggregated_comparison_view": [
+        { "name": "company", "on": "company_id" },
+        { "name": "active_users", "on": "cooling_unit_id" },
+        { "name": "crates_in", "on": "cooling_unit_id" },
+        { "name": "crates_out", "on": "cooling_unit_id" },
+        { "name": "occupancy_room", "on": "cooling_unit_id" },
+        { "name": "cooling_unit_revenue", "on": "cooling_unit_id" },
+        {"name":  "checkin_crop_distribution", "on": "cooling_unit_id" },
+        {"name":  "checkout_crop_distribution", "on": "cooling_unit_id" }
+    ],
+       "impact_view": [
+        { "name": "impact_metrics_room", "on": "cooling_unit_id" }
+    ]
+}

@@ -1,0 +1,62 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.5\n"
+
+msgid "sms_ttpu_2_days_left"
+msgstr "Only 2 days left to pick up and sell your crates of {crop_name}! (check in date: {checkin_date}, cooling unit ID: {cooling_unit}, check in ID: {checkin_code})"
+
+msgid "sms_invite_operator_with_code"
+msgstr "To join the Coldtivate app as an Operator, go to: {link}"
+
+msgid "sms_invite_service_provider_with_code"
+msgstr "To join the Coldtivate app as a Registered Employee, go to: {link}"
+
+msgid "sms_auth_reset_password"
+msgstr "Click on this link to reset your password: {link}"
+
+msgid "sms_marketplace_order_seller_notice"
+msgstr ""
+"Your produce has been sold in order #{order_id}:\n"
+"{details}"
+
+msgid "sms_marketplace_order_seller_notice_details"
+msgstr "{crop_name}: {weight_in_kg}kg for {amount} {currency}"
+
+msgid "sms_history_sms_report"
+msgstr ""
+"{company_name} - {movement_type} Receipt:\n"
+"Movement code: {code}\n"
+"Crops: {crops}\n"
+"Total weight: {weight} Kg\n"
+"{movement_type_for_date}: {date}\n"
+"Price: {price}\n"
+"Paid by: {farmers_name}"
+
+msgid "movement_type_check_out"
+msgstr "Check Out"
+
+msgid "movement_type_checkin"
+msgstr "Check In"
+
+msgid "movement_type_checked_out"
+msgstr "Checked out"
+
+msgid "movement_type_checked_in"
+msgstr "Checked in"
+
+msgid "sms_marketplace_seller_market_listed_crates_price_changed"
+msgstr ""
+"The listing prices for the crates storing '{crop_name}' at '{cooling_unit_name}' have been updated:\n"
+"{details}"
+
+msgid "sms_marketplace_seller_market_listed_crates_price_changed_details"
+msgstr "{crate_id}: {produce_price_in_kg} {currency} per kg"

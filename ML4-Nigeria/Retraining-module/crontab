@@ -1,0 +1,2 @@
+0 0 1 * * python3 /Retraining-module/retraining.py > /proc/1/fd/1 2>/proc/1/fd/2
+

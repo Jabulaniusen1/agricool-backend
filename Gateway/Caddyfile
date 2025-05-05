@@ -1,0 +1,118 @@
+{
+    # Global options block
+    # set the email for ACME (Automatic Certificate Management Environment)
+    email jmoreira@mosano.eu
+    acme_ca {$ACME_SERVER}
+}
+
+(cors) {
+    @cors_preflight method OPTIONS
+    @cors header_regexp Origin ^capacitor://localhost$|^https?://([a-zA-Z0-9-]+\.)*pages\.dev$|^https?://localhost(:[0-9]+)?$|^https?://({$FRONTEND_ORIGINS})$
+
+    handle @cors_preflight {
+        header Access-Control-Allow-Origin "{http.request.header.Origin}"
+        header Access-Control-Allow-Methods "OPTIONS,HEAD,GET,POST,PUT,PATCH,DELETE"
+        header Access-Control-Allow-Headers "Origin,X-Requested-With,Content-Type,Accept,Authorization"
+        header Access-Control-Max-Age "3600"
+        respond "" 204
+    }
+
+    handle @cors {
+        header Access-Control-Allow-Origin "{http.request.header.Origin}"
+        header Access-Control-Expose-Headers "Link"
+    }
+}
+
+(clear_reverse_proxy_cors_headers) {
+    header_down -Access-Control-Allow-Origin
+    header_down -Access-Control-Allow-Methods
+    header_down -Access-Control-Allow-Headers
+    header_down -Access-Control-Max-Age
+}
+
+# API proxy
+{$URL_BASE_API} {
+    import cors
+    tls internal
+
+    # Handle requests to /media separately
+    handle_path /media* {
+        root * /app/base/media
+        file_server
+    }
+
+    # Handle all other requests
+    reverse_proxy {
+        to http://base_api:8000
+        import clear_reverse_proxy_cors_headers
+    }
+}
+
+# Air proxy
+{$URL_AIR_VCCA} {
+    tls internal
+    import cors
+    reverse_proxy {
+        to http://air_api:5000
+        import clear_reverse_proxy_cors_headers
+    }
+}
+
+# Farmer proxy
+{$URL_FARMER_API} {
+    tls internal
+    import cors
+    reverse_proxy {
+        to http://farmer_api:80
+        import clear_reverse_proxy_cors_headers
+    }
+}
+
+# Impact proxy
+{$URL_IMPACT_API} {
+    tls internal
+    import cors
+    reverse_proxy {
+        to http://impact_api:80
+        import clear_reverse_proxy_cors_headers
+    }
+}
+
+
+:80 {
+    import cors
+
+    handle_path /base_api/* {
+        # Handle requests to /media separately
+        handle_path /media* {
+            root * /app/base/media
+            file_server
+        }
+
+        reverse_proxy {
+            to http://base_api:5000
+            import clear_reverse_proxy_cors_headers
+        }
+    }
+
+    handle_path /air_api/* {
+        reverse_proxy {
+            to http://air_api:5000
+            import clear_reverse_proxy_cors_headers
+        }
+    }
+
+    handle_path /farmer_api/* {
+        reverse_proxy {
+            to http://farmer_api:5000
+            import clear_reverse_proxy_cors_headers
+        }
+    }
+
+    handle_path /impact_api/* {
+        reverse_proxy {
+            to http://impact_api:5000
+            import clear_reverse_proxy_cors_headers
+        }
+    }
+}

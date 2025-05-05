@@ -1,0 +1,51 @@
+FROM python:3.9-slim
+
+##
+# Install OS dependencies
+##
+RUN apt-get update --fix-missing && apt-get -y install cron
+
+
+##
+# Set environment variables
+##
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+##
+# Install dependencies
+##
+WORKDIR /scheduler
+COPY requirements.txt /scheduler/
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+##
+# Copy scheduler script and cron job
+##
+COPY indicator_reporter.py /scheduler/
+COPY dataProcessor.py .
+COPY compute_co2.py .
+COPY queries_data.json .
+COPY utils.py .
+COPY ./sql_queries ./sql_queries
+COPY ./impact_queries ./impact_queries
+
+##
+# Cron
+##
+COPY cron/crontab /etc/cron.d/crontab
+COPY cron/*.sh /etc/cron.d/scripts/
+RUN crontab /etc/cron.d/crontab
+
+##
+# LCA project
+##
+RUN mkdir LCA
+COPY ./LCA /scheduler/LCA/
+COPY heat_capacity.ini .
+
+##
+# Container execution command
+##
+CMD ["cron","-f"]

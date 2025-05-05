@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Interface</title>
+</head>
+<body>
+    <h1>Test Interface</h1>
+
+    <form action="/farmer-base-slice/" method="post">
+        <h2>Farmer basic info</h2>
+
+        <label for="farmer_id">Farmer ID:</label>
+        <input type="number" id="farmer" name="farmer"><br><br>
+
+        <input type="submit" value="Submit">
+    </form>
+
+    <form action="/farmer-slice/" method="post">
+        <h2>Farmer cooling-unit metrics</h2>
+
+        <label for="farmer_id">Farmer ID:</label>
+        <input type="number" id="farmer_id" name="farmer_id"><br><br>
+
+        <label for="unit_ids">Unit IDs (comma-separated):</label>
+        <input type="text" id="unit_ids" name="unit_ids"><br><br>
+
+        <label for="start_date">Start Date:</label>
+        <input type="date" id="start_date" name="start_date"><br><br>
+
+        <label for="end_date">End Date:</label>
+        <input type="date" id="end_date" name="end_date"><br><br>
+
+        <input type="submit" value="Submit">
+    </form>
+
+
+    <form action="/impact-slice/" method="post">
+        <h2>Farmer Impact metrics</h2>
+
+        <label for="farmer_id_2">Farmer ID:</label>
+        <input type="number" id="farmer_id_2" name="farmer_id_2"><br><br>
+
+        <label for="cooling_unit_id">Cooling Unit IDs:</label>
+        <input type="text" id="cooling_unit_id" name="cooling_unit_id"><br><br>
+
+        <label for="start_date">Start Date:</label>
+        <input type="date" id="start_date" name="start_date"><br><br>
+
+        <label for="end_date">End Date:</label>
+        <input type="date" id="end_date" name="end_date"><br><br>
+
+        <input type="submit" value="Submit">
+    </form>
+
+</body>
+</html>

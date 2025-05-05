@@ -1,0 +1,79 @@
+# Docker-compose config file which defines the settings of the local development environment
+services:
+  gateway:
+    build: ./Gateway
+    environment:
+      URL_BASE_API: http://api.coldtivate.localhost
+      URL_AIR_VCCA: http://air.coldtivate.localhost
+      URL_FARMER_API: http://farmer.coldtivate.localhost
+      URL_IMPACT_API: http://impact.coldtivate.localhost
+      ACME_SERVER: https://acme-staging-v02.api.letsencrypt.org/directory
+
+  web:
+    build: ./Base-API/
+    env_file: ${DOT_ENV_PATH:-.env.development}
+    environment:
+      ENV: dev
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "8000:8000"
+    command: pipenv run gunicorn base.wsgi:application -w 2 -b :8000 --reload
+    links:
+      - scraping_india
+      - scraping_nigeria
+
+  celery:
+    build: ./Base-API/
+    env_file: ${DOT_ENV_PATH:-.env.development}
+    command: bash -c 'pipenv run celery -A base worker -B --scheduler django -l info --without-gossip --without-mingle'
+    restart: always
+    environment:
+      ENV: dev
+
+  impact_dashboard_web:
+    build:
+      context: ./Impact-Dashboard-Backend
+      dockerfile: Dockerfile
+    env_file: ${DOT_ENV_PATH:-.env.development}
+    ports:
+      - "8001:80"
+
+  impact_dashboard_scheduler:
+    build:
+      context: ./Impact-Dashboard-Backend
+      dockerfile: Dockerfile.scheduler
+    env_file: ${DOT_ENV_PATH:-.env.development}
+    ports:
+      - "5001:80"
+
+  vcca_air_service:
+    build: ./App-Impact-Reporting
+    env_file: ${DOT_ENV_PATH:-.env.development}
+    ports:
+      - "8002:5000"
+
+  farmer_web:
+    build:
+      context: ./Farmers-Dashboard-Backend
+      dockerfile: Dockerfile
+    env_file: ${DOT_ENV_PATH:-.env.development}
+    ports:
+      - "8003:80"
+
+  farmer_scheduler:
+    build:
+      context: ./Farmers-Dashboard-Backend
+      dockerfile: Dockerfile.scheduler
+    env_file: ${DOT_ENV_PATH:-.env.development}
+    ports:
+      - "5002:3000"
+
+  scraping_india:
+    build: ./ml4-india
+    ports:
+      - "5101:5000"
+
+  scraping_nigeria:
+    build: ./ml4-nigeria
+    ports:
+      - "5102:5000"

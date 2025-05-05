@@ -1,0 +1,17 @@
+Cython
+pillow==6.2.1
+numpy
+flask
+selenium
+pandas
+openpyxl
+tqdm
+matplotlib
+missingno
+datetime
+scikit-learn==1.2.2
+Unidecode
+lxml
+supervisor
+bz2file
+xlrd

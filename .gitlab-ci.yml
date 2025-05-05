@@ -1,0 +1,238 @@
+stages:
+  - build
+  - deploy
+
+## Templates
+.build-docker-image:
+  stage: build
+  image: docker:25.0.3
+  allow_failure: true
+  variables:
+    DOCKER_BUILDKIT: "1"
+    DAEMON_CONFIG: '{"features":{"containerd-snapshotter":true}}'
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_CERTDIR: "/certs"
+    IMAGE_AND_TAGS: ${IMAGE:-${CI_REGISTRY_IMAGE}}:${TAG:-latest}
+    CONTEXT_PATH: ${CONTEXT_PATH:-.}
+    DOCKERFILE_PATH: ""
+  services:
+    - name: docker:25.0.3-dind
+      entrypoint:
+        [
+          "/bin/sh",
+          "-c",
+          'mkdir -p /etc/docker && echo "${DAEMON_CONFIG}" > /etc/docker/daemon.json && exec dockerd-entrypoint.sh',
+        ]
+  before_script:
+    - docker info || true
+    # Ensure docker exists, that the service is running, and login towards the gitlab registry
+    - command -v docker && docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" registry.gitlab.com
+
+  script:
+    - | # Cache
+      if [ "$CACHE_IMAGE" != "" ]; then
+        # docker pull $CACHE_IMAGE || true;
+        DOCKER_BUILD_ARGS="$DOCKER_BUILD_ARGS --cache-from=type=registry,ref=$CACHE_IMAGE --cache-to=type=registry,ref=$CACHE_IMAGE,mode=max";
+      else
+        for image in ${IMAGE_AND_TAGS}; do
+          docker pull $image || true;
+          DOCKER_BUILD_ARGS="$DOCKER_BUILD_ARGS --cache-from $image";
+        done;
+      fi;
+    - | # tags
+      for image in ${IMAGE_AND_TAGS}; do
+        DOCKER_BUILD_ARGS="$DOCKER_BUILD_ARGS --tag $image";
+      done;
+    - |
+      if [ "$DOCKERFILE_PATH" != "" ]; then
+        DOCKER_BUILD_ARGS="$DOCKER_BUILD_ARGS --file $CONTEXT_PATH/$DOCKERFILE_PATH";
+      fi
+    - docker build $DOCKER_BUILD_ARGS "$CONTEXT_PATH"
+    - |
+      for image in ${IMAGE_AND_TAGS}; do
+        docker push $image;
+      done
+    - |
+      if [ "$CACHE_IMAGE" != "" ]; then
+        docker push $CACHE_IMAGE || true;
+      fi;
+
+###
+## Build Artifacts stage
+###
+
+# Base API
+build gateway image:
+  extends: .build-docker-image
+  variables:
+    CONTEXT_PATH: ./Gateway
+    IMAGE_AND_TAGS: ${CI_REGISTRY_IMAGE}/gateway:${CI_COMMIT_REF_SLUG} ${CI_REGISTRY_IMAGE}/gateway:${CI_COMMIT_SHORT_SHA}
+    CACHE_IMAGE: ${CI_REGISTRY_IMAGE}/gateway:buildcache
+  only:
+    # - development
+    - main
+    - tags
+
+# Base API
+build base-api image:
+  extends: .build-docker-image
+  variables:
+    CONTEXT_PATH: ./Base-API/
+    IMAGE_AND_TAGS: ${CI_REGISTRY_IMAGE}/base-api:${CI_COMMIT_REF_SLUG} ${CI_REGISTRY_IMAGE}/base-api:${CI_COMMIT_SHORT_SHA}
+    CACHE_IMAGE: ${CI_REGISTRY_IMAGE}/base-api:buildcache
+  only:
+    # - development
+    - main
+    - tags
+
+# ML Prediction 4 India
+# TODO: Performance improvement - train model on build
+build ml4-india image:
+  extends: .build-docker-image
+  variables:
+    CONTEXT_PATH: ./ML4-India/
+    IMAGE_AND_TAGS: ${CI_REGISTRY_IMAGE}/ml4-india:${CI_COMMIT_REF_SLUG} ${CI_REGISTRY_IMAGE}/ml4-india/scraping:${CI_COMMIT_SHORT_SHA}
+    CACHE_IMAGE: ${CI_REGISTRY_IMAGE}/ml4-india:buildcache
+  only:
+    # - development
+    - main
+    - tags
+
+# ML Prediction 4 Nigeria
+build ml4-nigeria image:
+  extends: .build-docker-image
+  variables:
+    CONTEXT_PATH: ./ML4-Nigeria/
+    IMAGE_AND_TAGS: ${CI_REGISTRY_IMAGE}/ml4-nigeria:${CI_COMMIT_REF_SLUG} ${CI_REGISTRY_IMAGE}/ml4-nigeria/scraping:${CI_COMMIT_SHORT_SHA}
+    CACHE_IMAGE: ${CI_REGISTRY_IMAGE}/ml4-nigeria:buildcache
+  only:
+    # - development
+    - main
+    - tags
+
+# Impact Dashboard Backend
+build Impact-Dashboard-Backend image:
+  extends: .build-docker-image
+  variables:
+    CONTEXT_PATH: ./Impact-Dashboard-Backend
+    IMAGE_AND_TAGS: ${CI_REGISTRY_IMAGE}/impact-dashboard-backend:${CI_COMMIT_REF_SLUG} ${CI_REGISTRY_IMAGE}/impact-dashboard-backend:${CI_COMMIT_SHORT_SHA}
+    CACHE_IMAGE: ${CI_REGISTRY_IMAGE}/impact-dashboard-backend:buildcache
+  only:
+    # - development
+    - main
+    - tags
+
+# Impact Dashboard Backend Scheduler
+build Impact-Dashboard-Backend scheduler image:
+  extends: .build-docker-image
+  variables:
+    CONTEXT_PATH: ./Impact-Dashboard-Backend
+    DOCKERFILE_PATH: Dockerfile.scheduler
+    IMAGE_AND_TAGS: ${CI_REGISTRY_IMAGE}/impact-dashboard-backend-scheduler:${CI_COMMIT_REF_SLUG} ${CI_REGISTRY_IMAGE}/impact-dashboard-backend-scheduler:${CI_COMMIT_SHORT_SHA}
+    CACHE_IMAGE: ${CI_REGISTRY_IMAGE}/impact-dashboard-backend-scheduler:buildcache
+  only:
+    # - development
+    - main
+    - tags
+
+# App Impact Reporting
+build App-Impact-Reporting image:
+  extends: .build-docker-image
+  variables:
+    CONTEXT_PATH: ./App-Impact-Reporting
+    IMAGE_AND_TAGS: ${CI_REGISTRY_IMAGE}/app-impact-reporting:${CI_COMMIT_REF_SLUG} ${CI_REGISTRY_IMAGE}/app-impact-reporting:${CI_COMMIT_SHORT_SHA}
+    CACHE_IMAGE: ${CI_REGISTRY_IMAGE}/app-impact-reporting:buildcache
+  only:
+    # - development
+    - main
+    - tags
+
+# Farmers Dashboard Backend
+build Farmers-Dashboard-Backend image:
+  extends: .build-docker-image
+  variables:
+    CONTEXT_PATH: ./Farmers-Dashboard-Backend
+    IMAGE_AND_TAGS: ${CI_REGISTRY_IMAGE}/farmers-dashboard-backend:${CI_COMMIT_REF_SLUG} ${CI_REGISTRY_IMAGE}/farmers-dashboard-backend:${CI_COMMIT_SHORT_SHA}
+    CACHE_IMAGE: ${CI_REGISTRY_IMAGE}/farmers-dashboard-backend:buildcache
+  only:
+    # - development
+    - main
+    - tags
+
+# Farmers Dashboard Backend scheduler
+build Farmers-Dashboard-Backend scheduler image:
+  extends: .build-docker-image
+  variables:
+    CONTEXT_PATH: ./Farmers-Dashboard-Backend
+    DOCKERFILE_PATH: Dockerfile.scheduler
+    IMAGE_AND_TAGS: ${CI_REGISTRY_IMAGE}/farmers-dashboard-backend-scheduler:${CI_COMMIT_REF_SLUG} ${CI_REGISTRY_IMAGE}/farmers-dashboard-backend-scheduler:${CI_COMMIT_SHORT_SHA}
+    CACHE_IMAGE: ${CI_REGISTRY_IMAGE}/farmers-dashboard-backend-scheduler:buildcache
+  only:
+    # - development
+    - main
+    - tags
+###
+## Deployment stage
+###
+
+.deploy-to-environment:
+  image: docker:23-cli
+  stage: deploy
+  when: manual
+  variables:
+    ENVIRONMENT: production
+    SSH_HOST: localhost
+    SSH_USER: user
+    SSH_PRIVATE_KEY: /tmp/changeme
+  before_script:
+    # Setup an SSH Agent with a previously provided key
+    - apk add --update sshpass openssh-client bash
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" > /tmp/ssh_private-key_rsa
+    - chmod 0600 /tmp/ssh_private-key_rsa
+    - ssh-add /tmp/ssh_private-key_rsa
+    # Don't request host key verification on CI
+    - mkdir -p ~/.ssh && chmod 700 ~/.ssh
+    - ssh-keyscan "$SSH_HOST" >> ~/.ssh/known_hosts
+    - |
+      cat <<EOF >> ~/.ssh/config
+      Host docker-host
+        HostName ${SSH_HOST}
+        User ${SSH_USER}
+        ForwardAgent yes
+        ControlMaster auto
+        ControlPersist 10m
+        ControlPath ~/.ssh/cm-%r@%h:%p
+        ServerAliveInterval 30
+        ServerAliveCountMax 3
+      EOF
+    - export DOCKER_HOST="ssh://docker-host";
+    # Ensure docker exists, that we can connect to the target docker context, and login towards the gitlab registry
+    - command -v docker && docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" registry.gitlab.com
+  script:
+    - export DOT_ENV_FILENAME=".env";
+    - echo "$DOT_ENV" > $DOT_ENV_FILENAME;
+    - docker system prune -f -a
+    - ./scripts/environment-deployment-management.sh deploy
+
+deploy to staging:
+  extends: .deploy-to-environment
+  variables:
+    ENVIRONMENT: staging
+    SSH_HOST: $STAGING_SSH_HOST
+    SSH_USER: $STAGING_SSH_USER
+    SSH_PRIVATE_KEY: $STAGING_SSH_PRIVATE_KEY_PATH # for some reason gitlab ci pulls the content instead of the file path
+    DOT_ENV: $STAGING_DOT_ENV_PATH # for some reason gitlab ci pulls the content instead of the file path
+  only:
+    - main
+
+deploy to production:
+  extends: .deploy-to-environment
+  variables:
+    ENVIRONMENT: production
+    SSH_HOST: $PRODUCTION_SSH_HOST
+    SSH_USER: $PRODUCTION_SSH_USER
+    SSH_PRIVATE_KEY: $PRODUCTION_SSH_PRIVATE_KEY_PATH # for some reason gitlab ci pulls the content instead of the file path
+    DOT_ENV: $PRODUCTION_DOT_ENV_PATH # for some reason gitlab ci pulls the content instead of the file path
+  only:
+    - tags

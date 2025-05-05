@@ -1,0 +1,37 @@
+FROM python:3.9-slim
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+# Install dependencies
+WORKDIR /scheduler
+COPY requirements.txt /scheduler/
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+RUN apt-get update --fix-missing && apt-get -y install dos2unix
+
+# Copy scheduler script and cron job
+COPY indicator_reporter.py /scheduler/
+COPY utils.py .
+COPY ./sql_queries ./sql_queries
+
+# Install cron and prepare the script
+RUN apt-get update && apt-get -y install cron
+
+COPY cron/crontab /etc/cron.d/crontab
+# Give execution rights on the cron job and run script
+RUN dos2unix /etc/cron.d/crontab
+RUN chmod 0644 /etc/cron.d/crontab
+RUN crontab /etc/cron.d/crontab
+RUN touch /var/log/cron.log
+
+COPY run_scheduler.sh /scheduler/run_scheduler.sh
+
+# Convert the shell script to Unix format and make it executable
+RUN dos2unix /scheduler/run_scheduler.sh && chmod 0744 /scheduler/run_scheduler.sh
+COPY supervisord.conf .
+COPY entry_point.sh /entry_point.sh
+RUN chmod +x /entry_point.sh
+ENTRYPOINT ["/entry_point.sh"]

@@ -1,0 +1,46 @@
+[
+    {
+        "model": "operation.movement",
+        "pk": 1,
+        "fields": {
+            "operator": null,
+            "date": "2022-03-23T07:04:31.943Z",
+            "code": "68PF1E"
+        }
+    },
+    {
+        "model": "operation.movement",
+        "pk": 2,
+        "fields": {
+            "operator": 1,
+            "date": "2022-03-23T07:10:30.297Z",
+            "code": "P99OA2"
+        }
+    },
+    {
+        "model": "operation.checkin",
+        "pk": 1,
+        "fields": {
+            "movement": 1,
+            "farmer": 1
+        }
+    },
+    {
+        "model": "operation.checkout",
+        "pk": 1,
+        "fields": {
+            "movement": 2,
+            "price": 5.0,
+            "paid": true
+        }
+    },
+    {
+        "model": "operation.checkout",
+        "pk": 2,
+        "fields": {
+            "movement": 2,
+            "price": 10.0,
+            "paid": true
+        }
+    }
+]

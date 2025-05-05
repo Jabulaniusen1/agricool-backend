@@ -1,0 +1,62 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: ig\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.5\n"
+
+msgid "sms_ttpu_2_days_left"
+msgstr "Otú ọ dị naanị ụbọchị 2 fọdụrụ iji were ihe ọkụkụ {crop_name} gị! (nwale ụbọchị ịbanye: {checkin_date}, njirimara ngwongwo oyi: {cooling_unit}, njirimara mbanye: {checkin_code})"
+
+msgid "sms_invite_operator_with_code"
+msgstr "Iji sonyere ngwa Coldtivate dịka Onye Ọrụ, biko gaa na: {link}"
+
+msgid "sms_invite_service_provider_with_code"
+msgstr "Iji sonye na ngwa Coldtivate dịka onye ọrụ edebanyere aha, biko gaa na: {link}"
+
+msgid "sms_auth_reset_password"
+msgstr "Pịa na njikọ a iji tọghata okwuntughe gị: {link}"
+
+msgid "sms_marketplace_order_seller_notice"
+msgstr ""
+"A na-ere ngwaahịa gị na usoro #{order_id}:\n"
+"{details}"
+
+msgid "sms_marketplace_order_seller_notice_details"
+msgstr "{crop_name}: {weight_in_kg}kg maka {amount} {currency}"
+
+msgid "sms_history_sms_report"
+msgstr ""
+"{company_name} - {movement_type} Nkwupụta Ọrụ:\n"
+"Koodu Ọrụ: {code}\n"
+"Ihe Ọkụkụ: {crops}\n"
+"Nha Ngụkọta: {weight} Kg\n"
+"{movement_type_for_date}: {date}\n"
+"Ọnụ Ahịa: {price}\n"
+"Ego si n'aka: {farmers_name}"
+
+msgid "movement_type_check_out"
+msgstr "Pụọ"
+
+msgid "movement_type_checkin"
+msgstr "Banye"
+
+msgid "movement_type_checked_out"
+msgstr "Apụrụ"
+
+msgid "movement_type_checked_in"
+msgstr "Abanyelarị"
+
+msgid "sms_marketplace_seller_market_listed_crates_price_changed"
+msgstr ""
+"Emeela ka ọnụahịa nke igbe echekwara '{crop_name}' na '{cooling_unit_name}' dị ọhụrụ:\n"
+"{details}"
+
+msgid "sms_marketplace_seller_market_listed_crates_price_changed_details"
+msgstr "{crate_id}: {produce_price_in_kg} {currency} kwa kilogram"

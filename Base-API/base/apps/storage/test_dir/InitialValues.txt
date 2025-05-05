@@ -1,0 +1,5 @@
+I0_sl 	1
+T_fruit_ini 	290
+SL_buffer  	2
+FruitIndex  	1
+T_set 	10

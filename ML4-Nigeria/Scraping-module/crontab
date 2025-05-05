@@ -1,0 +1,3 @@
+#run scraping python script every monday and friday by 0800, 12, and 18 restart flask prediction module 30 min after retraining is triggered
+0 20 * * 1,5 python3 /app/scraping.py > /proc/1/fd/1 2>/proc/1/fd/2
+0 1 1 * * pkill -f prediction.py > /proc/1/fd/1 2>/proc/1/fd/2

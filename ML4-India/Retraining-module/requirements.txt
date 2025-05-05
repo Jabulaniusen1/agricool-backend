@@ -1,0 +1,15 @@
+Pillow==8.0.1
+numpy==1.26.4
+flask
+selenium
+pandas
+tqdm
+matplotlib
+missingno
+numpy
+datetime
+scikit-learn
+catboost
+Unidecode
+lxml
+supervisor

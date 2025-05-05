@@ -1,0 +1,25 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+numpy = "==1.26.4"
+scikit-learn = "==1.2.2"
+pandas = "*"
+requests = "*"
+html5lib = "*"
+Pillow = "==8.0.1"
+beautifulsoup4 = "*"
+flask = "*"
+flask-caching = "*"
+redis = "*"
+selenium = "*"
+tqdm = "*"
+catboost = "*"
+gunicorn = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.9"

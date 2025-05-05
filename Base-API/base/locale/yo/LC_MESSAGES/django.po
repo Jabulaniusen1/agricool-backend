@@ -1,0 +1,62 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: yo\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.5\n"
+
+msgid "sms_ttpu_2_days_left"
+msgstr "Awọn ọjọ meji pere lo ku lati mu ati ta awọn apoti rẹ ti {crop_name}! (ọjọ ayẹwo: {checkin_date}, ID ẹrọ itutu: {cooling_unit}, ID ayẹwo: {checkin_code})"
+
+msgid "sms_invite_operator_with_code"
+msgstr "Lati darapọ mọ app Coldtivate gẹgẹ bi Oniṣẹ, jọwọ lọ si: {link}"
+
+msgid "sms_invite_service_provider_with_code"
+msgstr "Lati darapọ mọ ohun elo Coldtivate gẹgẹbi Oṣiṣẹ ti Iforukọsilẹ, jọwọ lọ si: {link}"
+
+msgid "sms_auth_reset_password"
+msgstr "Tẹ lori ọna asopọ yii lati tunṣe ọrọ igbaniwọle rẹ: {link}"
+
+msgid "sms_marketplace_order_seller_notice"
+msgstr ""
+"A ti ta awọn ọja rẹ ni ibere #{order_id}:\n"
+"{details}"
+
+msgid "sms_marketplace_order_seller_notice_details"
+msgstr "{crop_name}: {weight_in_kg}kg fun {amount} {currency}"
+
+msgid "sms_history_sms_report"
+msgstr ""
+"{company_name} - {movement_type} Iwe-ẹri:\n"
+"Koodu Gbigbe: {code}\n"
+"Awọn irugbin: {crops}\n"
+"Iwọn apapọ: {weight} Kg\n"
+"{movement_type_for_date}: {date}\n"
+"Iye owo: {price}\n"
+"San nipasẹ: {farmers_name}"
+
+msgid "movement_type_check_out"
+msgstr "Jade"
+
+msgid "movement_type_checkin"
+msgstr "Wọle"
+
+msgid "movement_type_checked_out"
+msgstr "Ti jade"
+
+msgid "movement_type_checked_in"
+msgstr "Ti wọle"
+
+msgid "sms_marketplace_seller_market_listed_crates_price_changed"
+msgstr ""
+"Awọn idiyele atokọ fun awọn apoti ti o tọju '{crop_name}' ni '{cooling_unit_name}' ti wa ni imudojuiwọn:\n"
+"{details}"
+
+msgid "sms_marketplace_seller_market_listed_crates_price_changed_details"
+msgstr "{crate_id}: {produce_price_in_kg} {currency} fun kg"

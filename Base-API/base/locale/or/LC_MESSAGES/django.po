@@ -1,0 +1,62 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: or\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.5\n"
+
+msgid "sms_ttpu_2_days_left"
+msgstr "ବାକୀ ଅଛି କେବଳ 2 ଦିନ ତୁମର {crop_name} କାଠ ଉଠାଇ ଏବଂ ବେଚିବା ପାଇଁ! (ଚେକ୍ ଇନ୍ ତାରିଖ: {checkin_date}, କୁଲିଂ ଇଉନିଟ୍ ID: {cooling_unit}, ଚେକ୍ ଇନ୍ ID: {checkin_code})"
+
+msgid "sms_invite_operator_with_code"
+msgstr "ଏକ ଅପରେଟର୍ ଭାବେ Coldtivate ଆପ୍ ରେ ଯୋଗ ଦେବାକୁ, କୃପୟା ଯାଆନ୍ତୁ: {link}"
+
+msgid "sms_invite_service_provider_with_code"
+msgstr "ପଞ୍ଜୀକୃତ କର୍ମଚାରୀ ଭାବରେ Coldtivate ଆପ୍ ରେ ଯୋଗ ଦେବାକୁ, କୃପୟା ଯାଆନ୍ତୁ: {link}"
+
+msgid "sms_auth_reset_password"
+msgstr "ପାସ୍‌ୱାର୍ଡ ରିସେଟ୍ କରିବାକୁ ଏହି ଲିଙ୍କ୍ କ୍ଲିକ୍ କରନ୍ତୁ: {link}"
+
+msgid "sms_marketplace_order_seller_notice"
+msgstr ""
+"ତୁମର ଉତ୍ପାଦ ଓଡା #{order_id}ରେ ବିକ୍ରୟ ହୋଇଛି:\n"
+"{details}"
+
+msgid "sms_marketplace_order_seller_notice_details"
+msgstr "{crop_name}: {weight_in_kg} କିଲୋଗ୍ରାମ ପାଇଁ {amount} {currency}"
+
+msgid "sms_history_sms_report"
+msgstr ""
+"{company_name} - {movement_type} ରସିଦ୍:\n"
+"ସ୍ଥାନାନ୍ତର କୋଡ୍: {code}\n"
+"ଫସଲଗୁଡିକ: {crops}\n"
+"ମୋଟ ଓଜନ: {weight} କିଲୋଗ୍ରାମ୍\n"
+"{movement_type_for_date}: {date}\n"
+"ମୂଲ୍ୟ: {price}\n"
+"ପେମେଣ୍ଟ କରିଥିବା: {farmers_name}"
+
+msgid "movement_type_check_out"
+msgstr "ଚେକ୍-ଆଉଟ୍"
+
+msgid "movement_type_checkin"
+msgstr "ଚେକ୍-ଇନ୍"
+
+msgid "movement_type_checked_out"
+msgstr "ଚେକ୍-ଆଉଟ୍ ହୋଇଛି"
+
+msgid "movement_type_checked_in"
+msgstr "ଚେକ୍-ଇନ୍ ହୋଇଛି"
+
+msgid "sms_marketplace_seller_market_listed_crates_price_changed"
+msgstr ""
+"'{cooling_unit_name}' ରେ '{crop_name}' ସଂଗ୍ରହ କରୁଥିବା କ୍ରେଟ୍ ଲିସ୍ଟିଂ ମୂଲ୍ୟଗୁଡିକ ସଂପାଦିତ ହୋଇଛି:\n"
+"{details}"
+
+msgid "sms_marketplace_seller_market_listed_crates_price_changed_details"
+msgstr "{crate_id}: {produce_price_in_kg} {currency} ପ୍ରତି କିଲୋ"
