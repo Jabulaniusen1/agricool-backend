@@ -579,10 +579,10 @@ class FarmerSurveyViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin):
         if not user.is_authenticated:
             raise AuthenticationFailed("Authentication credentials were not provided.")
 
-        user_id = self.request.query_params.get("farmer_id")
+        farmer_id = self.request.query_params.get("farmer_id")
 
         try:
-            farmer = Farmer.objects.get(user__id=user_id)
+            farmer = Farmer.objects.get(id=farmer_id)
         except ObjectDoesNotExist:
             farmer = None
 
@@ -592,10 +592,9 @@ class FarmerSurveyViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin):
         if Operator.objects.filter(user=user).exists():
             operator = Operator.objects.get(user=user)
             company_id = operator.company_id
-            
+
             if farmer and farmer.companies.filter(id=company_id).exists():
                 return self.model.objects.filter(farmer=farmer)
-
         raise AuthenticationFailed("You are not authorized to view this survey.")
 
     def create(self, request, *args, **kwargs):

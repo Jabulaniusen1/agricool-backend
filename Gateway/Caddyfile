@@ -90,7 +90,7 @@
         }
 
         reverse_proxy {
-            to http://base_api:5000
+            to http://base_api:8000
             import clear_reverse_proxy_cors_headers
         }
     }

@@ -56,4 +56,12 @@ We are committed to fostering a safe and inclusive environment for all contribut
 
 ## License
 
-Coldtivate is distributed under the MIT License. The complete license text is available in the [LICENSE](LICENSE) file.
+## License
+
+This project is licensed under the MIT License. However, it includes optional components that integrate with COMSOL Multiphysics®, which is proprietary software.
+
+You must have a valid COMSOL license to use these components and must comply with COMSOL's licensing terms. See the [LICENSE](./LICENSE) file for more details.
+
+Specifically, the `Base-API` module includes integration code for COMSOL Multiphysics®. Use of that module requires a valid COMSOL license and is not covered by the MIT License. For more information, refer to [`Base-API/NOTICE.md`](./Base-API/NOTICE.md).
+
+
