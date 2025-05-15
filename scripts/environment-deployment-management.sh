@@ -72,12 +72,23 @@ case $1 in
         # Pull the most recent images based on the given configuration
         $DOCKER_COMPOSE_CMD pull
 
+        # Start only the DB container in detached mode
+        echo "Starting the DB container..."
+        $DOCKER_COMPOSE_CMD up -d db
 
-        if [ "$ENVIRONMENT" = "development" ] && [ "$SKIP_DB_SEEDING" != "true" ]; then
+        if [ "$ENVIRONMENT" = "development" ]; then
+            # Wait for the database to be ready before proceeding
+            echo "Waiting for database to be ready..."
+            until $DOCKER_COMPOSE_CMD exec -T db pg_isready -U $DB_USERNAME -h $DB_HOST -p $DB_PORT; do
+                echo "Waiting for database..."
+                sleep 3
+            done
+            echo "Database is ready!"
+
             PSQL="$DOCKER_COMPOSE_CMD exec -T db psql -U $DB_USERNAME -h $DB_HOST -p $DB_PORT";
 
             echo "Checking for 'seed' database..."
-            if ! $PSQL -d postgres -c "SELECT 1 FROM pg_database WHERE datname = 'seed'" > /dev/null 2>&1; then
+            if ! $PSQL -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname = 'seed'" | grep -q 1; then
                 echo "Creating and seeding 'seed' database from $SEED_SQL_FILE..."
                 $PSQL -d postgres -c "CREATE DATABASE seed;"
                 $PSQL -d seed < "$SCRIPTS_ROOT/$SEED_SQL_FILE"

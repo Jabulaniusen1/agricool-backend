@@ -69,11 +69,11 @@ services:
       - "5002:3000"
 
   scraping_india:
-    build: ./ml4-india
+    build: ./ML4-India
     ports:
       - "5101:5000"
 
   scraping_nigeria:
-    build: ./ml4-nigeria
+    build: ./ML4-Nigeria
     ports:
       - "5102:5000"
