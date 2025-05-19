@@ -12,9 +12,9 @@ services:
       - base_network
     environment:
       POSTGRES_HOST_AUTH_METHOD: trust
-      POSTGRES_DB: base
-      POSTGRES_USER: base
-      POSTGRES_PASSWORD: base
+      POSTGRES_DB: ${DB_NAME:-base}
+      POSTGRES_USER: ${DB_USERNAME:-base}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-base}
     ports:
       - 54321:5432
     healthcheck:
