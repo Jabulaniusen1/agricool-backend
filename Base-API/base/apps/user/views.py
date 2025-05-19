@@ -272,7 +272,7 @@ class FarmerViewSet(
 ):
     model = Farmer
     serializer_class = FarmerSerializer
-    permission_classes = (permissions.AllowAny,)
+    permission_classes = (permissions.IsAuthenticated,)
 
     def get_queryset(self):
         if self.request.query_params.get("user_id"):
@@ -570,7 +570,7 @@ class LoginViewSet(TokenObtainPairView):
 class FarmerSurveyViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin):
     model = FarmerSurvey
     serializer_class = FarmerSurveySerializer
-    permission_classes = (permissions.AllowAny,)
+    permission_classes = (permissions.IsAuthenticated,)
 
 
     def get_queryset(self):
