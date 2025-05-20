@@ -13,7 +13,7 @@ class CoolingUnitSpecifications(models.Model):
     value = models.FloatField(null=False)
 
     # field used when cooling unit has sensor to save Set_T value retrieved from Ecozen
-    set_point_value = models.FloatField(max_length=32, null=True)
+    set_point_value = models.FloatField(null=True)
 
     specification_type = models.CharField(
         max_length=32, choices=SpecificationType.choices

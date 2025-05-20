@@ -19,6 +19,13 @@ export DOT_ENV_PATH="$MAIN_API_ROOT/$DOT_ENV_FILENAME"
 # Load the environment variables
 source "$DOT_ENV_PATH"
 
+# Load default database values
+DB_NAME=${DB_NAME:-base}
+DB_USERNAME=${DB_USERNAME:-base}
+DB_PASSWORD=${DB_PASSWORD:-base}
+DB_HOST=${DB_HOST:-db}
+DB_PORT=${DB_PORT:-5432}
+
 ###
 ## Helpers
 ###
@@ -51,6 +58,10 @@ to deploy to the existing environments.
 EOF
 }
 
+_database_url () {
+    echo -n "postgres://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${1:-${DB_NAME}}";
+}
+
 ###
 ## Main
 ###
@@ -72,32 +83,27 @@ case $1 in
         # Pull the most recent images based on the given configuration
         $DOCKER_COMPOSE_CMD pull
 
-        # Start only the DB container in detached mode
-        echo "Starting the DB container..."
-        $DOCKER_COMPOSE_CMD up -d db
+        # Start production database if not running on production
+        if [ "$ENVIRONMENT" != "production" ]; then
+            echo "Starting the DB container..."
+            $DOCKER_COMPOSE_CMD up --wait --detach db
+        fi
 
+        # Seed development environment
         if [ "$ENVIRONMENT" = "development" ]; then
-            # Wait for the database to be ready before proceeding
-            echo "Waiting for database to be ready..."
-            until $DOCKER_COMPOSE_CMD exec -T db pg_isready -U $DB_USERNAME -h $DB_HOST -p $DB_PORT; do
-                echo "Waiting for database..."
-                sleep 3
-            done
-            echo "Database is ready!"
-
-            PSQL="$DOCKER_COMPOSE_CMD exec -T db psql -U $DB_USERNAME -h $DB_HOST -p $DB_PORT";
+            PSQL="$DOCKER_COMPOSE_CMD exec -T db psql";
 
             echo "Checking for 'seed' database..."
-            if ! $PSQL -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname = 'seed'" | grep -q 1; then
+            if ! $PSQL -d "$(_database_url)" -tAc "SELECT 1 FROM pg_database WHERE datname = 'seed'" | grep -q 1; then
                 echo "Creating and seeding 'seed' database from $SEED_SQL_FILE..."
-                $PSQL -d postgres -c "CREATE DATABASE seed;"
-                $PSQL -d seed < "$SCRIPTS_ROOT/$SEED_SQL_FILE"
+                $PSQL -d "$(_database_url)" -c "CREATE DATABASE seed;"
+                $PSQL -d "$(_database_url seed)" < "$SCRIPTS_ROOT/$SEED_SQL_FILE"
             else
                 echo "'seed' database already exists."
             fi
 
             # Check if the DB_NAME database is empty
-            if ! $PSQL -d "$DB_NAME" -tAc "SELECT 1 FROM pg_tables WHERE schemaname = 'public' LIMIT 1" | grep -q 1; then
+            if ! $PSQL -d "$(_database_url)" -tAc "SELECT 1 FROM pg_tables WHERE schemaname = 'public' LIMIT 1" | grep -q 1; then
                 echo "Database $DB_NAME is empty, to recreate from seed, run the following commands:"
                 echo "  1. DROP DATABASE IF EXISTS \"$DB_NAME\";"
                 echo "  2. CREATE DATABASE \"$DB_NAME\" TEMPLATE seed;"
