@@ -217,14 +217,15 @@ class CoolingUnitViewSet(
         cooling_unit = self.get_object()
 
         user = request.user
+        unit_company = cooling_unit.location.company
 
-        # Check if the user has an authorized role
-        operator = Operator.objects.filter(user=user).first()
-        service_provider = ServiceProvider.objects.filter(user=user).first()
+        # Check if the user is an authorized Operator or ServiceProvider for this company
+        operator = Operator.objects.filter(user=user, company=unit_company).first()
+        service_provider = ServiceProvider.objects.filter(user=user, company=unit_company).first()
 
         if not operator and not service_provider:
             return Response(
-                {"error": "Only users with the Operator or Registered Employee role can perform this action"},
+                {"error": "You do not have permission to view sensor data for this cooling unit."},
                 status=status.HTTP_403_FORBIDDEN,
             )
 
