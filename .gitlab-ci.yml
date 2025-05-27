@@ -188,7 +188,7 @@ build Farmers-Dashboard-Backend scheduler image:
     # Setup an SSH Agent with a previously provided key
     - apk add --update sshpass openssh-client bash
     - eval $(ssh-agent -s)
-    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > /tmp/ssh_private-key_rsa
+    - echo "$SSH_PRIVATE_KEY" > /tmp/ssh_private-key_rsa
     - chmod 0600 /tmp/ssh_private-key_rsa
     - ssh-add /tmp/ssh_private-key_rsa
     # Don't request host key verification on CI
