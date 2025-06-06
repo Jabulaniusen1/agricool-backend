@@ -83,17 +83,5 @@ services:
     build: ./Comsol-Digital-Twins
     ports:
       - "5900:5900"
-    privileged: true
-    shm_size: 1g
-    deploy:
-      resources:
-        limits:
-          memory: 4g
-    cap_add:
-    - SYS_ADMIN
-    devices:
-      - /dev/fuse
-    security_opt:
-      - apparmor:unconfined
     env_file: ${DOT_ENV_PATH:-.env.development}
 

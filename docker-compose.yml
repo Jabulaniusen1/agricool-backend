@@ -157,6 +157,18 @@ services:
 
   comsol_dt_service:
     restart: always
+    privileged: true
+    shm_size: 1g
+    deploy:
+      resources:
+        limits:
+          memory: 4g
+    cap_add:
+      - SYS_ADMIN
+    devices:
+      - /dev/fuse
+    security_opt:
+      - apparmor:unconfined
     networks:
       - base_network
     expose:

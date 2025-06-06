@@ -45,3 +45,7 @@ services:
 
   scraping_nigeria:
     image: ${CI_REGISTRY_IMAGE}/ml4-nigeria:${CI_COMMIT_REF_SLUG:-latest}
+
+  comsol_dt_service:
+    image: ${CI_REGISTRY_IMAGE}/comsol-dt:${CI_COMMIT_REF_SLUG:-latest}
+    env_file: ${DOT_ENV_PATH:-.env.staging}
