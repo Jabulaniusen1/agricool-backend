@@ -44,6 +44,7 @@ services:
       - vcca_air_service:air_api
       - farmer_web:farmer_api
       - impact_dashboard_web:impact_api
+      - comsol_dt_service
     volumes:
       - caddy_data:/data
       - base_api_media_data:/app/base/media
@@ -63,6 +64,7 @@ services:
       - valkey
       - scraping_india
       - scraping_nigeria
+      - comsol_dt_service
     networks:
       - base_network
     environment:
@@ -84,6 +86,7 @@ services:
     links:
       - db
       - valkey
+      - comsol_dt_service
     networks:
       - base_network
 
@@ -151,6 +154,13 @@ services:
       FLASK_CACHE_TYPE: RedisCache
       FLASK_CACHE_REDIS_HOST: valkey
     command: pipenv run gunicorn prediction:app --workers 1 --bind 0.0.0.0:5000 --log-level=warning
+
+  comsol_dt_service:
+    restart: always
+    networks:
+      - base_network
+    expose:
+      - 5900
 
 volumes:
   caddy_data:

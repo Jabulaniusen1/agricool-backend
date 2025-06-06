@@ -1,0 +1,9 @@
+I0_sl	3
+T_fruit_ini	300
+SL_buffer	2
+FruitIndex	25
+T_set	4
+run_ID	25
+intervall_in_ms	1000
+
+

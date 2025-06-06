@@ -171,6 +171,18 @@ build Farmers-Dashboard-Backend scheduler image:
     # - development
     - main
     - tags
+
+# Comsol DT Service
+build comsol-dt-service image:
+  extends: .build-docker-image
+  variables:
+    CONTEXT_PATH: ./Comsol-Digital-Twins
+    IMAGE_AND_TAGS: ${CI_REGISTRY_IMAGE}/comsol-dt-service:${CI_COMMIT_REF_SLUG} ${CI_REGISTRY_IMAGE}/comsol-dt-service:${CI_COMMIT_SHORT_SHA}
+    CACHE_IMAGE: ${CI_REGISTRY_IMAGE}/comsol-dt-service:buildcache
+  only:
+    - main
+    - tags
+
 ###
 ## Deployment stage
 ###

@@ -1,11 +1,22 @@
 from rest_framework.routers import DefaultRouter
 
-from .views import (CoolingUnitCapacityViewSet, CoolingUnitCropViewSet,
-                    CoolingUnitSpecificationsViewSet,
-                    CoolingUnitTemperatureViewSet, CoolingUnitViewSet,
-                    CrateViewSet, CropTypeViewSet, CropViewSet, EcozenViewSet,
-                    LocationViewSet, MobileAppMinimumVersionCodesViewSet,
-                    NextCheckoutViewSet, ProduceViewSet, SensorIntegrationViewSet)
+from .views import (
+    ComsolCallbackViewSet,
+    CoolingUnitCapacityViewSet,
+    CoolingUnitCropViewSet,
+    CoolingUnitSpecificationsViewSet,
+    CoolingUnitTemperatureViewSet,
+    CoolingUnitViewSet,
+    CrateViewSet,
+    CropTypeViewSet,
+    CropViewSet,
+    EcozenViewSet,
+    LocationViewSet,
+    MobileAppMinimumVersionCodesViewSet,
+    NextCheckoutViewSet,
+    ProduceViewSet,
+    SensorIntegrationViewSet,
+)
 
 router = DefaultRouter()
 router.register(r"(?P<version>(v1))/crop-types", CropTypeViewSet, basename="crop")
@@ -48,6 +59,14 @@ router.register(
     r"(?P<version>(v1))/user-sensor", SensorIntegrationViewSet, basename="user-sensor"
 )
 
-router.register(r"version-code", MobileAppMinimumVersionCodesViewSet, basename="minimum-client-version-codes")
+router.register(
+    r"version-code",
+    MobileAppMinimumVersionCodesViewSet,
+    basename="minimum-client-version-codes",
+)
+
+router.register(
+    r"(?P<version>(v1))/comsol", ComsolCallbackViewSet, basename="comsol-callback"
+)
 
 urlpatterns = router.urls

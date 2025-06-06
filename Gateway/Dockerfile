@@ -7,4 +7,7 @@ ENV URL_AIR_VCCA=https://air-prod.coldtivate.org
 ENV URL_FARMER_API=https://farmer-prod.coldtivate.org
 ENV URL_IMPACT_API=https://impact-prod.coldtivate.org
 
+# TODO: Update to correct production URL
+ENV URL_COMSOL_DT_API=https://comsol_dt_service.coldtivate.org 
+
 COPY Caddyfile /etc/caddy/Caddyfile

@@ -1,7 +1,7 @@
-from genericpath import exists
-from pathlib import Path
-from datetime import timedelta
 import os
+from datetime import timedelta
+from pathlib import Path
+
 import environ
 import sentry_sdk
 
@@ -17,6 +17,7 @@ potential_env_file_path = os.path.join(BASE_DIR, ENV_FILE)
 if ENV_FILE != "" and os.path.exists(potential_env_file_path):
     environ.Env.read_env(potential_env_file_path)
 
+
 # Custom function to allow setting a fallback value when fetchin an environ environment value
 def getEnv(key, fallback=None):
     try:
@@ -28,8 +29,9 @@ def getEnv(key, fallback=None):
             )
         return fallback
 
+
 def str_to_bool(s):
-    return s.lower() in ['true', '1', 'yes']
+    return s.lower() in ["true", "1", "yes"]
 
 
 ##
@@ -56,19 +58,24 @@ ENVIRONMENT = getEnv("ENVIRONMENT", "development")
 FRONTEND_URL = getEnv("FRONTEND_URL", "http://localhost:8100")
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10 Mb limit
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10 Mb limit
-SECRET_KEY = getEnv("SECRET_KEY", "changeme") # SECURITY WARNING: keep the secret key used in production secret!
-DEBUG = str_to_bool(getEnv("DEBUG", "False")) # SECURITY WARNING: don't run with debug turned on in production!
+SECRET_KEY = getEnv(
+    "SECRET_KEY", "changeme"
+)  # SECURITY WARNING: keep the secret key used in production secret!
+DEBUG = str_to_bool(
+    getEnv("DEBUG", "False")
+)  # SECURITY WARNING: don't run with debug turned on in production!
 LOCALE_PATHS = [
-    os.path.join(BASE_DIR, 'locale'),
+    os.path.join(BASE_DIR, "locale"),
 ]
+URL_BASE_API = os.getenv("URL_BASE_API", "http://localhost:8000")
 
 CACHES = {
-    'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': REDIS_URL,  # Update the location based on your Redis setup
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-        }
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": REDIS_URL,  # Update the location based on your Redis setup
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
     }
 }
 
@@ -84,7 +91,6 @@ INSTALLED_APPS = [
     "corsheaders",
     "django_celery_beat",
     "rest_framework",
-
     # apps
     "base.apps.user",
     "base.apps.storage",
@@ -169,8 +175,8 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.BasicAuthentication",
     ),
-    'DEFAULT_RENDERER_CLASSES': [
-        'rest_framework.renderers.JSONRenderer',
+    "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",
         #'rest_framework.renderers.BrowsableAPIRenderer',  # Ensure this is included for the Browsable API
     ],
 }
@@ -240,9 +246,18 @@ INVITATION_CODE_SALT = getEnv("INVITATION_CODE_SALT", "ec*bgxfN4TFfoyFpCmgJ")
 # INVITATION_OPERATOR_URL = getEnv("INVITATION_OPERATOR_URL", "{base_url}/invite/{code}/op/{phone_number}")
 # INVITATION_SERVICE_PROVIDER_URL = getEnv("INVITATION_SERVICE_PROVIDER_URL", "{base_url}/invite/{code}/sp/{phone_number}")
 
-AUTH_PASSWORD_URL = getEnv("AUTH_PASSWORD_URL", "{base_url}/auth/reset/?resetcode={code}&phoneNumber={phone_number}")
-INVITATION_OPERATOR_URL = getEnv("INVITATION_OPERATOR_URL", "{base_url}/auth/signup-invitation/?user-type=2&invitation-code={code}&phoneNumber={phone_number}")
-INVITATION_SERVICE_PROVIDER_URL = getEnv("INVITATION_SERVICE_PROVIDER_URL", "{base_url}/auth/signup-invitation/?user-type=1&invitation-code={code}&phoneNumber={phone_number}")
+AUTH_PASSWORD_URL = getEnv(
+    "AUTH_PASSWORD_URL",
+    "{base_url}/auth/reset/?resetcode={code}&phoneNumber={phone_number}",
+)
+INVITATION_OPERATOR_URL = getEnv(
+    "INVITATION_OPERATOR_URL",
+    "{base_url}/auth/signup-invitation/?user-type=2&invitation-code={code}&phoneNumber={phone_number}",
+)
+INVITATION_SERVICE_PROVIDER_URL = getEnv(
+    "INVITATION_SERVICE_PROVIDER_URL",
+    "{base_url}/auth/signup-invitation/?user-type=1&invitation-code={code}&phoneNumber={phone_number}",
+)
 
 ##
 # Internationalization
@@ -264,12 +279,14 @@ TWILIO_NUMBER = getEnv("TWILIO_NUMBER", "")
 ##
 # Email
 ##
-DEFAULT_FROM_EMAIL = 'no-reply@coldtivate.org'
+DEFAULT_FROM_EMAIL = "no-reply@coldtivate.org"
 if DEBUG:
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 else:
-    EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
-    SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY')  # Storing API key in environment variable
+    EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"
+    SENDGRID_API_KEY = os.getenv(
+        "SENDGRID_API_KEY"
+    )  # Storing API key in environment variable
 
 
 # Logging for testing
@@ -300,15 +317,20 @@ LOGGING = {
 }
 
 # Price prediction
-PRICE_PREDICTION_URL_INDIA = os.getenv("PRICE_PREDICTION_URL_INDIA") or "http://scraping_india:5000/prediction"
-PRICE_PREDICTION_URL_NIGERIA = os.getenv("PRICE_PREDICTION_URL_NIGERIA") or "http://scraping_nigeria:5000/prediction"
+PRICE_PREDICTION_URL_INDIA = (
+    os.getenv("PRICE_PREDICTION_URL_INDIA") or "http://scraping_india:5000/prediction"
+)
+PRICE_PREDICTION_URL_NIGERIA = (
+    os.getenv("PRICE_PREDICTION_URL_NIGERIA")
+    or "http://scraping_nigeria:5000/prediction"
+)
 
 ##
 # Marketplace
 ##
 
 PAYSTACK_SECRET_KEY = os.getenv("PAYSTACK_SECRET_KEY") or "cH4ng3_m3"
-MARKETPLACE_COLDTIVATE_EXPONENT = 0.035 # 3.5%
+MARKETPLACE_COLDTIVATE_EXPONENT = 0.035  # 3.5%
 MARKETPLACE_OPEN_TO_COUNTRIES = ["NG"]
 
 ##
@@ -319,5 +341,13 @@ if ENVIRONMENT != "development":
     sentry_sdk.init(
         dsn="https://c67bfa37f9b1593641a2c37b05b3743d@o4508088181653504.ingest.de.sentry.io/4508088191156304",
         traces_sample_rate=1.0,
-        environment=ENVIRONMENT
+        environment=ENVIRONMENT,
     )
+
+##
+# Comsol DT Service
+##
+COMSOL_CALLBACK_KEY = os.getenv("COMSOL_CALLBACK_KEY") or "cH4ng3_m3"
+URL_COMSOL_DT_API = (
+    os.getenv("COMSOL_DT_API_URL") or "http://comsol_dt_service:5900/api/"
+)
