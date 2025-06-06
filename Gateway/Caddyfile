@@ -78,6 +78,15 @@
     }
 }
 
+# COMSOL DT proxy
+{$URL_COMSOL_DT_API} {
+    tls internal
+    import cors
+    reverse_proxy {
+        to http://comsol_dt_service:5900
+        import clear_reverse_proxy_cors_headers
+    }
+}
 
 :80 {
     import cors
@@ -112,6 +121,13 @@
     handle_path /impact_api/* {
         reverse_proxy {
             to http://impact_api:5000
+            import clear_reverse_proxy_cors_headers
+        }
+    }
+    
+    handle_path /comsol_dt/* {
+        reverse_proxy {
+            to http://comsol_dt_service:5900
             import clear_reverse_proxy_cors_headers
         }
     }

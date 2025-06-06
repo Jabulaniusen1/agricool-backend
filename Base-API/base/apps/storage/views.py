@@ -2,30 +2,54 @@ from datetime import datetime, timedelta
 from itertools import chain
 
 import requests
+from django.conf import settings
 from django.db.models import Count, Exists, Q
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from rest_framework import permissions, status
 from rest_framework.decorators import action
-from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
-                                   ListModelMixin, RetrieveModelMixin,
-                                   UpdateModelMixin)
+from rest_framework.mixins import (
+    CreateModelMixin,
+    DestroyModelMixin,
+    ListModelMixin,
+    RetrieveModelMixin,
+    UpdateModelMixin,
+)
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ViewSet
 
+from base.apps.storage.models import Crate
 from base.apps.storage.serializers.sensors import SensorIntegrationSerializer
 from base.apps.storage.services.sensors.utils import build_integration
+from base.apps.storage.tasks.digital_twins import send_crate_failure_email
 from base.apps.user.models import Country, Farmer, Operator, ServiceProvider
 
 from .apps import ANDROID_VERSION_CODE, IOS_VERSION_CODE
-from .models import (CoolingUnit, CoolingUnitCrop, CoolingUnitPower,
-                     CoolingUnitSpecifications, Crate, Crop, CropType, Location,
-                     Produce, SensorIntegration)
-from .serializers import (CoolingUnitCapacitySerializer,
-                          CoolingUnitCropSerializer, CoolingUnitPowerSerializer,
-                          CoolingUnitSerializer,
-                          CoolingUnitSpecificationsSerializer, CrateSerializer,
-                          CropSerializer, CropTypeSerializer,
-                          LocationSerializer, ProduceSerializer)
+from .models import (
+    CoolingUnit,
+    CoolingUnitCrop,
+    CoolingUnitPower,
+    CoolingUnitSpecifications,
+    Crate,
+    Crop,
+    CropType,
+    Location,
+    Produce,
+    SensorIntegration,
+)
+from .serializers import (
+    CoolingUnitCapacitySerializer,
+    CoolingUnitCropSerializer,
+    CoolingUnitPowerSerializer,
+    CoolingUnitSerializer,
+    CoolingUnitSpecificationsSerializer,
+    CrateSerializer,
+    CropSerializer,
+    CropTypeSerializer,
+    LocationSerializer,
+    ProduceSerializer,
+)
+
 
 class CropTypeViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
     model = CropType
@@ -112,26 +136,32 @@ class CoolingUnitViewSet(
                 farmer = Farmer.objects.get(
                     user__id=self.request.query_params.get("user")
                 )
-                
+
                 crates = Crate.objects.filter(
                     produce__checkin__owned_by_user__farmer=farmer,
                     weight__gt=0,
                 ).distinct("cooling_unit")
-                                
+
                 cooling_unit_ids = crates.values_list("cooling_unit", flat=True)
                 cooling_units = self.model.objects.filter(id__in=cooling_unit_ids)
 
                 if self.request.query_params.get("company"):
                     company_id = int(self.request.query_params.get("company"))
-                    cooling_units = cooling_units.filter(location__company__id=company_id) 
+                    cooling_units = cooling_units.filter(
+                        location__company__id=company_id
+                    )
 
-                return cooling_units 
-            
+                return cooling_units
+
             if self.request.query_params.get("company"):
                 return self.model.objects.filter(
-                    Q(location__company_id=self.request.query_params.get("company")) &
-                    Exists(Crate.generate_checkedin_crates_subquery("crate_cooling_unit__produce_id")) &
-                    Q(deleted=False),
+                    Q(location__company_id=self.request.query_params.get("company"))
+                    & Exists(
+                        Crate.generate_checkedin_crates_subquery(
+                            "crate_cooling_unit__produce_id"
+                        )
+                    )
+                    & Q(deleted=False),
                 ).distinct("id")
             if self.request.query_params.get("user"):
                 return self.model.objects.annotate(op=Count("name")).filter(
@@ -189,27 +219,36 @@ class CoolingUnitViewSet(
         cooling_unit_id = self.kwargs.get("pk")
 
         if not cooling_unit_id:
-            return Response({"error": "Cooling unit ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Cooling unit ID is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         cooling_unit = get_object_or_404(CoolingUnit, id=cooling_unit_id)
         company = cooling_unit.location.company
 
         if not ServiceProvider.is_employee_of_company(user, company):
-            return Response({"error": "Access denied"}, status=status.HTTP_403_FORBIDDEN)
+            return Response(
+                {"error": "Access denied"}, status=status.HTTP_403_FORBIDDEN
+            )
 
         if Produce.objects.filter(
-            Q(crates__cooling_unit=cooling_unit) &
-            Exists(Crate.generate_checkedin_crates_subquery())
+            Q(crates__cooling_unit=cooling_unit)
+            & Exists(Crate.generate_checkedin_crates_subquery())
         ).exists():
             return Response(
-                {"error": "This cooling unit cannot be deleted because it has active check-ins"},
+                {
+                    "error": "This cooling unit cannot be deleted because it has active check-ins"
+                },
                 status=status.HTTP_409_CONFLICT,
             )
 
         cooling_unit.deleted = True
         cooling_unit.save()
 
-        return Response({"success": "Successfully deleted cooling unit"}, status=status.HTTP_200_OK)
+        return Response(
+            {"success": "Successfully deleted cooling unit"}, status=status.HTTP_200_OK
+        )
 
     # TODO: move this to a dedicated sensor viewset when/if we implement the multiple sensors support
     @action(detail=True, methods=["GET"], url_path="sensor-data")
@@ -221,11 +260,15 @@ class CoolingUnitViewSet(
 
         # Check if the user is an authorized Operator or ServiceProvider for this company
         operator = Operator.objects.filter(user=user, company=unit_company).first()
-        service_provider = ServiceProvider.objects.filter(user=user, company=unit_company).first()
+        service_provider = ServiceProvider.objects.filter(
+            user=user, company=unit_company
+        ).first()
 
         if not operator and not service_provider:
             return Response(
-                {"error": "You do not have permission to view sensor data for this cooling unit."},
+                {
+                    "error": "You do not have permission to view sensor data for this cooling unit."
+                },
                 status=status.HTTP_403_FORBIDDEN,
             )
 
@@ -248,6 +291,7 @@ class CoolingUnitViewSet(
             status=status.HTTP_200_OK,
         )
 
+
 class CrateViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
     model = Crate
     serializer_class = CrateSerializer
@@ -260,7 +304,9 @@ class CrateViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
             return self.model.objects.filter(
                 cooling_unit=self.request.query_params.get("cooling_unit"),
                 weight__gt=0,
-                produce__checkin__owned_by_user__farmer=self.request.query_params.get("farmer"),
+                produce__checkin__owned_by_user__farmer=self.request.query_params.get(
+                    "farmer"
+                ),
             )
         return self.model.objects.all()
 
@@ -301,21 +347,27 @@ class LocationViewSet(
         location_id = self.kwargs.get("pk")
 
         if not location_id:
-            return Response({"error": "Location ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Location ID is required"}, status=status.HTTP_400_BAD_REQUEST
+            )
 
         location = get_object_or_404(Location, id=location_id)
         company = location.company
 
         if not ServiceProvider.is_employee_of_company(user, company):
-            return Response({"error": "Access denied"}, status=status.HTTP_403_FORBIDDEN)
+            return Response(
+                {"error": "Access denied"}, status=status.HTTP_403_FORBIDDEN
+            )
 
         cooling_units = CoolingUnit.objects.filter(location=location)
         if Produce.objects.filter(
-            Q(crates__cooling_unit__in=cooling_units) &
-            Exists(Crate.generate_checkedin_crates_subquery())
+            Q(crates__cooling_unit__in=cooling_units)
+            & Exists(Crate.generate_checkedin_crates_subquery())
         ).exists():
             return Response(
-                {"error": "This location cannot be deleted because it has cooling units with active check-ins"},
+                {
+                    "error": "This location cannot be deleted because it has cooling units with active check-ins"
+                },
                 status=status.HTTP_409_CONFLICT,
             )
 
@@ -323,8 +375,10 @@ class LocationViewSet(
         location.save()
         CoolingUnit.objects.filter(location=location).update(deleted=True)
 
-        return Response({"success": "Successfully deleted location and its cooling units"}, status=status.HTTP_200_OK)
-
+        return Response(
+            {"success": "Successfully deleted location and its cooling units"},
+            status=status.HTTP_200_OK,
+        )
 
 
 class ProduceViewSet(
@@ -341,10 +395,14 @@ class ProduceViewSet(
     def get_queryset(self):
         cooling_unit_id = self.request.query_params.get("cooling_unit")
 
-        queryset = self.model.objects.filter(
-            Q(crates__cooling_unit=cooling_unit_id)
-            & Exists(Crate.generate_checkedin_crates_subquery())
-        ).distinct().order_by("-checkin__movement__date")
+        queryset = (
+            self.model.objects.filter(
+                Q(crates__cooling_unit=cooling_unit_id)
+                & Exists(Crate.generate_checkedin_crates_subquery())
+            )
+            .distinct()
+            .order_by("-checkin__movement__date")
+        )
 
         # Prefetch related fields to solve the 1+N problem
         queryset = queryset.select_related(
@@ -352,7 +410,7 @@ class ProduceViewSet(
             "checkin__owned_by_user__farmer",
             "checkin__movement",
             "checkin__movement__operator",  # Added operator join
-            "checkin__movement__operator__user", # Added users operator join
+            "checkin__movement__operator__user",  # Added users operator join
             "crop",
         ).prefetch_related(
             "crates",
@@ -363,7 +421,9 @@ class ProduceViewSet(
 
         if self.request.query_params.get("farmer_id"):
             queryset = queryset.filter(
-                checkin__owned_by_user__farmer__id=self.request.query_params.get("farmer_id")
+                checkin__owned_by_user__farmer__id=self.request.query_params.get(
+                    "farmer_id"
+                )
             )
 
         return queryset
@@ -434,11 +494,7 @@ class NextCheckoutViewSet(ListModelMixin, GenericViewSet):
     def get_queryset(self):
         by_remaining_shelf_life = (
             self.model.objects.filter(
-                Q(
-                    crates__cooling_unit=self.request.query_params.get(
-                        "cooling_unit"
-                    )
-                )
+                Q(crates__cooling_unit=self.request.query_params.get("cooling_unit"))
                 & Exists(Crate.generate_checkedin_crates_subquery())
                 & ~Q(crates__modified_dt=None)
             )
@@ -447,11 +503,7 @@ class NextCheckoutViewSet(ListModelMixin, GenericViewSet):
         )
         by_planned_days = (
             self.model.objects.filter(
-                Q(
-                    crates__cooling_unit=self.request.query_params.get(
-                        "cooling_unit"
-                    )
-                )
+                Q(crates__cooling_unit=self.request.query_params.get("cooling_unit"))
                 & Exists(Crate.generate_checkedin_crates_subquery())
                 & Q(crates__modified_dt=None)
                 & ~Q(crates__planned_days=None)
@@ -461,11 +513,7 @@ class NextCheckoutViewSet(ListModelMixin, GenericViewSet):
         )
         by_checkout = (
             self.model.objects.filter(
-                Q(
-                    crates__cooling_unit=self.request.query_params.get(
-                        "cooling_unit"
-                    )
-                )
+                Q(crates__cooling_unit=self.request.query_params.get("cooling_unit"))
                 & Exists(Crate.generate_checkedin_crates_subquery())
                 & Q(crates__modified_dt=None)
                 & Q(crates__planned_days=None)
@@ -500,7 +548,9 @@ class EcozenViewSet(GenericViewSet):
         }
 
         if not params["username"] or not params["password"]:
-            return Response({"error": "Username and password are required."}, status=400)
+            return Response(
+                {"error": "Username and password are required."}, status=400
+            )
 
         login_url = "https://api.ecozen.ai/api/dashboard/auth/login/"
 
@@ -515,7 +565,9 @@ class EcozenViewSet(GenericViewSet):
             return Response({"error": "Invalid response from Ecozen API"}, status=500)
 
         if not access_token:
-            return Response({"error": "Authentication failed, no access token received"}, status=401)
+            return Response(
+                {"error": "Authentication failed, no access token received"}, status=401
+            )
 
         # Fetch temperature data
         room_headers = {"Authorization": f"Bearer {access_token}"}
@@ -536,6 +588,7 @@ class EcozenViewSet(GenericViewSet):
         else:
             return Response({"error": "Unknown Error"}, status=400)
 
+
 class MobileAppMinimumVersionCodesViewSet(ViewSet):
     """
     ViewSet to get the latest version code per platform.
@@ -543,14 +596,13 @@ class MobileAppMinimumVersionCodesViewSet(ViewSet):
     * Any authenticated user is able to access this view.
     """
 
-
     permission_classes = (permissions.AllowAny,)
 
-    @action(methods=['GET'], url_path='android', detail=False)
+    @action(methods=["GET"], url_path="android", detail=False)
     def android(self, request):
         return Response(ANDROID_VERSION_CODE)
 
-    @action(methods=['GET'], url_path='ios', detail=False)
+    @action(methods=["GET"], url_path="ios", detail=False)
     def ios(self, request):
         return Response(IOS_VERSION_CODE)
 
@@ -582,31 +634,49 @@ class SensorIntegrationViewSet(GenericViewSet, CreateModelMixin, DestroyModelMix
         password = request.data.get("password")
 
         if not integration_type or not username or not password:
-            return Response({"error": "Missing required fields (integration, username, password)"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Missing required fields (integration, username, password)"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
-        credentials = {"username": username, "password": password, "type": integration_type}
+        credentials = {
+            "username": username,
+            "password": password,
+            "type": integration_type,
+        }
         integration = build_integration(None, credentials)
 
         if not integration:
-            return Response({"error": "Invalid integration type"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Invalid integration type"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         try:
             integration.authorize()
         except Exception as e:
-            return Response({"error": f"Authentication failed: {str(e)}"}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(
+                {"error": f"Authentication failed: {str(e)}"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
 
         try:
             raw_sources = integration.list_sources()
-            
+
             serializer = SensorIntegrationSerializer(data=raw_sources, many=True)
 
             if serializer.is_valid():
                 return Response({"sources": serializer.data}, status=status.HTTP_200_OK)
             else:
-                return Response({"error": "Invalid data format from integration"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                return Response(
+                    {"error": "Invalid data format from integration"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
         except Exception as e:
-            return Response({"error": f"Failed to retrieve sources: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-   
+            return Response(
+                {"error": f"Failed to retrieve sources: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
     def destroy(self, request, *args, **kwargs):
         user = self.request.user
@@ -624,3 +694,64 @@ class SensorIntegrationViewSet(GenericViewSet, CreateModelMixin, DestroyModelMix
         # delete the sensor passed in
         sensor.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ComsolCallbackViewSet(ViewSet):
+    permission_classes = [permissions.AllowAny]
+
+    @action(detail=False, methods=["post"], url_path="callback")
+    def callback(self, request, *args, **kwargs):
+        """
+        POST /storage/v1/comsol/callback
+        Requires header: X-Comsol-Callback-Key: <API_KEY>
+        """
+        auth_header = request.headers.get("X-Comsol-Callback-Key")
+
+        if not auth_header or auth_header != settings.COMSOL_CALLBACK_KEY:
+            return Response(
+                {"error": "Unauthorized"}, status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        if request.data.get("error"):
+            try:
+                crate_id = request.data.get("crate_id")
+                crate = Crate.objects.filter(id=crate_id).first()
+
+                send_crate_failure_email(crate)
+                return Response({"status": "success"}, status=status.HTTP_200_OK)
+            except Crate.DoesNotExist:
+                return Response(
+                    {"error": "Crate not found"}, status=status.HTTP_404_NOT_FOUND
+                )
+
+        outputs = request.data.get("outputs", {})
+        crate_id = request.data.get("crate_id")
+        shelf_life = outputs.get("shelf_life")
+        quality_dt = outputs.get("quality_dt")
+        temperature_dt = outputs.get("temperature_dt")
+
+        if (
+            crate_id is None
+            or shelf_life is None
+            or quality_dt is None
+            or temperature_dt is None
+        ):
+            return Response(
+                {"error": "Missing required fields"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            crate = Crate.objects.select_related("produce").get(id=crate_id)
+        except Crate.DoesNotExist:
+            return Response(
+                {"error": "Crate not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        Crate.objects.filter(produce=crate.produce, weight__gt=0).update(
+            temperature_dt=temperature_dt,
+            quality_dt=quality_dt,
+            remaining_shelf_life=shelf_life,
+            modified_dt=timezone.now(),
+        )
+
+        return Response({"status": "success"}, status=status.HTTP_200_OK)

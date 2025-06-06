@@ -24,7 +24,7 @@ SOFTWARE.
 
 **Notice on Third-Party Software (COMSOL Multiphysics®):**
 
-This repository includes components under the `Base-API` module that interface with the COMSOL Multiphysics® software. COMSOL is proprietary software and is **not** covered by the MIT License.
+This repository includes components under the `Comsol-Digital-Twins` module that interface with the COMSOL Multiphysics® software. COMSOL is proprietary software and is **not** covered by the MIT License.
 
 Any use of COMSOL-related code (such as integrations with COMSOL APIs, models, or runtime)  
 requires a valid COMSOL license and must comply with COMSOL's own licensing terms.
