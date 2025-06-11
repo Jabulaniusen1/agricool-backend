@@ -17,11 +17,11 @@ class BaseTest(unittest.TestCase):
 
         # Get database configurations from environment variables
         params = {
-            "host": "***REMOVED***",
-            "dbname": "postgres",
-            "user": "coldtivatedbuser",
-            "password": "***REMOVED***",
-            "port": "5432",
+            "host": "CHANGEME",
+            "dbname": "CHANGEME",
+            "user": "CHANGEME",
+            "password": "CHANGEME",
+            "port": "CHANGEME",
         }
         return params
 
