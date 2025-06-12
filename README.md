@@ -56,8 +56,6 @@ We are committed to fostering a safe and inclusive environment for all contribut
 
 ## License
 
-## License
-
 This project is licensed under the MIT License. However, it includes optional components that integrate with COMSOL Multiphysics®, which is proprietary software.
 
 You must have a valid COMSOL license to use these components and must comply with COMSOL's licensing terms. See the [LICENSE](./LICENSE) file for more details.
