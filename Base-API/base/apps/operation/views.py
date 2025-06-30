@@ -1,40 +1,25 @@
 import json
-from rest_framework import status, permissions
+from datetime import date, datetime
+
+from django.db.models import Q
+from django.shortcuts import get_object_or_404
+from rest_framework import permissions
 from rest_framework.decorators import action
-from datetime import datetime
-import random, string
-from datetime import date
-from django.db import connection
-from django.db.models import F, Q, Exists, OuterRef, Count, Subquery, Case, When, IntegerField
-from django.shortcuts import render, get_object_or_404
-from .models import Checkin, Movement, Checkout, MarketSurvey
-from base.apps.storage.models import Crate, Produce, Crop, CoolingUnit, CoolingUnitCrop
-from base.apps.user.models import Farmer
-from base.apps.storage.serializers import CrateSerializer
-from rest_framework.mixins import (
-    CreateModelMixin,
-    ListModelMixin,
-    RetrieveModelMixin,
-    UpdateModelMixin,
-)
-from rest_framework.viewsets import (
-    GenericViewSet,
-    ViewSet,
-)
+from rest_framework.mixins import (CreateModelMixin, ListModelMixin,
+                                   RetrieveModelMixin)
 from rest_framework.response import Response
+from rest_framework.viewsets import GenericViewSet
 
-from .serializers import (
-    CheckinSerializer,
-    MovementSerializer,
-    CheckoutSerializer,
-    MarketSurveySerializer,
-)
-
-from rest_framework.exceptions import ValidationError
-from rest_framework.status import HTTP_403_FORBIDDEN
-from base.apps.user.models import Operator, ServiceProvider, Notification
+from base.apps.storage.models import (CoolingUnit, CoolingUnitCrop, Crate, Crop,
+                                      Produce)
+from base.apps.storage.serializers import CrateSerializer
+from base.apps.user.models import (Farmer, Notification, Operator,
+                                   ServiceProvider)
 from base.celery import app
-from base.apps.operation.models import MarketsurveyPreprocessing, MarketsurveyCheckout
+
+from .models import Checkin, Checkout, MarketSurvey, Movement
+from .serializers import (CheckinSerializer, CheckoutSerializer,
+                          MarketSurveySerializer, MovementSerializer)
 
 
 class CheckinViewSet(
@@ -56,10 +41,17 @@ class CheckinViewSet(
             request_data["owned_by_user"] = farmer.user_id
         elif request_data["owned_by_user_id"] is not None:
             request_data["owned_by_user"] = request_data["owned_by_user_id"]
-            request_data["owned_on_behalf_of_company"] = request_data["owned_on_behalf_of_company_id"]
+            request_data["owned_on_behalf_of_company"] = request_data[
+                "owned_on_behalf_of_company_id"
+            ]
 
         if not request_data["owned_by_user"]:
-            return Response({'error': "Please pass on the 'owned_by_user_id' and optionally the 'on_behalf_of_company_id'"}, status=HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "error": "Please pass on the 'owned_by_user_id' and optionally the 'on_behalf_of_company_id'"
+                },
+                status=400,
+            )
 
         code = Movement.generate_code()
         movement_date = date.today()
@@ -77,7 +69,9 @@ class CheckinViewSet(
             id=produces[0]["crates"][0]["cooling_unit_id"]
         )
 
-        serializer = self.serializer_class(data=request_data, context={"request": request})
+        serializer = self.serializer_class(
+            data=request_data, context={"request": request}
+        )
         if not serializer.is_valid():
             return Response(serializer.errors, status=400)
 
@@ -88,42 +82,49 @@ class CheckinViewSet(
     def update(self, request, *args, **kwargs):
         produce = get_object_or_404(Produce, pk=self.kwargs.get("pk"))
         if not produce:
-            return Response({'error': 'No produce found'}, status=404)
+            return Response({"error": "No produce found"}, status=404)
 
         checkin = Checkin.objects.filter(id=produce.checkin_id).first()
         crate = Crate.objects.filter(produce=produce).first()
 
         if not crate or not checkin:
-            return Response({'error': 'No check in / crate found'}, status=404)
+            return Response({"error": "No check in / crate found"}, status=404)
 
         print("check id, crate and produce id", checkin.id, produce.id, crate.id)
 
         cooling_unit = CoolingUnit.objects.get(id=crate.cooling_unit_id)
         movement_date = checkin.movement.date if checkin.movement else None
 
-        if cooling_unit.editable_checkins and movement_date.date() == datetime.today().date():
-            if request.data.get('farmer_id'):
-                farmer = Farmer.objects.get(id=request.data.get('farmer_id'))
+        if (
+            cooling_unit.editable_checkins
+            and movement_date.date() == datetime.today().date()
+        ):
+            if request.data.get("farmer_id"):
+                farmer = Farmer.objects.get(id=request.data.get("farmer_id"))
                 checkin.owned_by_user_id = farmer.user_id
                 checkin.save()
 
-            produce.crop_id = request.data.get('crop_id', produce.crop_id)
+            produce.crop_id = request.data.get("crop_id", produce.crop_id)
             produce.save()
 
             Crate.objects.filter(produce=produce).update(
-                planned_days=request.data.get('planned_days', crate.planned_days))
+                planned_days=request.data.get("planned_days", crate.planned_days)
+            )
         else:
             print(
-                f'coolingUnitEditable: {cooling_unit.editable_checkins}, {movement_date.date()} {datetime.today().date()}')
-            return Response({'error': f'Check in is not editable.'}, status=400)
+                f"coolingUnitEditable: {cooling_unit.editable_checkins}, {movement_date.date()} {datetime.today().date()}"
+            )
+            return Response({"error": f"Check in is not editable."}, status=400)
 
         # send a message to all the REs of the cooling unit about the update.
-        service_providers = ServiceProvider.objects.filter(company=cooling_unit.location.company)
+        service_providers = ServiceProvider.objects.filter(
+            company=cooling_unit.location.company
+        )
         for sp in service_providers:
             Notification.objects.create(
                 user=sp.user, specific_id=checkin.id, event_type="CHECKIN_EDITED"
             )
-        return Response({'success': 'Check in updated successfully'})
+        return Response({"success": "Check in updated successfully"})
 
 
 class MovementViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
@@ -140,27 +141,27 @@ class MovementViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
 
         if cooling_unit_id:
             queryset = queryset.filter(
-                Q(checkins__produces__crates__cooling_unit=cooling_unit_id) |
-                Q(checkouts__partial_checkouts__crate__cooling_unit=cooling_unit_id)
+                Q(checkins__produces__crates__cooling_unit=cooling_unit_id)
+                | Q(checkouts__partial_checkouts__crate__cooling_unit=cooling_unit_id)
             )
 
         if farmer_id:
             queryset = queryset.filter(
-                Q(checkins__owned_by_user__farmer__id=farmer_id) |
-                Q(checkouts__partial_checkouts__crate__produce__checkin__owned_by_user__farmer__id=farmer_id)
+                Q(checkins__owned_by_user__farmer__id=farmer_id)
+                | Q(
+                    checkouts__partial_checkouts__crate__produce__checkin__owned_by_user__farmer__id=farmer_id
+                )
             )
 
         if owned_by_user_id:
             queryset = queryset.filter(
-                Q(checkins__owned_by_user_id=owned_by_user_id) |
-                Q(checkouts__partial_checkouts__crate__produce__checkin__owned_by_user_id=owned_by_user_id)
+                Q(checkins__owned_by_user_id=owned_by_user_id)
+                | Q(
+                    checkouts__partial_checkouts__crate__produce__checkin__owned_by_user_id=owned_by_user_id
+                )
             )
 
-        return (
-            queryset
-            .order_by('-date')
-            .distinct()
-        )
+        return queryset.order_by("-date").distinct()
 
     def list(self, request, *args, **kwargs):
         serializer = MovementSerializer.optimized_init(self.get_queryset())
@@ -169,30 +170,38 @@ class MovementViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
     @action(detail=False, methods=["get"], url_path="revenue")
     def get_checkouts_revenue(self, request, *args, **kwargs):
         cooling_units = self.request.query_params.get("cooling_units", "").split(",")
-        payment_methods = self.request.query_params.get("payment_methods", "").split(",")
+        payment_methods = self.request.query_params.get("payment_methods", "").split(
+            ","
+        )
 
-        serializer = MovementSerializer.optimized_init((
-            self.model.objects.all()
-            .filter(
-                Q(checkouts__partial_checkouts__crate__cooling_unit__in=cooling_units) & Q(checkouts__payment_method__in=payment_methods)
+        serializer = MovementSerializer.optimized_init(
+            (
+                self.model.objects.all()
+                .filter(
+                    Q(
+                        checkouts__partial_checkouts__crate__cooling_unit__in=cooling_units
+                    )
+                    & Q(checkouts__payment_method__in=payment_methods)
+                )
+                .order_by("-date")
+                .distinct()
             )
-            .order_by('-date')
-            .distinct()
-        ))
+        )
 
         return Response(serializer.data, status=200)
 
     @action(detail=False, methods=["get"], url_path="usage")
     def get_checkouts_usage(self, request, *args, **kwargs):
         cooling_units = self.request.query_params.get("cooling_units", "").split(",")
-        serializer = MovementSerializer.optimized_init((
-            self.model.objects.filter(
-                Q(checkins__produces__crates__cooling_unit__in=cooling_units)
+        serializer = MovementSerializer.optimized_init(
+            (
+                self.model.objects.filter(
+                    Q(checkins__produces__crates__cooling_unit__in=cooling_units)
+                )
             )
-        ))
+        )
 
         return Response(serializer.data, status=200)
-
 
 
 class CheckoutViewSet(ListModelMixin, CreateModelMixin, GenericViewSet):
@@ -200,7 +209,7 @@ class CheckoutViewSet(ListModelMixin, CreateModelMixin, GenericViewSet):
     serializer_class = CheckoutSerializer
     permission_classes = (permissions.AllowAny,)
     # use the movement_id instead of code
-    lookup_field = 'movement_id'
+    lookup_field = "movement_id"
 
     def get_queryset(self):
         code = self.request.query_params.get("code")
@@ -208,7 +217,9 @@ class CheckoutViewSet(ListModelMixin, CreateModelMixin, GenericViewSet):
         if code:
             try:
                 checkout = self.model.objects.get(movement__code=code)
-                crates = Crate.objects.filter(partial_checkouts__checkout_id=checkout.id)
+                crates = Crate.objects.filter(
+                    partial_checkouts__checkout_id=checkout.id
+                )
                 return crates
             except:
                 return None
@@ -222,12 +233,16 @@ class CheckoutViewSet(ListModelMixin, CreateModelMixin, GenericViewSet):
         movement_date = date.today()
         operator = Operator.objects.get(user_id=self.request.user.id)
         movement_instance = Movement.objects.create(
-            code=code, date=movement_date, operator=operator,
+            code=code,
+            date=movement_date,
+            operator=operator,
             initiated_for=Movement.InitiatedFor.CHECK_OUT,
         )
         request_data["movement"] = movement_instance.id
 
-        serializer = self.serializer_class(data=request_data, context={"request": request})
+        serializer = self.serializer_class(
+            data=request_data, context={"request": request}
+        )
         if not serializer.is_valid():
             return Response(serializer.errors, status=400)
 
@@ -236,12 +251,16 @@ class CheckoutViewSet(ListModelMixin, CreateModelMixin, GenericViewSet):
 
     @action(detail=True, methods=["POST"], url_path="send_sms_report")
     def send_sms_report(self, request, movement_id=None):
-        """ GET /operation/checkouts/:movement_id/send_sms_report - sends an SMS report to a user """
+        """GET /operation/checkouts/:movement_id/send_sms_report - sends an SMS report to a user"""
 
         checkout = get_object_or_404(Checkout, movement_id=movement_id)
-        app.send_task("base.apps.operation.tasks.sms.send_sms_checkout_movement_report", args=[checkout.id, request.user.id])
+        app.send_task(
+            "base.apps.operation.tasks.sms.send_sms_checkout_movement_report",
+            args=[checkout.id, checkout.user.id],
+        )
 
         return Response(status=200)
+
 
 class CheckoutToCheckinViewSet(ListModelMixin, CreateModelMixin, GenericViewSet):
     model = Crate
@@ -254,7 +273,9 @@ class CheckoutToCheckinViewSet(ListModelMixin, CreateModelMixin, GenericViewSet)
             try:
                 movement = Movement.objects.get(code=code, used_for_checkin=False)
                 checkout = Checkout.objects.get(movement=movement)
-                crates = Crate.objects.filter(partial_checkouts__checkout_id=checkout.id)
+                crates = Crate.objects.filter(
+                    partial_checkouts__checkout_id=checkout.id
+                )
 
                 # Fix:
                 # This is a temporary fix and could later be changed with a more appropriate solution
@@ -263,8 +284,12 @@ class CheckoutToCheckinViewSet(ListModelMixin, CreateModelMixin, GenericViewSet)
                 # But in the meantime, there could have been several partial checkouts that caused the weight to change over time.ArithmeticError
                 # We're only interested to gather the latest checkout weight, so we will be patching this value just for the read aspect of it
                 for crate in crates:
-                    latest_crate_partial_checkout = crate.partial_checkouts.latest('id')
-                    weight_to_be_considered_in_kg = latest_crate_partial_checkout.weight_in_kg if latest_crate_partial_checkout else crate.initial_weight
+                    latest_crate_partial_checkout = crate.partial_checkouts.latest("id")
+                    weight_to_be_considered_in_kg = (
+                        latest_crate_partial_checkout.weight_in_kg
+                        if latest_crate_partial_checkout
+                        else crate.initial_weight
+                    )
 
                     crate.weight = weight_to_be_considered_in_kg
                     crate.initial_weight = weight_to_be_considered_in_kg
@@ -282,12 +307,8 @@ class CheckoutToCheckinViewSet(ListModelMixin, CreateModelMixin, GenericViewSet)
     def create(self, request, *args, **kwargs):
         code = request.data["params"]["code"]
         cooling_unit_id = request.data["params"]["coolingUnitId"]
-        days = (
-            request.data["params"].get("days", None)
-        )
-        tags = (
-            request.data["params"].get("tags", [])
-        )
+        days = request.data["params"].get("days", None)
+        tags = request.data["params"].get("tags", [])
         checkout = Checkout.objects.filter(movement__code=code)[0]
         crates = Crate.objects.filter(partial_checkouts__checkout_id=checkout.id)
 
@@ -337,7 +358,7 @@ class CheckoutToCheckinViewSet(ListModelMixin, CreateModelMixin, GenericViewSet)
 
                     # calculates pricing based on cooling unit pricing and crop type price
                     if not CoolingUnitCrop.objects.filter(
-                            cooling_unit_id=cooling_unit_id, crop=crop, active=True
+                        cooling_unit_id=cooling_unit_id, crop=crop, active=True
                     ):
                         return Response(
                             {
@@ -355,12 +376,12 @@ class CheckoutToCheckinViewSet(ListModelMixin, CreateModelMixin, GenericViewSet)
                     if cup_crop.pricing.pricing_type == "FIXED":
                         price += metric_multiplier * cup_crop.pricing.fixed_rate
                     elif (
-                            days
-                            and int(days) > 0
-                            and (cup_crop.pricing.pricing_type == "PERIODICITY")
+                        days
+                        and int(days) > 0
+                        and (cup_crop.pricing.pricing_type == "PERIODICITY")
                     ):
                         price += (
-                                metric_multiplier * int(days) * cup_crop.pricing.daily_rate
+                            metric_multiplier * int(days) * cup_crop.pricing.daily_rate
                         )
 
                     try:
@@ -368,8 +389,12 @@ class CheckoutToCheckinViewSet(ListModelMixin, CreateModelMixin, GenericViewSet)
                     except IndexError:
                         tag_value = None
 
-                    latest_crate_partial_checkout = crate.partial_checkouts.latest('id')
-                    weight_to_be_considered_in_kg = latest_crate_partial_checkout.weight_in_kg if latest_crate_partial_checkout else crate.initial_weight
+                    latest_crate_partial_checkout = crate.partial_checkouts.latest("id")
+                    weight_to_be_considered_in_kg = (
+                        latest_crate_partial_checkout.weight_in_kg
+                        if latest_crate_partial_checkout
+                        else crate.initial_weight
+                    )
 
                     Crate.objects.create(
                         # Operation
@@ -379,11 +404,9 @@ class CheckoutToCheckinViewSet(ListModelMixin, CreateModelMixin, GenericViewSet)
                         currency=crate.currency,
                         planned_days=days,
                         tag=tag_value,
-
                         # Weight
                         weight=weight_to_be_considered_in_kg,
                         initial_weight=weight_to_be_considered_in_kg,
-
                         # Quality
                         remaining_shelf_life=crate.remaining_shelf_life,
                         quality_dt=crate.quality_dt,
@@ -419,7 +442,9 @@ class MarketSurveyViewSet(
             temp = data["reason_for_loss"]
             data["reason_for_loss"] = "other"
 
-        serializer = self.serializer_class(data=request.data, context={"request": request})
+        serializer = self.serializer_class(
+            data=request.data, context={"request": request}
+        )
         if not serializer.is_valid():
             return Response(serializer.errors, status=400)
 

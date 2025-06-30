@@ -1,6 +1,7 @@
 import logging
 
 from django.db import transaction
+from django.utils import timezone
 
 from base.apps.storage.models import (CoolingUnitSpecifications,
                                       SensorIntegration)
@@ -42,6 +43,8 @@ def load_temperature(cooling_unit, specification_type="TEMPERATURE"):
 
         latest_datum = max(datums, key=lambda d: d.datetime_stamp)
         updated_date = latest_datum.datetime_stamp
+        if timezone.is_naive(updated_date):
+            updated_date = timezone.make_aware(updated_date)
         updated_value = latest_datum.value
         updated_point_value = None
 
