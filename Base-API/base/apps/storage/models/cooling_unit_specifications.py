@@ -31,3 +31,9 @@ class CoolingUnitSpecifications(models.Model):
 
     class Meta:
         verbose_name_plural = "cooling unit specifications"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["cooling_unit", "datetime_stamp", "specification_type"],
+                name="unique_specification_per_cu_timestamp_type"
+            )
+        ]
