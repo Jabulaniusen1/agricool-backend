@@ -17,7 +17,7 @@ DOCKER_COMPOSE_CMD="docker-compose --project-name=$PROJECT_NAME --project-direct
 export DOT_ENV_PATH="$MAIN_API_ROOT/$DOT_ENV_FILENAME"
 
 # Load the environment variables
-source "$DOT_ENV_PATH"
+set -a && source "$DOT_ENV_PATH" && set +a
 
 # Load default database values
 DB_NAME=${DB_NAME:-base}

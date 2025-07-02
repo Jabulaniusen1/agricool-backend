@@ -1,7 +1,7 @@
 ###
 ## BASE STAGE – Aims to have the base for both the model build and the scrapping + prediction services final image
 ###
-FROM python:3.9.7-slim as base_stage
+FROM python:3.9.7-slim AS base_stage
 
 # OS dependencies
 RUN apt-get update && apt-get -y install zlib1g-dev libjpeg-dev gcc g++ chromium-driver rsync
@@ -18,7 +18,7 @@ RUN pipenv install --dev
 ###
 ## RETRAINING STAGE – Aims to have the necessary code to generate the initial services state, including the price prediction model.
 ###
-FROM base_stage as retraining_stage
+FROM base_stage AS retraining_stage
 
 # Retraining pieces
 COPY ./Retraining-module/config.ini ./config.ini
@@ -31,7 +31,7 @@ COPY ./data/ ./data/
 ###
 ## FINAL STAGE – Aims to have the initial data state from the retraining process
 ###
-FROM base_stage as final_stage
+FROM base_stage AS final_stage
 
 
 ENV APP_DATA=/app/data/

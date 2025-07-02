@@ -18,6 +18,22 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunSQL(
+            sql="""
+                DO $$
+                BEGIN
+                    BEGIN
+                        CREATE EXTENSION IF NOT EXISTS postgis;
+                    EXCEPTION
+                        WHEN OTHERS THEN
+                            -- Suppress error
+                            RAISE NOTICE 'Could not create extension postgis: %', SQLERRM;
+                    END;
+                END
+                $$;
+            """,
+            reverse_sql=migrations.RunSQL.noop,
+        ),
         migrations.AddField(
             model_name='location',
             name='point',

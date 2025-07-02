@@ -17,11 +17,15 @@ services:
     image: ${CI_REGISTRY_IMAGE}/base-api:${CI_COMMIT_REF_SLUG:-latest}
     env_file: ${DOT_ENV_PATH:-.env.production}
     command: pipenv run gunicorn base.wsgi:application --workers 5 --bind 0.0.0.0:8000 --log-level=warning
+    environment:
+      URL_BASE_API: https://api.coldtivate.org
 
   celery:
     image: ${CI_REGISTRY_IMAGE}/base-api:${CI_COMMIT_REF_SLUG:-latest}
     env_file: ${DOT_ENV_PATH:-.env.production}
     command: pipenv run celery -A base worker -B --scheduler django -l info --without-gossip --without-mingle
+    environment:
+      URL_BASE_API: https://api.coldtivate.org
 
   impact_dashboard_web:
     image: ${CI_REGISTRY_IMAGE}/impact-dashboard-backend:${CI_COMMIT_REF_SLUG:-latest}

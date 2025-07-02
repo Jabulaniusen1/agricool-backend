@@ -7,6 +7,7 @@ from django.db.models import Count, Exists, F, OuterRef, Prefetch
 from django.db.models.query import QuerySet
 from rest_framework import serializers
 
+from base.celery import app
 from base.apps.operation.services.checkout import (
     crates_locked_within_marketplace_pending_orders, create_partial_checkout)
 from base.apps.prediction.models import Market
@@ -331,6 +332,7 @@ class CheckinSerializer(serializers.ModelSerializer):
 
         # creating and array to runDT
         produces_for_DT = []
+
         # getting all the pictures
         pictures = dict(request).get("pictures[]")
         # getting the produces and the index to map with the picture
@@ -381,16 +383,10 @@ class CheckinSerializer(serializers.ModelSerializer):
                     price_per_crate_per_pricing_type=price,
                     currency=company.currency
                 )
-                crate_id = crate.id
 
             # THERESA check if oos still works here or we need to define
-            if (crop.digital_twin_identifier) and (
-                cooling_unit.location.company.digital_twin is True
-            ):
-                Crate.objects.filter(produce=produce_instance).update(runDT=True)
-                produces_for_DT.append(
-                    {"produce_id": produce_instance.id, "crate_id": crate_id}
-                )
+            if (crop.digital_twin_identifier) and (cooling_unit.location.company.digital_twin is True):
+                produces_for_DT.append(produce_instance)
 
             # TODO - run the checks for each produce's crop here - and send the notification to the farmer + operator if needed
             sendNotification = False
@@ -419,24 +415,16 @@ class CheckinSerializer(serializers.ModelSerializer):
             else:
                 print("farmer survey commodity exists", farmerSurvey.id, crop)
 
-        for DT_produce in produces_for_DT:
-            compute_initial_ttpu_checkin(
-                DT_produce["produce_id"], DT_produce["crate_id"]
-            )
+        # Handle DTs and TTPU for produces
+        if len(produces_for_DT) > 0:
+            # Update the crates to activate runDT as a single update call.
+            Crate.objects.filter(produce__in=produces_for_DT).update(runDT=True)
+
+            # Compute the initial TTPU for each produce added in this checkin.
+            for produce in produces_for_DT:
+                compute_initial_ttpu_checkin(produce.id, produce.crates.first().id)
 
         return checkin_instance
-        # Create scheduled task to recompute DT every 6 hours after check-in creation
-        # if produces_for_DT:
-        #     schedule, created = IntervalSchedule.objects.get_or_create(
-        #         every=6,
-        #         period=IntervalSchedule.HOURS,
-        #     )
-        # PeriodicTask.objects.create(
-        #     interval=schedule,
-        #     name=f'recompute_digital_twin-checkin:{checkin_instance.id}',
-        #     task='base.apps.storage.tasks.digital_twins.recompute_digital_twin',
-        # )
-
     def get_has_dt(self, instance):
         produce = Produce.objects.filter(checkin=instance)
         return produce[0].crop.digital_twin_identifier

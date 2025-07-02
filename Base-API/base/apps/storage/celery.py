@@ -11,7 +11,7 @@ beat_schedule = {
     },
     "recompute_digital_twin": {
         "task": "base.apps.storage.tasks.digital_twins.recompute_digital_twin",
-        "schedule": crontab(minute=0, hour="*/12"),
+        "schedule": crontab(minute=0, hour="*/6"),
     },
     "market_survey_checks": {
         "task": "base.apps.storage.tasks.notifications.market_survey_checks",
