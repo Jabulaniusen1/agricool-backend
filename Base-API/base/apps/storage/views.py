@@ -8,13 +8,9 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import permissions, status
 from rest_framework.decorators import action
-from rest_framework.mixins import (
-    CreateModelMixin,
-    DestroyModelMixin,
-    ListModelMixin,
-    RetrieveModelMixin,
-    UpdateModelMixin,
-)
+from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
+                                   ListModelMixin, RetrieveModelMixin,
+                                   UpdateModelMixin)
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ViewSet
 
@@ -23,32 +19,18 @@ from base.apps.storage.serializers.sensors import SensorIntegrationSerializer
 from base.apps.storage.services.sensors.utils import build_integration
 from base.apps.storage.tasks.digital_twins import send_crate_failure_email
 from base.apps.user.models import Country, Farmer, Operator, ServiceProvider
+from base.settings import ENVIRONMENT
 
 from .apps import ANDROID_VERSION_CODE, IOS_VERSION_CODE
-from .models import (
-    CoolingUnit,
-    CoolingUnitCrop,
-    CoolingUnitPower,
-    CoolingUnitSpecifications,
-    Crate,
-    Crop,
-    CropType,
-    Location,
-    Produce,
-    SensorIntegration,
-)
-from .serializers import (
-    CoolingUnitCapacitySerializer,
-    CoolingUnitCropSerializer,
-    CoolingUnitPowerSerializer,
-    CoolingUnitSerializer,
-    CoolingUnitSpecificationsSerializer,
-    CrateSerializer,
-    CropSerializer,
-    CropTypeSerializer,
-    LocationSerializer,
-    ProduceSerializer,
-)
+from .models import (CoolingUnit, CoolingUnitCrop, CoolingUnitPower,
+                     CoolingUnitSpecifications, Crate, Crop, CropType, Location,
+                     Produce, SensorIntegration)
+from .serializers import (CoolingUnitCapacitySerializer,
+                          CoolingUnitCropSerializer, CoolingUnitPowerSerializer,
+                          CoolingUnitSerializer,
+                          CoolingUnitSpecificationsSerializer, CrateSerializer,
+                          CropSerializer, CropTypeSerializer,
+                          LocationSerializer, ProduceSerializer)
 
 
 class CropTypeViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
@@ -717,7 +699,10 @@ class ComsolCallbackViewSet(ViewSet):
                 crate_id = request.data.get("crate_id")
                 crate = Crate.objects.filter(id=crate_id).first()
 
-                send_crate_failure_email(crate)
+                if ENVIRONMENT in ("development", "e2e"):
+                    print(f"Skipping sending recomputation failure email for crate {crate.id}.")
+                else:
+                    send_crate_failure_email(crate)
                 return Response({"status": "success"}, status=status.HTTP_200_OK)
             except Crate.DoesNotExist:
                 return Response(
