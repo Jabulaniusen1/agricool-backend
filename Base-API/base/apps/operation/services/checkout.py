@@ -78,12 +78,7 @@ def create_partial_checkout(
         raise Exception("Please provide a Checkout instance to tie this checkout with")
 
     if cooling_fees is None:
-        is_final_checkout = weight_in_kg == crate.weight
-
-        if is_final_checkout:
-            cooling_fees = get_total_due_in_cooling_fees(crate)
-        else:
-            cooling_fees = get_total_due_in_cooling_fees(crate) * percentage_towards_state
+        cooling_fees = get_total_due_in_cooling_fees(crate) * percentage_towards_state
 
 
     # Checkout part or entire crate based on this item

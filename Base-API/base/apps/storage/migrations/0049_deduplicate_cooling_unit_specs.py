@@ -22,7 +22,12 @@ def deduplicate_cooling_unit_specs(apps, schema_editor):
             specification_type=entry['specification_type'],
         ).order_by('id')
 
-        specs.exclude(id=specs.first().id).delete()
+        to_delete = specs[1:]
+
+        if len(to_delete) >= 1:
+            print(f"Warning: {len(to_delete)} duplicates found for CU {entry['cooling_unit']} at {entry['datetime_stamp']} ({entry['specification_type']})")
+
+        to_delete.delete()
 
 
 class Migration(migrations.Migration):
