@@ -97,7 +97,7 @@ class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericV
                     Operator.objects.filter(company__id=company.id, user__is_active=True).update(
                         user__is_active=False, user__first_name="User", user__last_name="Disable", user__phone=None, user__email=None
                     )
-            
+
             operator = Operator.objects.filter(user=user_to_delete).first()
             if operator:
                 remaining_operators = Operator.objects.filter(company__id=operator.company.id, user__is_active=True)
@@ -126,14 +126,14 @@ class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericV
         except Exception as e:
             print(e)
             return Response({"error": "Error in deleting user"}, status=HTTP_400_BAD_REQUEST)
-        
-    
+
+
     @action(detail=True, methods=["delete"], url_path="operator-proxy-delete")
     def operator_proxy_delete(self, request, pk=None, **kwargs):
         """
         Allows an authenticated operator to deactivate a farmer account under specific conditions.
 
-        This endpoint is intended as a proxy delete mechanism for operators to manage farmer accounts 
+        This endpoint is intended as a proxy delete mechanism for operators to manage farmer accounts
         when the user cannot delete their account themselves (e.g., no smartphone access or app usage).
 
         Requirements:
@@ -151,7 +151,7 @@ class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericV
         - 200 OK on successful deletion.
         - 400/403 errors for failed validations or conditions.
         """
-     
+
         operator_user = request.user
         target_user = get_object_or_404(User, id=pk)
 
@@ -162,7 +162,7 @@ class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericV
 
         # Validate if target is farmer
         farmer = Farmer.objects.filter(user=target_user).first()
-  
+
         if not farmer:
             return Response({"error": "Cannot delete users who don't have the farmer role"}, status=HTTP_400_BAD_REQUEST)
 
@@ -272,7 +272,7 @@ class FarmerViewSet(
 ):
     model = Farmer
     serializer_class = FarmerSerializer
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.AllowAny,)
 
     def get_queryset(self):
         if self.request.query_params.get("user_id"):
@@ -303,12 +303,17 @@ class FarmerViewSet(
         serializer = self.serializer_class(
             data=request.data, context={"request": request}
         )
+
         if not serializer.is_valid():
             return Response(serializer.errors, status=400)
+
         serializer.save()
         return Response(serializer.data, status=200)
 
     def update(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            raise PermissionDenied()
+
         pk = self.kwargs.get("pk", None)
         instance = get_object_or_404(Farmer, id=pk)
         serializer = self.serializer_class(
