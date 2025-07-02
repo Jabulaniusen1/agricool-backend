@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 def deduplicate_cooling_unit_specs(apps, schema_editor):
     CoolingUnitSpecifications = apps.get_model('storage', 'CoolingUnitSpecifications')
-
     from django.db.models import Count
 
     duplicates = (
@@ -22,12 +21,13 @@ def deduplicate_cooling_unit_specs(apps, schema_editor):
             specification_type=entry['specification_type'],
         ).order_by('id')
 
-        to_delete = specs[1:]
-
-        if len(to_delete) >= 1:
-            print(f"Warning: {len(to_delete)} duplicates found for CU {entry['cooling_unit']} at {entry['datetime_stamp']} ({entry['specification_type']})")
-
-        to_delete.delete()
+        first = specs.first()
+        if first:
+            to_delete_qs = specs.exclude(id=first.id)
+            count = to_delete_qs.count()
+            if count > 0:
+                print(f"Warning: {count} duplicates found for CU {entry['cooling_unit']} at {entry['datetime_stamp']} ({entry['specification_type']})")
+                to_delete_qs.delete()
 
 
 class Migration(migrations.Migration):
