@@ -10,12 +10,12 @@ from django.utils import timezone
 from base.apps.storage.models import Crate
 from base.apps.storage.services.ttpu import get_set_t
 from base.celery import app
+from base.settings import ENVIRONMENT
 
 from ..models import CoolingUnitSpecifications, Crate
 
 # Default shelf life buffer in days, can be adjusted as needed
 DEFAULT_SHELF_LIFE_BUFFER = 0.5
-
 
 @app.task
 def recompute_digital_twin(crate_ids=[], produce_ids=[], force_recompute=False):
@@ -92,6 +92,9 @@ def recompute_digital_twin(crate_ids=[], produce_ids=[], force_recompute=False):
 
         except Exception as e:
             print(f"[ERROR] Failed to schedule crate id {crate.id}: {e}")
+            if ENVIRONMENT in ("development", "e2e"):
+                print(f"Skipping sending recomputation failure email for crate {crate.id}.")
+                return
             send_crate_failure_email(crate)
             continue
 

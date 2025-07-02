@@ -35,3 +35,6 @@ RUN pipenv install --dev
 # Copy app files
 COPY ./base /app/base
 COPY manage.py /app/manage.py
+
+# Compile translation messages (.mo files)
+RUN pipenv run python manage.py compilemessages
