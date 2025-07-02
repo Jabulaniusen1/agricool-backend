@@ -55,8 +55,10 @@ def initial_TTPU(
 
 
 def get_set_t(crate_id):
-    # option 1: Average of set point values in last 6 hours, option 2: Average of values in last 6 hours
-    # option 3: last set point value option 4: last value
+    # option 1: Average of set point values in last 6 hours
+    # option 2: Average of values in last 6 hours
+    # option 3: last set point value
+    # option 4: last value
 
     crate = Crate.objects.get(id=crate_id)
 
@@ -113,6 +115,7 @@ def compute_initial_ttpu_checkin(produce_id, crate_id):
     # 5. Compute the TTPU
     computed_initial_TTPU = initial_TTPU(last_temp, initial_quality, SL_buffer, k0, Ea)
     initial_quality /= 100
+
     # 6. Update the crates properties
     Crate.objects.filter(produce=produce).update(
         remaining_shelf_life=computed_initial_TTPU,

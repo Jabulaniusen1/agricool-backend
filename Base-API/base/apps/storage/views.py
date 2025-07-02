@@ -5,7 +5,6 @@ import requests
 from django.conf import settings
 from django.db.models import Count, Exists, Q
 from django.shortcuts import get_object_or_404
-from django.utils import timezone
 from rest_framework import permissions, status
 from rest_framework.decorators import action
 from rest_framework.mixins import (
@@ -21,7 +20,7 @@ from rest_framework.viewsets import GenericViewSet, ViewSet
 from base.apps.storage.models import Crate
 from base.apps.storage.serializers.sensors import SensorIntegrationSerializer
 from base.apps.storage.services.sensors.utils import build_integration
-from base.apps.storage.tasks.digital_twins import send_crate_failure_email
+from base.apps.storage.tasks.digital_twins import send_crate_failure_email, update_produce_crates_dts
 from base.apps.user.models import Country, Farmer, Operator, ServiceProvider
 
 from .apps import ANDROID_VERSION_CODE, IOS_VERSION_CODE
@@ -712,6 +711,8 @@ class ComsolCallbackViewSet(ViewSet):
                 {"error": "Unauthorized"}, status=status.HTTP_401_UNAUTHORIZED
             )
 
+        print("COMSOL DT Resulting Callback received:", request.data)
+
         if request.data.get("error"):
             try:
                 crate_id = request.data.get("crate_id")
@@ -740,18 +741,13 @@ class ComsolCallbackViewSet(ViewSet):
                 {"error": "Missing required fields"}, status=status.HTTP_400_BAD_REQUEST
             )
 
+        crate = get_object_or_404(Crate, id=crate_id)
+
         try:
-            crate = Crate.objects.select_related("produce").get(id=crate_id)
+            update_produce_crates_dts(crate.produce_id, temperature_dt, quality_dt, shelf_life)
         except Crate.DoesNotExist:
             return Response(
                 {"error": "Crate not found"}, status=status.HTTP_404_NOT_FOUND
             )
-
-        Crate.objects.filter(produce=crate.produce, weight__gt=0).update(
-            temperature_dt=temperature_dt,
-            quality_dt=quality_dt,
-            remaining_shelf_life=shelf_life,
-            modified_dt=timezone.now(),
-        )
 
         return Response({"status": "success"}, status=status.HTTP_200_OK)

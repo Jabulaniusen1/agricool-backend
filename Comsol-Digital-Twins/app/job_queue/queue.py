@@ -15,16 +15,14 @@ from common.constants import (
     TEMPERATURE_DT,
     TEMPERATURE_HISTORY,
 )
-from job_queue.constants import (
-    DEFAULT_FUSE_PATH,
-    ENV_CALLBACK_KEY,
+from job_queue.settings import (
+    ENV_COMSOL_CALLBACK_KEY,
     ENV_FUSE_PATH,
     HEADER_CALLBACK_KEY,
 )
 
 from .job_types import ActiveJob
 
-FUSE_PATH = os.getenv(ENV_FUSE_PATH, DEFAULT_FUSE_PATH)
 
 
 class JobQueueManager:
@@ -39,7 +37,7 @@ class JobQueueManager:
     def __init__(self):
         if self._initialized:
             return
-        self.fuse_path = FUSE_PATH
+        self.fuse_path = ENV_FUSE_PATH
         self.job_queue = []
         self.scheduled_jobs = set()
         self.active_job: Optional[ActiveJob] = None
@@ -93,6 +91,9 @@ class JobQueueManager:
             f"intervall_in_ms\t1000\n"
         )
 
+        print(f"[START] Input params: {input_params}")
+        print(f"[START] Temperature Table: {params[TEMPERATURE_HISTORY]}")
+
         self.active_job = ActiveJob(
             job=job,
             input_params=input_params,
@@ -104,13 +105,13 @@ class JobQueueManager:
     def end_job(self, success=True):
         if not self.active_job:
             return
-        
+
         job = self.active_job.job
         print(f"[END] Finishing job {job[RUN_ID]} [{datetime.now().isoformat()}]")
 
         if not success:
             print("[JOB MANAGER] Job ended with failure.")
-            headers = {HEADER_CALLBACK_KEY: os.getenv(ENV_CALLBACK_KEY)}
+            headers = {HEADER_CALLBACK_KEY: ENV_COMSOL_CALLBACK_KEY  }
             requests.post(
                 job[FIELD_CALLBACK_URL],
                 json={
@@ -121,7 +122,7 @@ class JobQueueManager:
                 headers=headers,
             )
             return
-        
+
         try:
             pl = self.active_job.output_pl.strip()
             val = self.active_job.output_values.strip()
@@ -138,23 +139,27 @@ class JobQueueManager:
                 JobQueueManager.safe_parse_float(values[2]) if len(values) > 2 else -1
             )
 
-            headers = {HEADER_CALLBACK_KEY: os.getenv(ENV_CALLBACK_KEY)}
+            output_params = {
+                "shelf_life": shelf_life,
+                "quality_dt": quality_dt,
+                "temperature_dt": temperature_dt,
+            }
+
+            print(f"[END] Output params: {output_params}")
+
+            headers = {HEADER_CALLBACK_KEY: ENV_COMSOL_CALLBACK_KEY }
             requests.post(
                 job[FIELD_CALLBACK_URL],
                 json={
                     "crate_id": job[JOB_CRATE_ID],
-                    "outputs": {
-                        "shelf_life": shelf_life,
-                        "quality_dt": quality_dt,
-                        "temperature_dt": temperature_dt,
-                    },
+                    "outputs": output_params,
                 },
                 headers=headers,
             )
 
         except Exception as e:
             print(f"[END] Error finishing job {job[RUN_ID]}: {e}")
-            headers = {HEADER_CALLBACK_KEY: os.getenv(ENV_CALLBACK_KEY)}
+            headers = {HEADER_CALLBACK_KEY: ENV_COMSOL_CALLBACK_KEY }
             requests.post(
                 job[FIELD_CALLBACK_URL],
                 json={

@@ -16,6 +16,7 @@ services:
     environment:
       ENV: dev
       PYTHONUNBUFFERED: 1
+      URL_BASE_API: http://web:8000
     ports:
       - "8000:8000"
     command: pipenv run gunicorn base.wsgi:application -w 2 -b :8000 --reload
@@ -30,6 +31,7 @@ services:
     restart: always
     environment:
       ENV: dev
+      URL_BASE_API: http://web:8000
 
   impact_dashboard_web:
     build:
@@ -84,4 +86,3 @@ services:
     ports:
       - "5900:5900"
     env_file: ${DOT_ENV_PATH:-.env.development}
-
