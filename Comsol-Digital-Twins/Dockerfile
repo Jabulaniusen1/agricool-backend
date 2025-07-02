@@ -46,9 +46,9 @@ RUN chmod +x /media/comsol/csa/*.sh
 RUN echo -e "installmode = install\nshowgui = 0\nautofinish = 1\nquiet = 0\nagree = 1" > "$COMSOL_SETUP_CONFIG"
 
 # Install COMSOL runtime
-RUN --mount=type=cache,target=/tmp \
+RUN --mount=type=tmpfs,target=/tmp \
     for installer in "$COMSOL_CSA_DIR"/*.sh; do \
-        bash "$installer" -s "$COMSOL_SETUP_CONFIG" -prefsdir "$COMSOL_PREFS_DIR"; \
+    bash "$installer" -s "$COMSOL_SETUP_CONFIG" -prefsdir "$COMSOL_PREFS_DIR"; \
     done
 
 # JVM optimizations (optional, guarded)
@@ -97,4 +97,4 @@ EXPOSE 5900
 ENV PYTHONUNBUFFERED=1
 
 # Start supervisor
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
+CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]
