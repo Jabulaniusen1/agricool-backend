@@ -256,7 +256,7 @@ class CheckoutViewSet(ListModelMixin, CreateModelMixin, GenericViewSet):
         checkout = get_object_or_404(Checkout, movement_id=movement_id)
         app.send_task(
             "base.apps.operation.tasks.sms.send_sms_checkout_movement_report",
-            args=[checkout.id, checkout.user.id],
+            args=[checkout.id, request.user.id],
         )
 
         return Response(status=200)
