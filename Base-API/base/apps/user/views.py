@@ -9,36 +9,62 @@ from django.utils import timezone, translation
 from rest_framework import permissions
 from rest_framework.decorators import action
 from rest_framework.exceptions import AuthenticationFailed, PermissionDenied
-from rest_framework.mixins import (CreateModelMixin, ListModelMixin,
-                                   RetrieveModelMixin, UpdateModelMixin)
+from rest_framework.mixins import (
+    CreateModelMixin,
+    ListModelMixin,
+    RetrieveModelMixin,
+    UpdateModelMixin,
+)
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.status import (HTTP_200_OK, HTTP_400_BAD_REQUEST,
-                                   HTTP_403_FORBIDDEN)
+from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
 from rest_framework.viewsets import GenericViewSet, ViewSet
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from base.apps.storage.models.location import Location
 from base.apps.storage.services.mail import invitation_mail_service
 from base.celery import app
-from base.settings import (AUTH_PASSWORD_URL, ENVIRONMENT, FRONTEND_URL,
-                           INVITATION_OPERATOR_URL,
-                           INVITATION_SERVICE_PROVIDER_URL,
-                           MARKETPLACE_OPEN_TO_COUNTRIES)
+from base.settings import (
+    AUTH_PASSWORD_URL,
+    ENVIRONMENT,
+    FRONTEND_URL,
+    INVITATION_OPERATOR_URL,
+    INVITATION_SERVICE_PROVIDER_URL,
+    MARKETPLACE_OPEN_TO_COUNTRIES,
+)
 
 from ..storage.models import CoolingUnit, Location, Produce
-from .models import (BankAccount, Company, Farmer, FarmerSurvey,
-                     FarmerSurveyCommodity, GenericUserCode, InvitationUser,
-                     Notification, Operator, ServiceProvider, User)
-from .serializers import (CompanySerializer, FarmerLoginSerializer,
-                          FarmerSerializer, FarmerSurveySerializer,
-                          GenericCodeSerializer, InvitationUserSerializer,
-                          NotificationSerializer, OperatorLoginSerializer,
-                          OperatorRegistrationWithInvitationSerializer,
-                          OperatorSerializer, ServiceProviderLoginSerializer,
-                          ServiceProviderRegistrationSerializer,
-                          ServiceProviderRegistrationWithInvitationSerializer,
-                          ServiceProviderSerializer, UserSerializer)
+from .models import (
+    BankAccount,
+    Company,
+    Farmer,
+    FarmerSurvey,
+    FarmerSurveyCommodity,
+    GenericUserCode,
+    InvitationUser,
+    Notification,
+    Operator,
+    ServiceProvider,
+    User,
+)
+from .serializers import (
+    CompanySerializer,
+    FarmerLoginSerializer,
+    FarmerSerializer,
+    FarmerSurveySerializer,
+    FarmerWithPublicUserSerializer,
+    GenericCodeSerializer,
+    InvitationUserSerializer,
+    NotificationSerializer,
+    OperatorLoginSerializer,
+    OperatorRegistrationWithInvitationSerializer,
+    OperatorSerializer,
+    ServiceProviderLoginSerializer,
+    ServiceProviderRegistrationSerializer,
+    ServiceProviderRegistrationWithInvitationSerializer,
+    ServiceProviderSerializer,
+    UserSerializer,
+)
 
 
 class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericViewSet):
@@ -69,15 +95,22 @@ class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericV
         user_id = self.kwargs.get("pk")
 
         if not user_id:
-            return Response({"error": "User ID is required"}, status=HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "User ID is required"}, status=HTTP_400_BAD_REQUEST
+            )
 
         user_to_delete = get_object_or_404(User, id=user_id)
 
         if user.id != user_to_delete.id:
-            return Response({"error": "You can only delete your own account"}, status=HTTP_403_FORBIDDEN)
+            return Response(
+                {"error": "You can only delete your own account"},
+                status=HTTP_403_FORBIDDEN,
+            )
 
         try:
-            service_provider = ServiceProvider.objects.filter(user=user_to_delete).first()
+            service_provider = ServiceProvider.objects.filter(
+                user=user_to_delete
+            ).first()
             if service_provider:
                 message = (
                     f"The Registered Employee with the id {user_to_delete.id} of the company {service_provider.company.name} has deleted their account.\n\n"
@@ -85,34 +118,66 @@ class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericV
                     f"Phone: {user_to_delete.phone} Email: {user_to_delete.email}\n\n"
                     f"In this company, there are {service_provider.company.service_provider_company.filter(user__is_active=True).count() - 1} Registered employees left."
                 )
-                if service_provider.company.service_provider_company.filter(user__is_active=True).count() - 1 == 0:
+                if (
+                    service_provider.company.service_provider_company.filter(
+                        user__is_active=True
+                    ).count()
+                    - 1
+                    == 0
+                ):
                     company = service_provider.company
                     company.name = f"Deleted company {company.id}"
                     company.logo.delete()
                     company.save()
-                    CoolingUnit.objects.filter(location__company_id=company.id, deleted=False).update(name="Deleted cooling unit", deleted=True)
-                    Location.objects.filter(company__id=company.id, deleted=False).update(
-                        deleted=True, name=None, state="", city="", street="", street_number=None, zip_code="", point=[0, 0]
+                    CoolingUnit.objects.filter(
+                        location__company_id=company.id, deleted=False
+                    ).update(name="Deleted cooling unit", deleted=True)
+                    Location.objects.filter(
+                        company__id=company.id, deleted=False
+                    ).update(
+                        deleted=True,
+                        name=None,
+                        state="",
+                        city="",
+                        street="",
+                        street_number=None,
+                        zip_code="",
+                        point=[0, 0],
                     )
-                    Operator.objects.filter(company__id=company.id, user__is_active=True).update(
-                        user__is_active=False, user__first_name="User", user__last_name="Disable", user__phone=None, user__email=None
+                    Operator.objects.filter(
+                        company__id=company.id, user__is_active=True
+                    ).update(
+                        user__is_active=False,
+                        user__first_name="User",
+                        user__last_name="Disable",
+                        user__phone=None,
+                        user__email=None,
                     )
 
             operator = Operator.objects.filter(user=user_to_delete).first()
             if operator:
-                remaining_operators = Operator.objects.filter(company__id=operator.company.id, user__is_active=True)
+                remaining_operators = Operator.objects.filter(
+                    company__id=operator.company.id, user__is_active=True
+                )
                 message = (
                     f"The operator with the id {user_to_delete.id} of the company {operator.company.name} has deleted their account.\n\n"
                     f"Name: {user_to_delete.first_name} {user_to_delete.last_name}\n"
                     f"Phone: {user_to_delete.phone}\n\n"
                     f"In this company, there are {remaining_operators.count() - 1} Operators left."
                 )
-                CoolingUnit.objects.filter(operators=user_to_delete).update(operators=None)
+                CoolingUnit.objects.filter(operators=user_to_delete).update(
+                    operators=None
+                )
 
             # Avoid send the mails on dev
             if ENVIRONMENT != "development":
                 try:
-                    send_mail("User deletion", message, settings.DEFAULT_FROM_EMAIL, ["app@yourvcca.org"])
+                    send_mail(
+                        "User deletion",
+                        message,
+                        settings.DEFAULT_FROM_EMAIL,
+                        ["app@yourvcca.org"],
+                    )
                 except Exception as e:
                     print(f"Error sending the mail: {e}")
 
@@ -122,11 +187,14 @@ class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericV
             user_to_delete.phone = None
             user_to_delete.email = None
             user_to_delete.save()
-            return Response({"success": "Successfully deleted user"}, status=HTTP_200_OK)
+            return Response(
+                {"success": "Successfully deleted user"}, status=HTTP_200_OK
+            )
         except Exception as e:
             print(e)
-            return Response({"error": "Error in deleting user"}, status=HTTP_400_BAD_REQUEST)
-
+            return Response(
+                {"error": "Error in deleting user"}, status=HTTP_400_BAD_REQUEST
+            )
 
     @action(detail=True, methods=["delete"], url_path="operator-proxy-delete")
     def operator_proxy_delete(self, request, pk=None, **kwargs):
@@ -158,21 +226,33 @@ class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericV
         # Check operator role
         operator = Operator.objects.filter(user=operator_user).first()
         if not operator:
-            return Response({"error": "Only users with the operator role can perform this action"}, status=HTTP_403_FORBIDDEN)
+            return Response(
+                {"error": "Only users with the operator role can perform this action"},
+                status=HTTP_403_FORBIDDEN,
+            )
 
         # Validate if target is farmer
         farmer = Farmer.objects.filter(user=target_user).first()
 
         if not farmer:
-            return Response({"error": "Cannot delete users who don't have the farmer role"}, status=HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Cannot delete users who don't have the farmer role"},
+                status=HTTP_400_BAD_REQUEST,
+            )
 
         # Same company check
         if not farmer.companies.filter(id=operator.company_id).exists():
-            return Response({"error": "Cannot delete a user that does not belong to your company"}, status=HTTP_403_FORBIDDEN)
+            return Response(
+                {"error": "Cannot delete a user that does not belong to your company"},
+                status=HTTP_403_FORBIDDEN,
+            )
 
         # Smartphone check
         if farmer.user_code is not None or farmer.smartphone:
-            return Response({"error": "Cannot delete users with smartphone"}, status=HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Cannot delete users with smartphone"},
+                status=HTTP_400_BAD_REQUEST,
+            )
 
         try:
             target_user.is_active = False
@@ -185,7 +265,10 @@ class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericV
             return Response({"success": "User deleted by operator"}, status=HTTP_200_OK)
         except Exception as e:
             print(f"Error in operator_proxy_delete: {e}")
-            return Response({"error": "Something went wrong"}, status=HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Something went wrong"}, status=HTTP_400_BAD_REQUEST
+            )
+
 
 class CompanyViewSet(
     CreateModelMixin,
@@ -201,7 +284,7 @@ class CompanyViewSet(
     def get_queryset(self):
         queryset = self.model.objects.all()
 
-        if self.request.query_params.get('marketplace_filter_scoped', None):
+        if self.request.query_params.get("marketplace_filter_scoped", None):
             return queryset.filter(
                 country__in=MARKETPLACE_OPEN_TO_COUNTRIES,
                 flag_opt_out_from_marketplace_filter=False,
@@ -218,7 +301,7 @@ class CompanyViewSet(
         if not serializer.is_valid():
             return Response(serializer.errors, status=400)
         serializer.save()
-        return Response(serializer.data,  status=200)
+        return Response(serializer.data, status=200)
 
 
 class ServiceProviderViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin):
@@ -249,7 +332,8 @@ class OperatorViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin):
     def get_queryset(self):
         if self.request.query_params.get("company"):
             return self.model.objects.filter(
-                company_id=self.request.query_params.get("company"), user__is_active=True
+                company_id=self.request.query_params.get("company"),
+                user__is_active=True,
             )
         if self.request.query_params.get("user_id"):
             return self.model.objects.filter(
@@ -289,10 +373,6 @@ class FarmerViewSet(
                 user__is_active=True,
             ).distinct()
 
-        if self.request.query_params.get("user_code"):
-            user_code = self.request.query_params.get("user_code")
-            return self.model.objects.filter(user_code=user_code, user__is_active=True)
-
         return self.model.objects.all()
 
     def create(self, request, *args, **kwargs):
@@ -327,13 +407,37 @@ class FarmerViewSet(
             return Response(serializer.data, status=200)
         return Response(serializer.errors, status=400)
 
+    @action(detail=False, methods=["GET"], url_path="by-code")
+    def get_farmer_by_code(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            raise PermissionDenied()
+
+        user_code = request.query_params.get("user_code")
+        if not user_code:
+            return Response({"error": "Missing user_code param"}, status=400)
+
+        try:
+            Operator.objects.get(user=request.user)
+        except Operator.DoesNotExist:
+            return Response({"error": "Requesting user is not an operator"}, status=403)
+
+        try:
+            farmer = Farmer.objects.get(user_code=user_code, user__is_active=True)
+        except Farmer.DoesNotExist:
+            return Response({"error": "Farmer not found"}, status=404)
+
+        serializer = FarmerWithPublicUserSerializer(
+            farmer, context=self.get_serializer_context()
+        )
+        return Response(serializer.data)
+
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        context['request'] = self.request
+        context["request"] = self.request
         return context
 
     def get_serializer(self, *args, **kwargs):
-        kwargs['context'] = self.get_serializer_context()
+        kwargs["context"] = self.get_serializer_context()
         return super().get_serializer(*args, **kwargs)
 
 
@@ -412,10 +516,15 @@ class InviteServiceProviderViewSet(
         except:
             print("Error sending the mail")
 
-
         # enqueue sms to be sent
-        print("base.apps.user.tasks.sms.send_sms_invite_service_provider_with_code", [request.user.id, serializer.data["phone"], link])
-        app.send_task("base.apps.user.tasks.sms.send_sms_invite_service_provider_with_code", [request.user.id, serializer.data["phone"], link])
+        print(
+            "base.apps.user.tasks.sms.send_sms_invite_service_provider_with_code",
+            [request.user.id, serializer.data["phone"], link],
+        )
+        app.send_task(
+            "base.apps.user.tasks.sms.send_sms_invite_service_provider_with_code",
+            [request.user.id, serializer.data["phone"], link],
+        )
 
         return Response({}, status=200)
 
@@ -480,7 +589,7 @@ class InviteOperatorViewSet(
         )
 
         # construct message
-        with translation.override(request.user.language or 'en'):
+        with translation.override(request.user.language or "en"):
             message = translation.gettext("sms_invite_operator_with_code").format(
                 link=link
             )
@@ -499,10 +608,17 @@ class InviteOperatorViewSet(
             print("Error sending the mail")
 
         # enqueue sms to be sent
-        print("base.apps.user.tasks.sms.send_sms_invite_operator_with_code", [request.user.id, serializer.data["phone"], link])
-        app.send_task("base.apps.user.tasks.sms.send_sms_invite_operator_with_code", [request.user.id, serializer.data["phone"], link])
+        print(
+            "base.apps.user.tasks.sms.send_sms_invite_operator_with_code",
+            [request.user.id, serializer.data["phone"], link],
+        )
+        app.send_task(
+            "base.apps.user.tasks.sms.send_sms_invite_operator_with_code",
+            [request.user.id, serializer.data["phone"], link],
+        )
 
         return Response({}, status=200)
+
 
 class ServiceProviderRegistrationViewSet(GenericViewSet):
     serializer_class = ServiceProviderRegistrationSerializer
@@ -511,13 +627,15 @@ class ServiceProviderRegistrationViewSet(GenericViewSet):
     def create(self, request, *args, **kwargs):
 
         # TOD : have cleaner way to do this
-        if "bank_account" in request.data['company']:
+        if "bank_account" in request.data["company"]:
             bank_instance_created = BankAccount.objects.create(
-                bank_name=request.data['company']["bank_account"]["bank_name"],
-                account_name=request.data['company']["bank_account"]["account_name"],
-                account_number=request.data['company']["bank_account"]["account_number"],
+                bank_name=request.data["company"]["bank_account"]["bank_name"],
+                account_name=request.data["company"]["bank_account"]["account_name"],
+                account_number=request.data["company"]["bank_account"][
+                    "account_number"
+                ],
             )
-            request.data['company']["bank_account"] = bank_instance_created.id
+            request.data["company"]["bank_account"] = bank_instance_created.id
 
         serializer = self.serializer_class(
             data=request.data, context={"request": request}
@@ -576,7 +694,6 @@ class FarmerSurveyViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin):
     model = FarmerSurvey
     serializer_class = FarmerSurveySerializer
     permission_classes = (permissions.IsAuthenticated,)
-
 
     def get_queryset(self):
         user = self.request.user
@@ -735,15 +852,20 @@ class ResetPasswordViewSet(GenericViewSet):
                 email_from = settings.DEFAULT_FROM_EMAIL
                 recipient_list = [user.email]
 
-                # construct message
-                with translation.override(user.language or 'en'):
-                    message = translation.gettext("sms_auth_reset_password").format(
-                        link=link
-                    )
+                try:
+                    with translation.override(user.language or "en"):
+                        message = translation.gettext("sms_auth_reset_password").format(
+                            link=link
+                        )
+                    send_mail(subject, message, email_from, recipient_list)
+                except Exception as e:
+                    print(f"[ResetPassword] Failed to send email to {user.email}: {e}")
+                    pass
 
-                send_mail(subject, message, email_from, recipient_list)
-
-            app.send_task("base.apps.user.tasks.sms.send_sms_auth_reset_password", [user.id, phone_number, link])
+            app.send_task(
+                "base.apps.user.tasks.sms.send_sms_auth_reset_password",
+                [user.id, phone_number, link],
+            )
 
             return Response({}, status=200)
 
@@ -815,7 +937,9 @@ class NotificationViewSet(
         authenticated_user = self.request.user
 
         if user_id is None or user_id != str(authenticated_user.id):
-            raise AuthenticationFailed("You are not authorized to view these notifications.")
+            raise AuthenticationFailed(
+                "You are not authorized to view these notifications."
+            )
 
         week_delta = datetime.now().astimezone() - timedelta(days=7)
         return Notification.objects.filter(
@@ -859,21 +983,22 @@ class NotificationViewSet(
 
 class DevelopmentViewSet(ViewSet):
     permission_classes = (AllowAny,)
-    lookup_field = 'id'
+    lookup_field = "id"
 
-    @action(methods=['GET'], url_path='test', detail=False)
+    @action(methods=["GET"], url_path="test", detail=False)
     def test(self, request):
-        return Response({ "message": "Hello World!" }, status=HTTP_200_OK)
+        return Response({"message": "Hello World!"}, status=HTTP_200_OK)
 
-
-    @action(methods=['GET'], url_path='last-sent-sms', detail=False)
+    @action(methods=["GET"], url_path="last-sent-sms", detail=False)
     def last_sent_sms(self, request):
-        phoneNumber = request.query_params.get('phoneNumber')
+        phoneNumber = request.query_params.get("phoneNumber")
 
         if not phoneNumber:
             return Response({"sent": None}, status=HTTP_400_BAD_REQUEST)
 
-        result = app.send_task("base.apps.user.tasks.sms.get_last_sent_sms", args=[phoneNumber])
+        result = app.send_task(
+            "base.apps.user.tasks.sms.get_last_sent_sms", args=[phoneNumber]
+        )
         lastSmsSent = result.get(timeout=10)  # Wait up to 10 seconds for the result
         if not lastSmsSent:
             return Response({"sent": None}, status=HTTP_200_OK)
