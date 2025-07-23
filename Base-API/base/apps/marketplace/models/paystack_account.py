@@ -95,7 +95,7 @@ class PaystackAccount(models.Model):
 
         if paystack_response['status'] is False:
             paystack_account.delete()
-            reason = paystack_response['message'] or "Uknown reason"
+            reason = paystack_response['message'] or "Unknown reason"
             raise Exception(f"Failed to create Paystack subaccount. Reason: {reason}")
 
         # Update the paystack_subaccount_code
