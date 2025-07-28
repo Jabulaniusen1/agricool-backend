@@ -1,3 +1,17 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:11e21b059d91c92845c15210c3942adb03dc11d968e57f64fb3b22f928c7815b
-size 601
+-- This query extracts the number of check ins performed in a particular day/year as well
+-- as total number of crates checked in in that given day/year.
+SELECT
+  acm.checkin_farmer as farmer_id,
+  acm.cooling_unit_id as cooling_unit_id,
+  COUNT(*) as crates_in,
+  COUNT(DISTINCT acm.checkin_id) as operations_in,
+  SUM(acm.weight) as kg_in
+FROM
+  analytics_crate_movements acm
+WHERE
+  acm.checkin_date >= '%(year)s-%(month)s-%(day)s 00:00:00'
+  AND acm.checkin_date <= '%(year)s-%(month)s-%(day)s 23:59:59'
+  AND acm.checkin_operator IS NOT NULL
+GROUP BY
+  acm.checkin_farmer,
+  acm.cooling_unit_id;

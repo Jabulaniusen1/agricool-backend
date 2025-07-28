@@ -1,3 +1,32 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:4d8904fd4d01d4a4cb8d01ee8001f0258e0d80b8505cf2fb8d756ea9fe216aba
-size 868
+WITH company_details as (
+    SELECT c.id as company_id,
+        c.country
+    FROM user_company c
+)
+select scu.id,
+       scu.name,
+       scu.capacity_in_metric_tons,
+       scu.capacity_in_number_crates,
+       scu.metric,
+       scu.sensor,
+       scu.cooling_unit_type,
+       scu.time_pickup_to_customer,
+       scu.crate_length,
+       scu.crate_width,
+       scu.crate_height,
+       scu.crate_weight,
+       scu.location_id,
+       scu.deleted,
+       scu.food_capacity_in_metric_tons,
+       scu.date_creation,
+       scu.date_last_modified,
+       scu.occupancy,
+       scu.occupancy_modified_date,
+       scu.public,
+       sl.id as location_id,
+       sl.company_id,
+       cds.country
+from storage_coolingunit scu
+join storage_location sl on scu.location_id = sl.id
+join company_details cds on sl.company_id = cds.company_id
+where scu.id =  %(unit_id)s;

@@ -1,3 +1,5 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:7da5f3b16a74ee888d258df8e9e6a3f49b2881ddc6d10827462a5a9f97c6003c
-size 170
+select cooling_unit_id,
+       (AVG(monthly_perc_loss) / 100) as average_foodloss
+from impact_metrics im
+where im.cooling_unit_id = %(unit_id)s
+group by cooling_unit_id;
