@@ -71,7 +71,7 @@ class FarmerBaseSlicer(BaseSlicer):
                 MAX(gender) as gender,
                 MAX(user_type) as user_type,
                 CEIL(EXTRACT(EPOCH FROM AVG(acm.checkout_date - acm.checkin_date)) / 86400) AS avg_storage_days,
-                SUM(acm.avg_price_per_crate) AS total_storage_cost
+                SUM(acm.total_crate_cooling_fee) AS total_storage_cost
             FROM
                 analytics_crate_movements acm
             LEFT JOIN user_details ud on acm.survey_farmer = ud.farmer_id

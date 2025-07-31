@@ -1,6 +1,6 @@
 SELECT  sl.company_id,
         MAX(uc.currency) as currency_crate,
-        SUM (avg_price_per_crate) as company_total_revenue
+        SUM (acm.total_crate_cooling_fee) as company_total_revenue
 FROM analytics_crate_movements acm
 LEFT JOIN storage_coolingunit sc on acm.cooling_unit_id = sc.id
 LEFT JOIN storage_location sl on  sc.location_id = sl.id
