@@ -1,7 +1,7 @@
 -- This query computes the revenue per day for each cooling unit
 
 SELECT acm.cooling_unit_id,
-       ROUND(SUM(acm.avg_price_per_crate)::NUMERIC, 2) AS revenue_room
+       ROUND(SUM(acm.total_crate_cooling_fee)::NUMERIC, 2) AS revenue_room
 FROM
     analytics_crate_movements acm
 WHERE
