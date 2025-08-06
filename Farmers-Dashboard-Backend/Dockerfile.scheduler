@@ -10,18 +10,14 @@ COPY requirements.txt /scheduler/
 RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-RUN apt-get update --fix-missing && apt-get -y install dos2unix
+RUN apt-get update --fix-missing && apt-get -y install dos2unix cron
 
 # Copy scheduler script and cron job
 COPY indicator_reporter.py /scheduler/
 COPY utils.py .
 COPY ./sql_queries ./sql_queries
 
-# Install cron and prepare the script
-RUN apt-get update && apt-get -y install cron
-
 COPY cron/crontab /etc/cron.d/crontab
-# Give execution rights on the cron job and run script
 RUN dos2unix /etc/cron.d/crontab
 RUN chmod 0644 /etc/cron.d/crontab
 RUN crontab /etc/cron.d/crontab

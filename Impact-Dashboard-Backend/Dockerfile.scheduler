@@ -3,7 +3,7 @@ FROM python:3.9-slim
 ##
 # Install OS dependencies
 ##
-RUN apt-get update --fix-missing && apt-get -y install cron
+RUN apt-get update --fix-missing && apt-get -y install cron dos2unix
 
 
 ##
@@ -36,7 +36,10 @@ COPY ./impact_queries ./impact_queries
 ##
 COPY cron/crontab /etc/cron.d/crontab
 COPY cron/*.sh /etc/cron.d/scripts/
+RUN dos2unix /etc/cron.d/crontab
+RUN chmod 0644 /etc/cron.d/crontab
 RUN crontab /etc/cron.d/crontab
+RUN touch /var/log/cron.log
 
 ##
 # LCA project
