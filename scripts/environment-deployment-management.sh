@@ -119,7 +119,7 @@ case $1 in
         $DOCKER_COMPOSE_CMD run --rm web pipenv run python manage.py load_roles
 
         # Push Farmer and Impact dashboards views
-        $DOCKER_COMPOSE_CMD run --rm farmer_web python create_view.py -v analytics_crate_movements
+        $DOCKER_COMPOSE_CMD run --rm impact_dashboard_web python create_view.py -v analytics_crate_movements
         $DOCKER_COMPOSE_CMD run --rm impact_dashboard_web python create_view.py -v create_relevant_checkins_view
 
         # We should be ready to now rollout the rest of the dependencies
