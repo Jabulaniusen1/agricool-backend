@@ -16,7 +16,7 @@ services:
   web:
     image: ${CI_REGISTRY_IMAGE}/base-api:${CI_COMMIT_REF_SLUG:-latest}
     env_file: ${DOT_ENV_PATH:-.env.production}
-    command: pipenv run gunicorn base.wsgi:application --workers 5 --bind 0.0.0.0:8000 --log-level=warning
+    command: pipenv run gunicorn base.wsgi:application --workers 5 --bind 0.0.0.0:8000 --log-level=warning --timeout 50
     environment:
       URL_BASE_API: https://api.coldtivate.org
 

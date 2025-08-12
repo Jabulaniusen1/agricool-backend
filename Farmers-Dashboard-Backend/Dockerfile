@@ -18,6 +18,5 @@ COPY main.py /FarmerDashboard/
 COPY fastAPI /FarmerDashboard/fastAPI
 
 COPY utils.py /FarmerDashboard/
-COPY create_view.py /FarmerDashboard/
 
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80", "--reload"]
