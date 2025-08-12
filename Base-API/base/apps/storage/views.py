@@ -3,7 +3,7 @@ from itertools import chain
 
 import requests
 from django.conf import settings
-from django.db.models import Count, Exists, Q
+from django.db.models import Count, Exists, Q, OuterRef, Prefetch
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, status
 from rest_framework.decorators import action
@@ -14,6 +14,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ViewSet
 
 from base.apps.storage.models import Crate
+from base.apps.marketplace.models import MarketListedCrate
 from base.apps.storage.serializers.sensors import SensorIntegrationSerializer
 from base.apps.storage.services.sensors.utils import build_integration
 from base.apps.storage.tasks.digital_twins import send_crate_failure_email, update_produce_crates_dts
@@ -385,6 +386,32 @@ class ProduceViewSet(
             .order_by("-checkin__movement__date")
         )
 
+        # Define subqueries for annotations
+        listed_qs = MarketListedCrate.objects.filter(
+            crate_id=OuterRef('pk'),
+            delisted_at__isnull=True,
+        )
+        locked_qs = MarketListedCrate.objects.filter(
+            crate_id=OuterRef('pk'),
+            delisted_at__isnull=True,
+            cmp_weight_locked_in_payment_pending_orders_in_kg__gt=0,
+        )
+
+        # Annotated Crates queryset
+        crates_qs = Crate.objects.filter(weight__gt=0).annotate(
+            is_listed_in_the_marketplace=Exists(listed_qs),
+            is_locked_within_pending_orders=Exists(locked_qs),
+        ).select_related(
+            "cooling_unit",
+            "cooling_unit__location__company"
+        ).prefetch_related(
+            Prefetch(
+                "cooling_unit__crop_cooling_unit",
+                queryset=CoolingUnitCrop.objects.select_related("pricing", "crop"),
+                to_attr="all_crop_cooling_units",
+            ),
+        )
+
         # Prefetch related fields to solve the 1+N problem
         queryset = queryset.select_related(
             "checkin__owned_by_user",
@@ -394,10 +421,8 @@ class ProduceViewSet(
             "checkin__movement__operator__user",  # Added users operator join
             "crop",
         ).prefetch_related(
-            "crates",
-            "crates__cooling_unit__crop_cooling_unit__pricing",
-            "crates__cooling_unit__location__company",
-            "crates__market_listed_crates",
+            Prefetch("crates", queryset=crates_qs),
+
         )
 
         if self.request.query_params.get("farmer_id"):

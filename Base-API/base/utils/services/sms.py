@@ -1,4 +1,4 @@
-from base.settings import ENVIRONMENT, SERVICE_SID, TWILIO_AUTH, TWILIO_SID
+from base.settings import DEBUG, ENVIRONMENT, SERVICE_SID, TWILIO_AUTH, TWILIO_SID
 
 
 # -----------------------------------------------------------------------------
@@ -72,7 +72,7 @@ def send_sms(phoneNumber, message):
         history.add_item(phoneNumber, message)
 
     # In development/E2E or if the Twilio client is not available, print and skip sending.
-    if ENVIRONMENT in ("development", "e2e") or not client:
+    if ENVIRONMENT in ("development", "e2e") or DEBUG or not client:
         print(f"Skipping sending message to {phoneNumber}.")
         print(f"Message content:\n{message}")
         return

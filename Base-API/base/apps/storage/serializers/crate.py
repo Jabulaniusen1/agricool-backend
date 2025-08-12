@@ -55,11 +55,17 @@ class CrateSerializer(serializers.ModelSerializer):
     def get_crop_image(self, instance):
         return instance.produce.crop.image.name
 
-    # I don't agree with the returned type of this attribute (array with single object), but
-    # I'm trying not to break the frontend implementation during this optimization effort
     def get_pricing(self, instance):
-        # Fetch the pricing using pre-fetched data (avoiding filter queries)
-        cu_crop = instance.cooling_unit.crop_cooling_unit.filter(crop=instance.produce.crop).first()
+        cu = instance.cooling_unit
+
+        # Try to get the pre-fetched 'all_crop_cooling_units' attribute first
+        if hasattr(cu, "all_crop_cooling_units"):
+            # `all_crop_cooling_units` is a list (from Prefetch with to_attr)
+            # Find the first item with a matching crop
+            cu_crop = next((c for c in getattr(cu, "all_crop_cooling_units", []) if c.crop_id == instance.produce.crop_id), None)
+        else:
+            # Fallback: query directly from DB (slower)
+            cu_crop = cu.crop_cooling_unit.filter(crop=instance.produce.crop).first()
 
         if cu_crop and cu_crop.pricing:
             return [PricingSerializer(cu_crop.pricing).data]
@@ -109,10 +115,18 @@ class CrateSerializer(serializers.ModelSerializer):
         return None
 
     def get_listed_in_the_marketplace(self, instance):
+        is_listed_in_the_marketplace = getattr(instance, "is_listed_in_the_marketplace", None)
+        if is_listed_in_the_marketplace is not None:
+            return is_listed_in_the_marketplace
+
         # Check if the crate is listed in the marketplace
         return instance.market_listed_crates.filter(delisted_at__isnull=True).exists()
 
     def get_locked_within_pending_orders(self, instance):
+        is_locked_within_pending_orders = getattr(instance, "is_locked_within_pending_orders", None)
+        if is_locked_within_pending_orders is not None:
+            return is_locked_within_pending_orders
+
         return (
             instance.market_listed_crates
             .filter(

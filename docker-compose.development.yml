@@ -19,7 +19,7 @@ services:
       URL_BASE_API: http://web:8000
     ports:
       - "8000:8000"
-    command: pipenv run gunicorn base.wsgi:application -w 2 -b :8000 --reload
+    command: pipenv run gunicorn base.wsgi:application -w 2 -b :8000 --timeout 600
     links:
       - scraping_india
       - scraping_nigeria
