@@ -4,14 +4,23 @@ from rest_framework_simplejwt import views as jwt_views
 
 from base.settings import ENVIRONMENT
 
-from .views import (CompanyViewSet, FarmerSurveyViewSet, FarmerViewSet,
-                    GenericCodeViewSet, InviteOperatorViewSet,
-                    InviteServiceProviderViewSet, LoginViewSet,
-                    NotificationViewSet,
-                    OperatorRegistrationWithInvitationViewSet, OperatorViewSet,
-                    ResetPasswordViewSet, ServiceProviderRegistrationViewSet,
-                    ServiceProviderRegistrationWithInvitationViewSet,
-                    ServiceProviderViewSet, UserViewSet)
+from .views import (
+    CompanyViewSet,
+    FarmerSurveyViewSet,
+    FarmerViewSet,
+    GenericCodeViewSet,
+    InviteOperatorViewSet,
+    InviteServiceProviderViewSet,
+    LoginViewSet,
+    NotificationViewSet,
+    OperatorRegistrationWithInvitationViewSet,
+    OperatorViewSet,
+    ResetPasswordViewSet,
+    ServiceProviderRegistrationViewSet,
+    ServiceProviderRegistrationWithInvitationViewSet,
+    ServiceProviderViewSet,
+    UserViewSet,
+)
 
 router = DefaultRouter()
 
@@ -66,10 +75,10 @@ router.register(
 router.register(r"(?P<version>(v1))/code", GenericCodeViewSet, basename="code")
 
 # Development test endpoints
-if ENVIRONMENT == 'development' or ENVIRONMENT == 'e2e':
+if ENVIRONMENT == "development" or ENVIRONMENT == "e2e":
     from base.apps.user.views import DevelopmentViewSet
 
-    router.register(r'development', DevelopmentViewSet, basename='development')
+    router.register(r"development", DevelopmentViewSet, basename="development")
 
 urlpatterns = router.urls + [
     path("token/obtain/", jwt_views.TokenObtainPairView.as_view(), name="token_create"),

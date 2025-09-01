@@ -94,10 +94,6 @@ class ProduceSerializer(serializers.ModelSerializer):
         return farmer.id if farmer else None
 
     def get_owner_contact(self, instance):
-        # owned_on_behalf_of_company = instance.checkin.owned_on_behalf_of_company
-        # if owned_on_behalf_of_company:
-        #     return f"{owned_on_behalf_of_company.phone}"
-
         return str(instance.checkin.owned_by_user.phone)
 
     def get_operator_contact(self, instance):

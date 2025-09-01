@@ -1,14 +1,15 @@
+from django.urls import path
 from rest_framework.routers import DefaultRouter
+
 from .views import (
-    PredictionsDataGraphAPIView,
-    PredictionsDataTableAPIView,
-    StateViewSet,
     MarketViewSet,
+    PredictionsDataGraphAPIView,
     PredictionsDataGraphAPIViewNg,
+    PredictionsDataTableAPIView,
     PredictionsDataTableAPIViewNg,
+    StateViewSet,
     StateViewSetNg,
 )
-from django.urls import path
 
 router = DefaultRouter()
 router.register(r"states", StateViewSet, basename="states")

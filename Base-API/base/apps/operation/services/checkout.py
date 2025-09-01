@@ -5,29 +5,6 @@ from django.db import models, transaction
 from base.apps.operation.models.movement import Movement
 from base.utils.currencies import quantitize_float
 
-# price = 0
-# cooling_unit = CoolingUnit.objects.get(id=crate.cooling_unit_id)
-# cup_crop = CoolingUnitCrop.objects.get(
-#     cooling_unit_id=crate.cooling_unit_id, crop=crate.produce.crop
-# )
-# metric_multiplier = (
-#     crate.weight if cooling_unit.metric == "KILOGRAMS" else 1
-# )
-
-# checkin_date = crate.produce.checkin.movement.date.replace(
-#     tzinfo=None
-# ).replace(hour=0, minute=0, second=0, microsecond=0)
-# current_datetime = datetime.datetime.now().replace(
-#     hour=0, minute=0, second=0, microsecond=0
-# )
-# duration = (current_datetime - checkin_date).days
-# duration = 1 if duration == 0 else duration
-# if cup_crop.pricing.pricing_type == "FIXED":
-#     price += metric_multiplier * cup_crop.pricing.fixed_rate
-# elif cup_crop.pricing.pricing_type == "PERIODICITY":
-#     price += metric_multiplier * duration * cup_crop.pricing.daily_rate
-
-
 def get_total_in_cooling_fees(crate, storage_duration_days=None, **kargs):
     from base.apps.storage.models.cooling_unit_crop import CoolingUnitCrop
 

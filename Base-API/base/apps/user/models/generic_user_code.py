@@ -1,9 +1,9 @@
-import os
 import base64
-# from hashlib import sha256
-# from django.conf import settings
+import os
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+
 from .user import User
 
 
@@ -11,7 +11,9 @@ class GenericUserCode(models.Model):
     class Type(models.TextChoices):
         RESET = "RESET", "reset"
 
-    type = models.CharField(max_length=32, choices=Type.choices, default=None, null=True, blank=True)
+    type = models.CharField(
+        max_length=32, choices=Type.choices, default=None, null=True, blank=True
+    )
 
     user = models.OneToOneField(
         User,
@@ -30,4 +32,3 @@ class GenericUserCode(models.Model):
     @classmethod
     def generate_code(cls, phone):
         return base64.urlsafe_b64encode(os.urandom(6)).decode()
-        # return sha256(phone.encode() + settings.INVITATION_CODE_SALT.encode()).hexdigest()
