@@ -3,7 +3,7 @@ from datetime import datetime
 from rest_framework import serializers
 
 from base.apps.user.models import ServiceProvider
-from base.apps.user.serializers import CompanySerializer
+from base.apps.user.serializers.company import CompanySerializer
 
 from ..models import CoolingUnit, Location
 from .cooling_unit import CoolingUnitSerializer

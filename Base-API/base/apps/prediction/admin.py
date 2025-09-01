@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import State, Market, MLPredictionData, MLMarketDataIndia
+from .models import Market, MLMarketDataIndia, MLPredictionData, State
 
 
 class StateAdmin(admin.ModelAdmin):

@@ -22,7 +22,6 @@ from django.urls import (
     path,
 )
 
-from base.apps.user.views import LoginViewSet
 
 urlpatterns = [
     # path('admin/login/', LoginViewSet.as_view(), kwargs={"template_name":"admin/login.html"}, name='login'),

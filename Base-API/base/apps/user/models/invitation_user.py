@@ -1,15 +1,17 @@
-import os
 import base64
-# from hashlib import sha256
-from phonenumber_field.modelfields import PhoneNumberField
-from rest_framework.serializers import ValidationError
-# from django.conf import settings
+import os
+
 from django.db import models
-from django.utils.translation import gettext_lazy as _
 from django.db.models import ManyToManyField
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+from phonenumber_field.modelfields import PhoneNumberField
+from rest_framework.serializers import ValidationError
+
 from base.settings import INVITATION_EXPIRY
+
 from .user import User
+
 
 class InvitationUser(models.Model):
     USER_TYPE_CHOICES = (
@@ -79,7 +81,6 @@ class InvitationUser(models.Model):
 
     @classmethod
     def generate_code(cls, phone):
-        # return sha256(phone.encode() + settings.INVITATION_CODE_SALT.encode()).hexdigest()
         return base64.urlsafe_b64encode(os.urandom(6)).decode()
 
     @classmethod
@@ -95,8 +96,6 @@ class InvitationUser(models.Model):
 
     @classmethod
     def send_invitation(cls, phone, user, user_type, cooling_units):
-        # from base.apps.user.services import send_invitation_phone
-
         if User.objects.filter(phone=phone).count() > 0:
             raise Exception("User with that phone already exists")
 
