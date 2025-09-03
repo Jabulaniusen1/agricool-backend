@@ -107,7 +107,6 @@ class CompanySerializer(CountryFieldMixin, serializers.ModelSerializer):
                             pricing=new_pricing_instance,
                             active=True,
                         )
-
         else:
             crops = validated_data.pop("crop")
 

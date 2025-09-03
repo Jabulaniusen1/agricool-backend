@@ -351,3 +351,15 @@ COMSOL_CALLBACK_KEY = os.getenv("COMSOL_CALLBACK_KEY") or "cH4ng3_m3"
 URL_COMSOL_DT_API = (
     os.getenv("COMSOL_DT_API_URL") or "http://comsol_dt_service:5900/api/"
 )
+
+##
+# reCAPTCHA Configuration
+##
+# Disable reCAPTCHA for E2E testing environments
+if ENVIRONMENT == "e2e":
+    RECAPTCHA_ENABLED = False
+else:
+    RECAPTCHA_ENABLED = str_to_bool(getEnv("RECAPTCHA_ENABLED", "false"))
+
+RECAPTCHA_SECRET_KEY = getEnv("RECAPTCHA_SECRET_KEY", None)
+RECAPTCHA_SITE_KEY = getEnv("RECAPTCHA_SITE_KEY", None)
