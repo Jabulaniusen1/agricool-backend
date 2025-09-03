@@ -1,9 +1,18 @@
 from django.db import models
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext, gettext_lazy as _
 
 from .company import Company
 from .operator import Operator
 from .user import User
+
+# Field length constants
+PARENT_NAME_MAX_LENGTH = 255
+COUNTRY_MAX_LENGTH = 150
+USER_CODE_MAX_LENGTH = 8
+
+# Default values
+DEFAULT_IS_UNKNOWN = False
+DEFAULT_SMARTPHONE = False
 
 
 class Farmer(models.Model):
@@ -14,7 +23,7 @@ class Farmer(models.Model):
         related_name="farmer",
         on_delete=models.CASCADE,
     )
-    parent_name = models.CharField(_("parent_name"), max_length=255, blank=True)
+    parent_name = models.CharField(_("parent_name"), max_length=PARENT_NAME_MAX_LENGTH, blank=True)
 
     created_by = models.ForeignKey(
         Operator,
@@ -25,13 +34,13 @@ class Farmer(models.Model):
         null=True,
     )
 
-    isUnknown = models.BooleanField(default=False)
+    is_unknown = models.BooleanField(default=DEFAULT_IS_UNKNOWN)
 
-    smartphone = models.BooleanField(default=False)
+    smartphone = models.BooleanField(default=DEFAULT_SMARTPHONE)
 
-    country = models.CharField(max_length=150, null=True, blank=True)
+    country = models.CharField(max_length=COUNTRY_MAX_LENGTH, null=True, blank=True)
 
-    user_code = models.CharField(max_length=8, unique=True, blank=True, null=True)
+    user_code = models.CharField(max_length=USER_CODE_MAX_LENGTH, unique=True, blank=True, null=True)
 
     companies = models.ManyToManyField(
         Company,

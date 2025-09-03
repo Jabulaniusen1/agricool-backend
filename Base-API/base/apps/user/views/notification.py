@@ -46,7 +46,7 @@ class NotificationViewSet(
     def create(self, request, *args, **kwargs):
         user_id = self.request.user.id
         hours_delta = datetime.now().astimezone() - timedelta(hours=6)
-        lastSensorNotification = (
+        last_sensor_notification = (
             Notification.objects.filter(
                 Q(user=user_id),
                 Q(date__gt=hours_delta),
@@ -59,7 +59,7 @@ class NotificationViewSet(
             data=request.data, context={"request": request}
         )
         if serializer.is_valid():
-            if user_id is not None and lastSensorNotification is None:
+            if user_id is not None and last_sensor_notification is None:
                 serializer.save()
             return Response(serializer.data, status=200)
         return Response(serializer.errors, status=400)

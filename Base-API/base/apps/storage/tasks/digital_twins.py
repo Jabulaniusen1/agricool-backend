@@ -17,37 +17,72 @@ from ..models import CoolingUnitSpecifications, Crate
 # Default shelf life buffer in days, can be adjusted as needed
 DEFAULT_SHELF_LIFE_BUFFER = 0.5
 
+# Time constants
+RECOMPUTE_HOURS_THRESHOLD = 5
+RECOMPUTE_MINUTES_THRESHOLD = 30
+TEMPERATURE_HISTORY_HOURS = 6
+
+# Request constants
+REQUEST_TIMEOUT = 30
+DEFAULT_WEIGHT_THRESHOLD = 0
+
+# Specification type constants
+TEMPERATURE_SPEC_TYPE = "TEMPERATURE"
+
+# Environment constants
+DEVELOPMENT_ENV = "development"
+E2E_ENV = "e2e"
+
+# Email constants
+ADMIN_EMAIL = "app@yourvcca.org"
+EMAIL_SUBJECT_TEMPLATE = "Celery issue in: {}"
+
+# API endpoints
+COMSOL_CALLBACK_PATH = "/storage/v1/comsol/callback/"
+SCHEDULE_ENDPOINT = "schedule"
+
+# Log message templates
+START_MESSAGE = "Starting recompute digital twin..."
+CRATE_SCOPE_TEMPLATE = "Scoped to Crate ids: {}"
+PRODUCE_SCOPE_TEMPLATE = "Scoped to Produce ids: {}"
+CRATES_FOUND_TEMPLATE = "Found {} crates to recompute"
+CRATE_SCHEDULING_TEMPLATE = "Crate id {} - scheduling... Params: {}"
+SCHEDULING_SUCCESS_TEMPLATE = "Crate id {} - scheduling successful: {}"
+SCHEDULING_ERROR_TEMPLATE = "[ERROR] Failed to schedule crate id {}: {}"
+SKIP_EMAIL_TEMPLATE = "Skipping sending recomputation failure email for crate {}."
+UPDATE_PRODUCE_TEMPLATE = "Updating crates for produce id {}. Temperature: {}, Quality: {}, Shelf Life: {}"
+
 @app.task
 def recompute_digital_twin(crate_ids=[], produce_ids=[], force_recompute=False):
-    print(f"Starting recompute digital twin...")
+    print(START_MESSAGE)
 
     if len(crate_ids) > 0:
-        print(f"Scoped to Crate ids: {crate_ids}")
+        print(CRATE_SCOPE_TEMPLATE.format(crate_ids))
 
     if len(produce_ids) > 0:
-        print(f"Scoped to Produce ids: {produce_ids}")
+        print(PRODUCE_SCOPE_TEMPLATE.format(produce_ids))
 
-    five_hours_ago = datetime.now().astimezone() - timedelta(hours=5, minutes=30)
+    five_hours_ago = datetime.now().astimezone() - timedelta(hours=RECOMPUTE_HOURS_THRESHOLD, minutes=RECOMPUTE_MINUTES_THRESHOLD)
 
-    querySelector = Crate.objects.filter(
+    query_selector = Crate.objects.filter(
         produce__crop__digital_twin_identifier__isnull=False,
         cooling_unit__location__company__digital_twin=True,
-        weight__gt=0,
-        runDT=True,
+        weight__gt=DEFAULT_WEIGHT_THRESHOLD,
+        run_dt=True,
     )
 
     # Data scoping
     if len(crate_ids) > 0:
-        querySelector = querySelector.filter(id__in=crate_ids)
+        query_selector = query_selector.filter(id__in=crate_ids)
     if len(produce_ids) > 0:
-        querySelector = querySelector.filter(produce_id__in=produce_ids)
+        query_selector = query_selector.filter(produce_id__in=produce_ids)
 
-    crates = querySelector.distinct("produce")
+    crates = query_selector.distinct("produce")
 
     cooling_unit_temperatures = {}
 
     count_crates = crates.count()
-    print(f"Found {count_crates} crates to recompute")
+    print(CRATES_FOUND_TEMPLATE.format(count_crates))
 
     for crate in crates.iterator():
         if not force_recompute and crate.modified_dt and crate.modified_dt.astimezone() > five_hours_ago:
@@ -71,29 +106,27 @@ def recompute_digital_twin(crate_ids=[], produce_ids=[], force_recompute=False):
                 "temperature_history": cu_temperatures["temperature_history"],
             }
 
-            print(f"Crate id {crate.id} - scheduling... Params: {params}")
+            print(CRATE_SCHEDULING_TEMPLATE.format(crate.id, params))
 
             payload = {
-                "callback_url": f"{settings.URL_BASE_API}/storage/v1/comsol/callback/",
+                "callback_url": f"{settings.URL_BASE_API}{COMSOL_CALLBACK_PATH}",
                 "context": {"crate_id": crate.id, "produce_id": crate.produce_id},
                 "params": params,
             }
 
             response = requests.post(
-                f"{settings.URL_COMSOL_DT_API}schedule",
+                f"{settings.URL_COMSOL_DT_API}{SCHEDULE_ENDPOINT}",
                 headers={"Content-Type": "application/json"},
                 data=json.dumps(payload),
-                timeout=30,
+                timeout=REQUEST_TIMEOUT,
             )
             response.raise_for_status()
-            print(
-                f"Crate id {crate.id} - scheduling successful: {response.status_code}"
-            )
+            print(SCHEDULING_SUCCESS_TEMPLATE.format(crate.id, response.status_code))
 
         except Exception as e:
-            print(f"[ERROR] Failed to schedule crate id {crate.id}: {e}")
-            if ENVIRONMENT in ("development", "e2e"):
-                print(f"Skipping sending recomputation failure email for crate {crate.id}.")
+            print(SCHEDULING_ERROR_TEMPLATE.format(crate.id, e))
+            if ENVIRONMENT in (DEVELOPMENT_ENV, E2E_ENV):
+                print(SKIP_EMAIL_TEMPLATE.format(crate.id))
                 return
             send_crate_failure_email(crate)
             continue
@@ -101,11 +134,11 @@ def recompute_digital_twin(crate_ids=[], produce_ids=[], force_recompute=False):
 
 def get_temperature_lines(crate, six_hours_ago=None):
     if six_hours_ago is None:
-        six_hours_ago = datetime.now().astimezone() - timedelta(hours=6)
+        six_hours_ago = datetime.now().astimezone() - timedelta(hours=TEMPERATURE_HISTORY_HOURS)
 
     temp_qs = (
         CoolingUnitSpecifications.objects.filter(
-            cooling_unit=crate.cooling_unit, specification_type="TEMPERATURE"
+            cooling_unit=crate.cooling_unit, specification_type=TEMPERATURE_SPEC_TYPE
         )
         .exclude(datetime_stamp__lte=six_hours_ago)
         .order_by("datetime_stamp")
@@ -123,9 +156,9 @@ def get_temperature_lines(crate, six_hours_ago=None):
     return "\n".join(lines)
 
 def send_crate_failure_email(crate):
-    subject = f"Celery issue in: {settings.ENVIRONMENT}"
+    subject = EMAIL_SUBJECT_TEMPLATE.format(settings.ENVIRONMENT)
     email_from = settings.DEFAULT_FROM_EMAIL
-    recipient_list = ["app@yourvcca.org"]
+    recipient_list = [ADMIN_EMAIL]
 
     crate_repr = f"TTPU : Kg {crate}" if crate else "Unknown crate"
     last_recompute = getattr(crate, "modified_dt", "N/A")
@@ -141,9 +174,9 @@ def send_crate_failure_email(crate):
     send_mail(subject, message, email_from, recipient_list)
 
 def update_produce_crates_dts(produce_id, temperature_dt, quality_dt, shelf_life):
-    print(f"Updating crates for produce id {produce_id}. Temperature: {temperature_dt}, Quality: {quality_dt}, Shelf Life: {shelf_life}")
+    print(UPDATE_PRODUCE_TEMPLATE.format(produce_id, temperature_dt, quality_dt, shelf_life))
 
-    Crate.objects.filter(produce=produce_id, weight__gt=0).update(
+    Crate.objects.filter(produce=produce_id, weight__gt=DEFAULT_WEIGHT_THRESHOLD).update(
         temperature_dt=temperature_dt,
         quality_dt=quality_dt,
         remaining_shelf_life=shelf_life,

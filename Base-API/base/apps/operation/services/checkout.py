@@ -3,30 +3,58 @@ from datetime import datetime
 from django.db import models, transaction
 
 from base.apps.operation.models.movement import Movement
+from base.apps.storage.models.cooling_unit import CoolingUnit
+from base.apps.storage.models.pricing import Pricing
 from base.utils.currencies import quantitize_float
 
-def get_total_in_cooling_fees(crate, storage_duration_days=None, **kargs):
+# Constants
+MINIMUM_WEIGHT_DIVISOR = 1
+MINIMUM_STORAGE_DAYS = 1
+ERROR_CHECKOUT_EXCEEDS_INITIAL_WEIGHT = (
+    "Cannot checkout more than crate's initial weight"
+)
+ERROR_CHECKOUT_EXCEEDS_CURRENT_WEIGHT = (
+    "Cannot checkout more than 100% of current's crate state"
+)
+ERROR_CHECKOUT_INSTANCE_REQUIRED = (
+    "Please provide a Checkout instance to tie this checkout with"
+)
+
+
+def zero_time_fields(dt):
+    """Utility function to zero out time fields from datetime."""
+    return dt.replace(hour=0, minute=0, second=0, microsecond=0)
+
+
+def get_total_in_cooling_fees(crate, storage_duration_days=None, **kwargs):
     from base.apps.storage.models.cooling_unit_crop import CoolingUnitCrop
 
     # Get the daily rate from CoolingUnitCrop for the crate's cooling unit and crop
-    cup_crop = CoolingUnitCrop.objects.get(
-        cooling_unit=crate.cooling_unit, crop=crate.produce.crop
-    )
+    try:
+        cup_crop = CoolingUnitCrop.objects.get(
+            cooling_unit=crate.cooling_unit, crop=crate.produce.crop
+        )
+    except CoolingUnitCrop.DoesNotExist:
+        raise ValueError(
+            f"No pricing found for cooling unit {crate.cooling_unit.id} and crop {crate.produce.crop.id}"
+        )
 
     metric_multiplier = (
-        crate.initial_weight if crate.cooling_unit.metric == "KILOGRAMS" else 1
+        crate.initial_weight
+        if crate.cooling_unit.metric == CoolingUnit.CoolingUnitMetric.KILOGRAMS
+        else MINIMUM_WEIGHT_DIVISOR
     )
 
     # Calculate the storage duration (days) based on checkin and check_out (if available)
     if not storage_duration_days:
-        storage_duration_days = get_storage_duration_days(crate, **kargs)
+        storage_duration_days = get_storage_duration_days(crate, **kwargs)
 
     # Calculate the cooling fees if we have a valid daily rate and storage duration
-    if cup_crop.pricing.pricing_type == "FIXED":
+    if cup_crop.pricing.pricing_type == Pricing.PricingType.FIXED:
         return quantitize_float(
             metric_multiplier * cup_crop.pricing.fixed_rate, crate.currency
         )
-    elif cup_crop.pricing.pricing_type == "PERIODICITY":
+    elif cup_crop.pricing.pricing_type == Pricing.PricingType.PERIODICITY:
         return quantitize_float(
             metric_multiplier * storage_duration_days * cup_crop.pricing.daily_rate,
             crate.currency,
@@ -39,24 +67,22 @@ def get_total_in_cooling_fees(crate, storage_duration_days=None, **kargs):
 def create_partial_checkout(
     crate, weight_in_kg, checkout=None, cooling_fees=None, compute_dependencies=True
 ):
-    from base.apps.storage.models.crate_partial_checkout import \
-        CratePartialCheckout
+    from base.apps.storage.models.crate_partial_checkout import CratePartialCheckout
 
-    percentage = weight_in_kg / max(1, crate.initial_weight)
-    percentage_towards_state = weight_in_kg / max(1, crate.weight)
+    percentage = weight_in_kg / max(MINIMUM_WEIGHT_DIVISOR, crate.initial_weight)
+    percentage_towards_state = weight_in_kg / max(MINIMUM_WEIGHT_DIVISOR, crate.weight)
 
     if percentage > 1.0:
-        raise Exception("Cannot checkout more than crate's initial weight")
+        raise ValueError(ERROR_CHECKOUT_EXCEEDS_INITIAL_WEIGHT)
 
     if percentage_towards_state > 1.0:
-        raise Exception("Cannot checkout more than 100% of current's crate state")
+        raise ValueError(ERROR_CHECKOUT_EXCEEDS_CURRENT_WEIGHT)
 
     if not checkout:
-        raise Exception("Please provide a Checkout instance to tie this checkout with")
+        raise ValueError(ERROR_CHECKOUT_INSTANCE_REQUIRED)
 
     if cooling_fees is None:
         cooling_fees = get_total_due_in_cooling_fees(crate) * percentage_towards_state
-
 
     # Checkout part or entire crate based on this item
     checkout_item = CratePartialCheckout.objects.create(
@@ -77,22 +103,20 @@ def create_partial_checkout(
 
 
 def get_storage_duration_days(crate, checkout_date=None, checkin_date=None):
-    current_datetime = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    current_datetime = zero_time_fields(datetime.now())
 
     if crate.produce and crate.produce.checkin:
         if not checkout_date and crate.partial_checkouts.exists():
-            checkout_date = (
-                crate.partial_checkouts.last()
-                .checkout.movement.date.replace(tzinfo=None)
-                .replace(hour=0, minute=0, second=0, microsecond=0)
+            checkout_date = zero_time_fields(
+                crate.partial_checkouts.last().checkout.movement.date.replace(
+                    tzinfo=None
+                )
             )
 
         if not checkin_date and crate.produce.checkin.movement:
             movement = crate.produce.checkin.movement
 
-            checkin_date = movement.date.replace(tzinfo=None).replace(
-                hour=0, minute=0, second=0, microsecond=0
-            )
+            checkin_date = zero_time_fields(movement.date.replace(tzinfo=None))
 
     if not checkout_date:
         checkout_date = current_datetime
@@ -107,18 +131,18 @@ def get_storage_duration_days(crate, checkout_date=None, checkin_date=None):
     )
     is_marketplace_originated_crate = str(
         crate.produce and crate.produce.checkin.movement.initiated_for
-    ) == str(Movement.InitiatedFor.MARKERPLACE_ORDER)
+    ) == str(Movement.InitiatedFor.MARKETPLACE_ORDER)
 
     # Calculate the storage duration (days) based on checkin and check_out
     # Note: Theres an exception for crates that are created through marketplace order movements, that are checked out within the same day
     return (
         0
         if is_marketplace_originated_crate and is_same_day
-        else max(1, (checkout_date - checkin_date).days)
+        else max(MINIMUM_STORAGE_DAYS, (checkout_date - checkin_date).days)
     )
 
 
-def get_total_paid_in_cooling_fees(crate, **kargs):
+def get_total_paid_in_cooling_fees(crate, **kwargs):
     total_paid_in_cooling_fees = crate.partial_checkouts.aggregate(
         total_paid_in_cooling_fees=models.Sum("cooling_fees")
     )["total_paid_in_cooling_fees"]
@@ -126,9 +150,9 @@ def get_total_paid_in_cooling_fees(crate, **kargs):
     return total_paid_in_cooling_fees or 0
 
 
-def get_total_due_in_cooling_fees(crate, **kargs):
-    total_amount_in_cooling_fees = get_total_in_cooling_fees(crate, **kargs)
-    total_amount_paid_in_cooling_fees = get_total_paid_in_cooling_fees(crate, **kargs)
+def get_total_due_in_cooling_fees(crate, **kwargs):
+    total_amount_in_cooling_fees = get_total_in_cooling_fees(crate, **kwargs)
+    total_amount_paid_in_cooling_fees = get_total_paid_in_cooling_fees(crate, **kwargs)
 
     # Don't allow negative amounts
     fees = max(0, total_amount_in_cooling_fees - total_amount_paid_in_cooling_fees)
@@ -136,17 +160,16 @@ def get_total_due_in_cooling_fees(crate, **kargs):
     return max(0, quantitize_float(fees, crate.currency))
 
 
-def get_total_due_in_cooling_fees_per_kg(crate, **kargs):
+def get_total_due_in_cooling_fees_per_kg(crate, **kwargs):
     total_due_in_cooling_fees_per_kg = get_total_due_in_cooling_fees(
-        crate, **kargs
-    ) / max(1, crate.weight)
+        crate, **kwargs
+    ) / max(MINIMUM_WEIGHT_DIVISOR, crate.weight)
 
     return max(0, quantitize_float(total_due_in_cooling_fees_per_kg, crate.currency))
 
 
 def crates_locked_within_marketplace_pending_orders(crate_ids):
-    from base.apps.marketplace.models.market_listed_crate import \
-        MarketListedCrate
+    from base.apps.marketplace.models.market_listed_crate import MarketListedCrate
 
     return MarketListedCrate.objects.filter(
         crate_id__in=crate_ids,

@@ -8,6 +8,14 @@ from base.apps.user.models import User
 from .location import Location
 from .operator_assigned_cooling_unit import OperatorAssignedCoolingUnit
 
+# Field length constants
+COOLING_UNIT_NAME_MAX_LENGTH = 255
+
+# Default values
+DEFAULT_LOCATION = None
+DEFAULT_FOOD_CAPACITY = None
+DEFAULT_ROOM_DIMENSION = 0
+
 
 class CoolingUnit(models.Model):
     class CoolingUnitType(models.TextChoices):
@@ -34,19 +42,19 @@ class CoolingUnit(models.Model):
         verbose_name=_("location"),
         related_name="cooling_units",
         on_delete=models.CASCADE,
-        default=None,
+        default=DEFAULT_LOCATION,
     )
     name = models.CharField(
         _("name"),
-        max_length=255,
+        max_length=COOLING_UNIT_NAME_MAX_LENGTH,
     )
 
     # Maximum volume of food that can be stored, in metric tons (cooling unit capacity)
     food_capacity_in_metric_tons = models.FloatField(
-        _("food_capacity_in_metric_tons"), default=None, blank=True, null=True
+        _("food_capacity_in_metric_tons"), default=DEFAULT_FOOD_CAPACITY, blank=True, null=True
     )
 
-    room_length = models.FloatField(_("room_length"), null=True, blank=True, default=0)
+    room_length = models.FloatField(_("room_length"), null=True, blank=True, default=DEFAULT_ROOM_DIMENSION)
 
     room_width = models.FloatField(_("room_width"), null=True, blank=True, default=0)
 

@@ -4,6 +4,15 @@ from django_cryptography.fields import encrypt
 
 from .cooling_unit import CoolingUnit
 
+# Field length constants
+SENSOR_TYPE_MAX_LENGTH = 16
+USERNAME_MAX_LENGTH = 150
+PASSWORD_MAX_LENGTH = 150
+SOURCE_ID_MAX_LENGTH = 64
+
+# Default values
+DEFAULT_PASSWORD = ""
+
 
 class SensorIntegration(models.Model):
     class SensorType(models.TextChoices):
@@ -20,11 +29,11 @@ class SensorIntegration(models.Model):
         null=True,
     )
 
-    type = models.CharField(_("type"), max_length=16, null=False, blank=False, choices=SensorType.choices)
+    type = models.CharField(_("type"), max_length=SENSOR_TYPE_MAX_LENGTH, null=False, blank=False, choices=SensorType.choices)
 
-    username = models.CharField(max_length=150, blank=True)
-    password = encrypt(models.CharField(max_length=150, default="", blank=True))
-    source_id = models.CharField(max_length=64, blank=True)
+    username = models.CharField(max_length=USERNAME_MAX_LENGTH, blank=True)
+    password = encrypt(models.CharField(max_length=PASSWORD_MAX_LENGTH, default=DEFAULT_PASSWORD, blank=True))
+    source_id = models.CharField(max_length=SOURCE_ID_MAX_LENGTH, blank=True)
 
     date_sensor_first_linked = models.DateTimeField(
         blank=True,

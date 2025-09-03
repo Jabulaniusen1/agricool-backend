@@ -7,6 +7,9 @@ from rest_framework.viewsets import ViewSet
 from base.apps.marketplace.payment_processor.paystack import paystack
 from base.utils.decorators.cache import cache_response
 
+# Cache timeout constants
+BANKS_CACHE_TIMEOUT = 3600  # 1 hour
+
 
 class MarketplaceDataViewSet(ViewSet):
     """
@@ -18,7 +21,7 @@ class MarketplaceDataViewSet(ViewSet):
     permission_classes = (AllowAny,)
 
     @action(detail=False, methods=['get'], url_path='banks', url_name='banks')
-    @cache_response(timeout=3600)  # Cache the response for 1 hour.
+    @cache_response(timeout=BANKS_CACHE_TIMEOUT)  # Cache the response for 1 hour.
     def banks(self, request):
         """
         Retrieve a list of supported banks from Paystack.

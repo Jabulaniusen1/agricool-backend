@@ -6,9 +6,9 @@ from django.db import migrations
 
 
 def update_ml4_fields(apps, schema_editor):
-    companyModel = apps.get_model("user", "company")
+    company_model = apps.get_model("user", "company")
 
-    for row in companyModel.objects.all():
+    for row in company_model.objects.all():
         if row.country.code == "IN":
             row.ML4_market = True
         else:

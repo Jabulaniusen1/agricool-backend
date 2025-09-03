@@ -5,7 +5,7 @@ from .market_survey import MarketSurvey
 
 class MarketsurveyCheckout(models.Model):
     class Meta:
-        unique_together = ("checkout", "marketsurvey")
+        unique_together = ("checkout", "market_survey")
         db_table = "operation_marketsurvey_checkout"
 
     checkout = models.ForeignKey(
@@ -15,7 +15,7 @@ class MarketsurveyCheckout(models.Model):
         on_delete=models.CASCADE,
     )
 
-    marketsurvey = models.ForeignKey(
+    market_survey = models.ForeignKey(
         MarketSurvey,
         verbose_name=_("market_survey"),
         related_name="marketsurveycheckout_market_survey",

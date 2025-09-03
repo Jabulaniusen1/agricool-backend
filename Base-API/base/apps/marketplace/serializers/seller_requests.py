@@ -4,6 +4,22 @@ from rest_framework import serializers
 
 from base.apps.marketplace.models import PaystackAccount
 
+# Field length constants
+COUPON_CODE_MAX_LENGTH = 40
+ACCOUNT_NAME_MAX_LENGTH = 100
+
+# Validation constants
+MIN_COMPANY_ID = 1
+MIN_CRATE_ID = 1
+MIN_DISCOUNT_PERCENTAGE = 0
+MAX_DISCOUNT_PERCENTAGE = 1
+MIN_PRICE_PER_KG = 0
+
+# Validation patterns
+BANK_CODE_PATTERN = r'^[A-Z0-9]{1,9}$'
+COUNTRY_CODE_PATTERN = r'^[A-Z]{2}$'
+ACCOUNT_NUMBER_PATTERN = r'^[0-9]{6,30}$'
+
 ##
 # Seller related serializers
 ##
@@ -19,13 +35,13 @@ class SellerRegisterNewCouponRequestSerializer(serializers.Serializer):
         required=True,
         allow_blank=False,
         help_text="Coupon code",
-        max_length=40
+        max_length=COUPON_CODE_MAX_LENGTH
     )
     discount_percentage = serializers.FloatField(
         required=True,
         help_text="Discount percentage (between 0 and 1)",
-        min_value=0,
-        max_value=1
+        min_value=MIN_DISCOUNT_PERCENTAGE,
+        max_value=MAX_DISCOUNT_PERCENTAGE
     )
 
     class Meta:
@@ -49,7 +65,7 @@ class SellerListingUpdateRequestSerializer(serializers.Serializer):
     Validates the list of crate IDs and the price per kilogram of produce.
     """
     crate_ids = serializers.ListField(
-        child=serializers.IntegerField(required=True, help_text="Crate ID", min_value=1),
+        child=serializers.IntegerField(required=True, help_text="Crate ID", min_value=MIN_CRATE_ID),
         required=True,
         help_text="List of Crate IDs"
     )
@@ -65,7 +81,7 @@ class SellerListingUpdateRequestSerializer(serializers.Serializer):
         """
         Validate that the produce price per kilogram is non-negative.
         """
-        if value < 0:
+        if value < MIN_PRICE_PER_KG:
             raise serializers.ValidationError("Price per kg must be non-negative.")
         return value
 
@@ -80,7 +96,7 @@ class SellerAttachPaystackAccountRequestSerializer(serializers.Serializer):
     company_id = serializers.IntegerField(
         required=False,
         help_text="Company ID (if applicable)",
-        min_value=1
+        min_value=MIN_COMPANY_ID
     )
     account_type = serializers.ChoiceField(
         choices=PaystackAccount.AccountType.choices,
@@ -88,19 +104,19 @@ class SellerAttachPaystackAccountRequestSerializer(serializers.Serializer):
         help_text="Account type"
     )
     bank_code = serializers.RegexField(
-        regex=re.compile(r'^[A-Z0-9]{1,9}$'),
+        regex=re.compile(BANK_CODE_PATTERN),
         help_text="Bank code (alphanumeric, 1-9 characters)"
     )
     country_code = serializers.RegexField(
-        regex=re.compile(r'^[A-Z]{2}$'),
+        regex=re.compile(COUNTRY_CODE_PATTERN),
         help_text="Country code (2 uppercase letters)"
     )
     account_number = serializers.RegexField(
-        regex=re.compile(r'^[0-9]{6,30}$'),
+        regex=re.compile(ACCOUNT_NUMBER_PATTERN),
         help_text="Account number (6 to 30 digits)"
     )
     account_name = serializers.CharField(
-        max_length=100,
+        max_length=ACCOUNT_NAME_MAX_LENGTH,
         help_text="Account name"
     )
 

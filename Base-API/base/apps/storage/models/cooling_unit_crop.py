@@ -5,6 +5,9 @@ from .cooling_unit import CoolingUnit
 from .crop import Crop
 from .pricing import Pricing
 
+# Default values
+DEFAULT_ACTIVE = False
+
 
 class CoolingUnitCrop(models.Model):
     crop = models.ForeignKey(
@@ -32,7 +35,7 @@ class CoolingUnitCrop(models.Model):
     )
 
     # When add an available crop to the cooling unit, pass the field to True
-    active = models.BooleanField(default=False)
+    active = models.BooleanField(default=DEFAULT_ACTIVE)
 
     def __str__(self):
         return "{} : {}".format(self.crop, self.cooling_unit)

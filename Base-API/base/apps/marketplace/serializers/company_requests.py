@@ -5,6 +5,16 @@ from rest_framework import serializers
 
 from base.apps.marketplace.models import PaystackAccount
 
+# Field length constants
+DELIVERY_COMPANY_NAME_MAX_LENGTH = 255
+CONTACT_NAME_MAX_LENGTH = 255
+ACCOUNT_NAME_MAX_LENGTH = 100
+
+# Validation patterns
+BANK_CODE_PATTERN = r'^[A-Z0-9]{1,9}$'
+COUNTRY_CODE_PATTERN = r'^[A-Z]{2}$'
+ACCOUNT_NUMBER_PATTERN = r'^[0-9]{6,30}$'
+
 
 class CompanyCreateDeliveryContactRequestSerializer(serializers.Serializer):
     """
@@ -15,13 +25,13 @@ class CompanyCreateDeliveryContactRequestSerializer(serializers.Serializer):
         required=True,
         allow_blank=False,
         help_text="Delivery Company Name",
-        max_length=255
+        max_length=DELIVERY_COMPANY_NAME_MAX_LENGTH
     )
     contact_name = serializers.CharField(
         required=True,
         allow_blank=False,
         help_text="Contact Name",
-        max_length=255
+        max_length=CONTACT_NAME_MAX_LENGTH
     )
     phone = PhoneNumberField(
         required=True,
@@ -46,11 +56,11 @@ class CompanySetupUsersFirstPaystackBankAccountRequestSerializer(serializers.Ser
         required=True,
         help_text="Account type"
     )
-    bank_code = serializers.RegexField(re.compile(r'^[A-Z0-9]{1,9}$')) # TODO: base this on a list of dynamic choices by using the Paystack API / list of banks
-    country_code = serializers.RegexField(re.compile(r'^[A-Z]{2}$'))
-    account_number = serializers.RegexField(re.compile(r'^[0-9]{6,30}$'))
+    bank_code = serializers.RegexField(re.compile(BANK_CODE_PATTERN)) # TODO: base this on a list of dynamic choices by using the Paystack API / list of banks
+    country_code = serializers.RegexField(re.compile(COUNTRY_CODE_PATTERN))
+    account_number = serializers.RegexField(re.compile(ACCOUNT_NUMBER_PATTERN))
     account_name = serializers.CharField(
-        max_length=100,
+        max_length=ACCOUNT_NAME_MAX_LENGTH,
         help_text="Account name"
     )
 

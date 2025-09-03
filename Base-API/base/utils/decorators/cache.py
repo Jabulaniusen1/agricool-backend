@@ -3,16 +3,18 @@ from django.core.cache import cache
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_300_MULTIPLE_CHOICES, HTTP_503_SERVICE_UNAVAILABLE
 
-CACHE_DECORATOR_PRREFIX = 'cd_'
+# Cache decorator constants
+CACHE_DECORATOR_PREFIX = 'cd_'
+DEFAULT_CACHE_TIMEOUT = 300
 
-def cache_response(timeout=300):
+def cache_response(timeout=DEFAULT_CACHE_TIMEOUT):
     """
     Cache the response of the view method for a given timeout (in seconds).
     """
     def decorator(func):
         @wraps(func)
         def _wrapped_view(viewset, request, *args, **kwargs):
-            cache_key = f'{CACHE_DECORATOR_PRREFIX}_{viewset.__class__.__name__}_{func.__name__}_{request.path}'
+            cache_key = f'{CACHE_DECORATOR_PREFIX}_{viewset.__class__.__name__}_{func.__name__}_{request.path}'
             cached_res = cache.get(cache_key)
 
             if cached_res:

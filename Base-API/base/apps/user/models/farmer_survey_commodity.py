@@ -3,6 +3,14 @@ from django.utils.translation import gettext_lazy as _
 from base.utils.currencies import validate_currency
 from .farmer_survey import FarmerSurvey
 
+# Field length constants
+UNIT_MAX_LENGTH = 32
+CURRENCY_MAX_LENGTH = 3
+REASON_FOR_LOSS_MAX_LENGTH = 255
+
+# Default values
+DEFAULT_CURRENCY = None
+
 class FarmerSurveyCommodity(models.Model):
     class SellingMetric(models.TextChoices):
         KILOGRAMS = "KILOGRAMS", "Kilograms"
@@ -43,7 +51,7 @@ class FarmerSurveyCommodity(models.Model):
     average_price = models.PositiveSmallIntegerField(blank=True, null=True)
 
     unit = models.CharField(
-        max_length=32, choices=SellingMetric.choices, blank=True, null=True
+        max_length=UNIT_MAX_LENGTH, choices=SellingMetric.choices, blank=True, null=True
     )
 
     # Total quantity produced in a season (kg)
@@ -62,14 +70,14 @@ class FarmerSurveyCommodity(models.Model):
     average_season_in_months = models.PositiveIntegerField(blank=True, null=True)
 
     currency = models.CharField(
-        _("currency"), max_length=3, default=None, blank=True, null=True,
+        _("currency"), max_length=CURRENCY_MAX_LENGTH, default=DEFAULT_CURRENCY, blank=True, null=True,
         validators=[validate_currency]
     )
 
     kg_in_unit = models.PositiveIntegerField(_("kg_in_unit"), blank=True, null=True)
 
     reason_for_loss = models.CharField(
-        choices=ReasonForLoss.choices, max_length=255, null=True, blank=True
+        choices=ReasonForLoss.choices, max_length=REASON_FOR_LOSS_MAX_LENGTH, null=True, blank=True
     )
 
     date_filled_in = models.DateTimeField(

@@ -1,9 +1,22 @@
 from datetime import date
+
 from django.core.exceptions import ValidationError
 
-from base.apps.operation.models import Checkin, Movement, Checkout
-from base.apps.storage.models import CoolingUnit, CoolingUnitCrop, Crate, Produce, Crop
+from base.apps.operation.models import Checkin, Checkout, Movement
+from base.apps.storage.models import (
+    CoolingUnit,
+    CoolingUnitCrop,
+    Crate,
+    Crop,
+    Pricing,
+    Produce,
+)
 from base.apps.user.models import Operator
+
+# Constants
+ERROR_COOLING_UNIT_INCOMPATIBLE = (
+    "This cooling unit doesn't accept this type of produce"
+)
 
 
 def convert_checkout_to_checkin(
@@ -26,12 +39,23 @@ def convert_checkout_to_checkin(
     tags = tags or []
 
     # Find the source checkout
-    checkout = Checkout.objects.get(movement__code=checkout_code)
+    try:
+        checkout = Checkout.objects.get(movement__code=checkout_code)
+    except Checkout.DoesNotExist:
+        raise ValidationError(f"Checkout with code '{checkout_code}' not found")
+
     crates = Crate.objects.filter(partial_checkouts__checkout_id=checkout.id)
 
     # Determine operator and cooling unit
-    operator = Operator.objects.get(user_id=operator_user_id)
-    cooling_unit = CoolingUnit.objects.get(id=cooling_unit_id)
+    try:
+        operator = Operator.objects.get(user_id=operator_user_id)
+    except Operator.DoesNotExist:
+        raise ValidationError(f"Operator for user {operator_user_id} not found")
+
+    try:
+        cooling_unit = CoolingUnit.objects.get(id=cooling_unit_id)
+    except CoolingUnit.DoesNotExist:
+        raise ValidationError(f"Cooling unit with ID {cooling_unit_id} not found")
 
     # Create new Movement
     movement = Movement.objects.create(
@@ -56,7 +80,10 @@ def convert_checkout_to_checkin(
 
             # Recreate produce
             old_produce = crate.produce
-            crop = Crop.objects.get(id=old_produce.crop.id)
+            try:
+                crop = Crop.objects.get(id=old_produce.crop.id)
+            except Crop.DoesNotExist:
+                raise ValidationError(f"Crop with ID {old_produce.crop.id} not found")
 
             new_produce = Produce.objects.create(
                 harvest_date=old_produce.harvest_date,
@@ -74,13 +101,13 @@ def convert_checkout_to_checkin(
         ).first()
 
         if not cup_crop:
-            raise ValidationError("This cooling unit doesn't accept this type of produce")
+            raise ValidationError(ERROR_COOLING_UNIT_INCOMPATIBLE)
 
-        metric_multiplier = crate.weight if cooling_unit.metric == "KILOGRAMS" else 1
+        metric_multiplier = crate.weight if cooling_unit.metric == CoolingUnit.CoolingUnitMetric.KILOGRAMS else 1
 
-        if cup_crop.pricing.pricing_type == "FIXED":
+        if cup_crop.pricing.pricing_type == Pricing.PricingType.FIXED:
             price = metric_multiplier * cup_crop.pricing.fixed_rate
-        elif days and int(days) > 0 and cup_crop.pricing.pricing_type == "PERIODICITY":
+        elif days and int(days) > 0 and cup_crop.pricing.pricing_type == Pricing.PricingType.PERIODICITY:
             price = metric_multiplier * int(days) * cup_crop.pricing.daily_rate
         else:
             price = 0

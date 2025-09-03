@@ -8,10 +8,31 @@ from base.apps.marketplace.models import Order, PaystackAccount
 from base.apps.marketplace.payment_processor.paystack import paystack
 from base.utils.currencies import float_to_flat_int, is_valid_currency
 
+# Payment reference configuration
+PAYMENT_REFERENCE_LENGTH = 12
+
+# Payment types
+PAYMENT_TYPE_COOLING_FEES = "cooling-fees"
+PAYMENT_TYPE_PRODUCE = "produce"
+
+# Paystack split configuration
+SPLIT_TYPE_FLAT = "flat"
+SPLIT_CURRENCY_NGN = "NGN"
+SPLIT_BEARER_TYPE_ACCOUNT = "account"
+
+# Email domain suffixes
+COMPANY_EMAIL_DOMAIN = "@company.coldtivate.org"
+USER_EMAIL_DOMAIN = "@user.coldtivate.org"
+
+# Callback URLs
+BASE_APP_URL = "https://in-app.coldtivate.org"
+PAYMENT_CALLBACK_URL_TEMPLATE = f"{BASE_APP_URL}/order/{{order_id}}/payment/callback"
+PAYMENT_CANCEL_URL_TEMPLATE = f"{BASE_APP_URL}/order/{{order_id}}/payment/cancel"
+
 
 def generate_payment_reference() -> str:
-    """Generates a random 12-character payment reference."""
-    return "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(12))
+    """Generates a random payment reference."""
+    return "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(PAYMENT_REFERENCE_LENGTH))
 
 
 @transaction.atomic
@@ -83,13 +104,13 @@ def set_the_order_as_pending_payment(order: Order) -> None:
 
         # Define split for cooling fees
         cooling_fees_split = {
-            'payment_type': "cooling-fees",
+            'payment_type': PAYMENT_TYPE_COOLING_FEES,
             'subaccount_code': order_crate_item.cooling_company_subaccount_code,
             'amount': float_to_flat_int(order_crate_item.cmp_cooling_fees_amount, currency),
         }
         # Define split for produce payment
         produce_seller_split = {
-            'payment_type': "produce",
+            'payment_type': PAYMENT_TYPE_PRODUCE,
             'subaccount_code': order_crate_item.seller_subaccount_code,
             'amount': float_to_flat_int(
                 max(order_crate_item.cmp_produce_amount - order_crate_item.cmp_discount_amount - order_crate_item.cmp_cooling_fees_amount, 0),
@@ -116,9 +137,9 @@ def set_the_order_as_pending_payment(order: Order) -> None:
         })
 
     common_args = {
-        "type": "flat",
-        "currency": "NGN",
-        "bearer_type": "account",
+        "type": SPLIT_TYPE_FLAT,
+        "currency": SPLIT_CURRENCY_NGN,
+        "bearer_type": SPLIT_BEARER_TYPE_ACCOUNT,
         "subaccounts": subaccounts_arr
     }
 
@@ -185,9 +206,9 @@ def get_checkout_url_for_order(order: Order) -> str:
 
     payment_reference = generate_payment_reference()
     hidden_email = (
-        f"{order.owned_on_behalf_of_company_id}@company.coldtivate.org"
+        f"{order.owned_on_behalf_of_company_id}{COMPANY_EMAIL_DOMAIN}"
         if order.owned_on_behalf_of_company_id
-        else f"{order.created_by_user_id}@user.coldtivate.org"
+        else f"{order.created_by_user_id}{USER_EMAIL_DOMAIN}"
     )
 
     response = paystack.transaction.initialize(
@@ -197,10 +218,10 @@ def get_checkout_url_for_order(order: Order) -> str:
         email=hidden_email,
         reference=payment_reference,
         amount=float_to_flat_int(order.cmp_total_amount, order.currency),
-        callback_url=f"https://in-app.coldtivate.org/order/{order.id}/payment/callback",
+        callback_url=PAYMENT_CALLBACK_URL_TEMPLATE.format(order_id=order.id),
         metadata={
             "order_id": order.id,
-            "cancel_action": f"https://in-app.coldtivate.org/order/{order.id}/payment/cancel",
+            "cancel_action": PAYMENT_CANCEL_URL_TEMPLATE.format(order_id=order.id),
         }
     )
 

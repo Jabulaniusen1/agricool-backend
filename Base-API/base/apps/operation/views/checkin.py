@@ -3,7 +3,7 @@ from datetime import date
 
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
-from rest_framework import permissions
+from rest_framework import permissions, status
 from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
@@ -13,6 +13,10 @@ from base.apps.operation.serializers import CheckinSerializer
 from base.apps.operation.services.checkin import update_checkin
 from base.apps.storage.models import CoolingUnit, Produce
 from base.apps.user.models import Farmer, Operator
+
+# Constants
+ERROR_MISSING_OWNER = "Please pass on the 'owned_by_user_id' and optionally the 'on_behalf_of_company_id'"
+SUCCESS_CHECKIN_UPDATED = "Check in updated successfully"
 
 
 class CheckinViewSet(
@@ -40,18 +44,24 @@ class CheckinViewSet(
 
         if not request_data["owned_by_user"]:
             return Response(
-                {
-                    "error": "Please pass on the 'owned_by_user_id' and optionally the 'on_behalf_of_company_id'"
-                },
-                status=400,
+                {"error": ERROR_MISSING_OWNER},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         code = Movement.generate_code()
         movement_date = date.today()
+        try:
+            operator = Operator.objects.get(user_id=request.user.id)
+        except Operator.DoesNotExist:
+            return Response(
+                {"error": "Operator not found for current user"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
         movement_instance = Movement.objects.create(
             code=code,
             date=movement_date,
-            operator=Operator.objects.get(user_id=request.user.id),
+            operator=operator,
             initiated_for=Movement.InitiatedFor.CHECK_IN,
         )
         request_data["movement"] = movement_instance.id
@@ -66,11 +76,11 @@ class CheckinViewSet(
             data=request_data, context={"request": request}
         )
         if not serializer.is_valid():
-            return Response(serializer.errors, status=400)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         serializer.save()
         cooling_unit.compute(save=True)
-        return Response(serializer.data, status=200)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def update(self, request, *args, **kwargs):
         """
@@ -83,7 +93,7 @@ class CheckinViewSet(
         try:
             update_checkin(checkin_id, request.data)
         except ValidationError as e:
-            return Response({"error": str(e)}, status=400)
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response({"success": "Check in updated successfully"})
+        return Response({"success": SUCCESS_CHECKIN_UPDATED})
 

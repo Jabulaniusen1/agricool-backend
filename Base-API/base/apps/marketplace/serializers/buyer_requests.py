@@ -5,6 +5,24 @@ from rest_framework import serializers
 from base.apps.marketplace.models import MarketListedCrate, OrderPickupDetails
 from base.apps.storage.models import Crate
 
+# Pagination constants
+DEFAULT_PAGE = 1
+DEFAULT_ITEMS_PER_PAGE = 50
+MIN_ITEMS_PER_PAGE = 10
+MIN_PAGE_VALUE = 1
+
+# Field length constants
+COUPON_CODE_MAX_LENGTH = 40
+
+# Validation constants
+MIN_PRODUCE_WEIGHT = 0.1
+PRODUCE_WEIGHT_DECIMAL_PATTERN = r'^\d+(\.\d{1})?$'
+
+# Sorting choices
+SORT_NEARBY_ME = 'nearby-me'
+SORT_PRICE_ASC = 'price-asc'
+SORT_PRICE_DESC = 'price-desc'
+
 """
 Buyer-related serializers for marketplace operations.
 
@@ -24,14 +42,14 @@ class BuyerMarketListingQueryParamsSerializer(serializers.Serializer):
     )
     sort_by = serializers.ChoiceField(
         choices=[
-            ('nearby-me', 'Nearby'),
-            ('price-asc', 'Price Asc'),
-            ('price-desc', 'Price Desc')
+            (SORT_NEARBY_ME, 'Nearby'),
+            (SORT_PRICE_ASC, 'Price Asc'),
+            (SORT_PRICE_DESC, 'Price Desc')
         ],
         required=False,
         default='nearby-me'
     )
-    filter_by_cooling_units_ids = serializers.CharField(
+    filter_by_cooling_unit_ids = serializers.CharField(
         required=False,
         default='',
         help_text="Comma-separated list of cooling unit IDs"
@@ -43,13 +61,13 @@ class BuyerMarketListingQueryParamsSerializer(serializers.Serializer):
     )
     page = serializers.IntegerField(
         required=False,
-        default=1,
-        min_value=1
+        default=DEFAULT_PAGE,
+        min_value=MIN_PAGE_VALUE
     )
     items_per_page = serializers.IntegerField(
         required=False,
-        default=50,
-        min_value=10
+        default=DEFAULT_ITEMS_PER_PAGE,
+        min_value=MIN_ITEMS_PER_PAGE
     )
 
     def validate_location(self, value):
@@ -62,7 +80,7 @@ class BuyerMarketListingQueryParamsSerializer(serializers.Serializer):
             raise serializers.ValidationError("Invalid location format. Expected format: 'lat,lng'")
         return lat, lng
 
-    def validate_filter_by_cooling_units_ids(self, value):
+    def validate_filter_by_cooling_unit_ids(self, value):
         """
         Validate that the cooling unit IDs are provided as a comma-separated string of integers.
         """
@@ -108,7 +126,7 @@ class BuyerAddItemToCartRequestSerializer(serializers.Serializer):
     ordered_produce_weight = serializers.FloatField(
         required=True,
         help_text="Ordered produce weight in kilograms",
-        min_value=0.1
+        min_value=MIN_PRODUCE_WEIGHT
     )
 
     class Meta:
@@ -119,7 +137,7 @@ class BuyerAddItemToCartRequestSerializer(serializers.Serializer):
         Validate that the ordered produce weight has at most one decimal place.
         """
         value_str = str(value)
-        if not re.match(r'^\d+(\.\d{1})?$', value_str):
+        if not re.match(PRODUCE_WEIGHT_DECIMAL_PATTERN, value_str):
             raise serializers.ValidationError("Ordered produce weight must have at most one decimal place.")
         return value
 
@@ -145,7 +163,7 @@ class BuyerUpdateItemInCartRequestSerializer(serializers.Serializer):
     ordered_produce_weight = serializers.FloatField(
         required=True,
         help_text="Ordered produce weight in kilograms",
-        min_value=0.1
+        min_value=MIN_PRODUCE_WEIGHT
     )
 
     class Meta:
@@ -156,7 +174,7 @@ class BuyerUpdateItemInCartRequestSerializer(serializers.Serializer):
         Validate that the ordered produce weight has at most one decimal place.
         """
         value_str = str(value)
-        if not re.match(r'^\d+(\.\d{1})?$', value_str):
+        if not re.match(PRODUCE_WEIGHT_DECIMAL_PATTERN, value_str):
             raise serializers.ValidationError("Ordered produce weight must have at most one decimal place.")
         return value
 
@@ -169,7 +187,7 @@ class BuyerApplyOrClearCouponRequestSerializer(serializers.Serializer):
         required=True,
         allow_blank=False,
         help_text="Coupon code",
-        max_length=40
+        max_length=COUPON_CODE_MAX_LENGTH
     )
 
     class Meta:

@@ -35,9 +35,9 @@ class CompanySerializer(CountryFieldMixin, serializers.ModelSerializer):
         else:
             ml4market = False
 
-        companyInstance = Company.objects.create(**validated_data, ML4_market=ml4market)
+        company_instance = Company.objects.create(**validated_data, ML4_market=ml4market)
 
-        return companyInstance
+        return company_instance
 
     def update(self, instance, validated_data):
 

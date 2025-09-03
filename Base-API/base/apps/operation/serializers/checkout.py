@@ -9,6 +9,9 @@ from base.apps.operation.services.checkout import (
 from base.apps.storage.models import CoolingUnit, Crate, Produce
 from base.apps.user.models import Notification
 
+# Constants
+ERROR_OPERATOR_CANNOT_CHECKOUT = "Operator cannot checkout all the crates"
+
 
 class CheckoutSerializer(serializers.ModelSerializer):
     class Meta:
@@ -35,8 +38,11 @@ class CheckoutSerializer(serializers.ModelSerializer):
         cooling_units_to_be_computed = []
 
         # TODO: can be optimized to a single query
-        for c in request["crates"]:
-            crate = Crate.objects.get(id=c)
+        for crate_id in request["crates"]:
+            try:
+                crate = Crate.objects.get(id=crate_id)
+            except Crate.DoesNotExist:
+                raise serializers.ValidationError(f"Crate with ID {crate_id} not found")
 
             if crate.cooling_unit_id not in cooling_units_to_be_computed:
                 cooling_units_to_be_computed.append(crate.cooling_unit_id)
@@ -53,7 +59,7 @@ class CheckoutSerializer(serializers.ModelSerializer):
         if crates_locked_within_marketplace_pending_orders(
             [crate.id for crate in crates]
         ):
-            raise serializers.ValidationError("Operator cannot checkout all the crates")
+            raise serializers.ValidationError(ERROR_OPERATOR_CANNOT_CHECKOUT)
 
         for crate in crates:
             create_partial_checkout(
@@ -67,7 +73,10 @@ class CheckoutSerializer(serializers.ModelSerializer):
 
             notification_instance = Notification.objects.filter(specific_id=crate.id)
             if notification_instance:
-                Notification.objects.get(specific_id=crate.id).delete()
+                try:
+                    Notification.objects.get(specific_id=crate.id).delete()
+                except Notification.DoesNotExist:
+                    pass  # Notification may have been deleted by another process
 
         # compute each one of the affected produces
         for produce in Produce.objects.filter(crates__id__in=request["crates"]):

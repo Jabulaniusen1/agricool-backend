@@ -56,10 +56,10 @@ class VictronIntegration(SensorIntegrationBase[VictronSensorSource]):
 
             res_body_json = res.json()
 
-            accessToken = res_body_json['token']
+            access_token = res_body_json['token']
             self.user_id = res_body_json['idUser']
 
-            if not accessToken:
+            if not access_token:
                 raise Exception("Error: Unable to capture access token from Ecozen")
 
             self.set_authorization(accessToken)

@@ -4,6 +4,12 @@ from django.utils.translation import gettext_lazy as _
 
 from base.apps.user.models import Company, User
 
+# Constants
+COUPON_CODE_MAX_LENGTH = 25
+MIN_DISCOUNT_PERCENTAGE = 0
+MAX_DISCOUNT_PERCENTAGE = 1
+DEFAULT_DISCOUNT_PERCENTAGE = 0
+
 
 class Coupon(models.Model):
     """
@@ -21,12 +27,12 @@ class Coupon(models.Model):
     owned_by_user = models.ForeignKey(User, on_delete=models.PROTECT, null=True, blank=True, related_name='own_coupons')
     owned_on_behalf_of_company = models.ForeignKey(Company, on_delete=models.PROTECT, null=True, blank=True, related_name='own_coupons')
 
-    code = models.CharField(_("code"), max_length=25)
-    discount_percentage = models.FloatField(_("discount_percentage"), default=0)
+    code = models.CharField(_("code"), max_length=COUPON_CODE_MAX_LENGTH)
+    discount_percentage = models.FloatField(_("discount_percentage"), default=DEFAULT_DISCOUNT_PERCENTAGE)
 
     class Meta:
         constraints = [
-            models.CheckConstraint(check=models.Q(discount_percentage__gt=0, discount_percentage__lt=1), name='valid_discount_percentage'),
+            models.CheckConstraint(check=models.Q(discount_percentage__gt=MIN_DISCOUNT_PERCENTAGE, discount_percentage__lt=MAX_DISCOUNT_PERCENTAGE), name='valid_discount_percentage'),
             models.UniqueConstraint(fields=['created_by_user', 'code'], condition=models.Q(revoked_at__isnull=True), name='unique_valid_coupon_per_user')
         ]
 
@@ -45,4 +51,5 @@ class Coupon(models.Model):
         return self.revoked_at is None
 
     def __str__(self):
-        return f"Coupon {self.code} for user {self.owned_by_user}"
+        user_display = self.owned_by_user or "No User"
+        return f"Coupon {self.code} for user {user_display}"

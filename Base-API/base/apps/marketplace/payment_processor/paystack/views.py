@@ -6,6 +6,14 @@ from rest_framework.viewsets import ViewSet
 from base.apps.marketplace.models import Order
 from base.utils.currencies import flat_int_to_float
 
+# Webhook event types
+WEBHOOK_EVENT_CHARGE_SUCCESS = "charge.success"
+
+# Error messages
+ERROR_EVENT_NOT_IMPLEMENTED = "Event not yet implemented"
+ERROR_ORDER_ID_NOT_FOUND = "Order ID not found"
+ERROR_ORDER_REFERENCE_NOT_FOUND = "Order reference not found"
+
 
 # Create a viewset to receive webhooks from Paystack
 class WebhooksPaystackViewSet(ViewSet):
@@ -35,7 +43,7 @@ class WebhooksPaystackViewSet(ViewSet):
         #     return Response({"error": "Signature does not match"}, status=HTTP_400_BAD_REQUEST)
 
         # switch case based on request.event
-        if event == 'charge.success':
+        if event == WEBHOOK_EVENT_CHARGE_SUCCESS:
             return self.process_charge_succeeded(data)
 
         # if request.event == 'charge.failed':
@@ -60,7 +68,7 @@ class WebhooksPaystackViewSet(ViewSet):
         #     return self.process_charge_dispute_lost(data)
 
         # Report that this is not yet implemented
-        return Response({ "error": "Event not yet implemented" }, status=HTTP_400_BAD_REQUEST)
+        return Response({"error": ERROR_EVENT_NOT_IMPLEMENTED}, status=HTTP_400_BAD_REQUEST)
 
     def process_charge_succeeded(self, data={}):
         from base.apps.operation.models import Checkout
@@ -73,13 +81,13 @@ class WebhooksPaystackViewSet(ViewSet):
         amount_paid = flat_int_to_float(data.get('amount'), currency)
 
         if not order_id:
-            return Response({ "error": "Order ID not found" }, status=HTTP_400_BAD_REQUEST)
+            return Response({"error": ERROR_ORDER_ID_NOT_FOUND}, status=HTTP_400_BAD_REQUEST)
 
         # Identify the order
         order = Order.objects.filter(id=order_id).first()
 
         if not order:
-            return Response({ "error": "Order reference not found" }, status=HTTP_400_BAD_REQUEST)
+            return Response({"error": ERROR_ORDER_REFERENCE_NOT_FOUND}, status=HTTP_400_BAD_REQUEST)
 
         try:
             # update the amount paid
@@ -88,10 +96,10 @@ class WebhooksPaystackViewSet(ViewSet):
             if order.status == Order.Status.PAYMENT_PENDING:
                 order.complete_payment_pending_order(
                     payment_through=Checkout.PaymentThrough.COLDTIVATE,
-                    payment_gateway=Checkout.PaymentGateway.PAYTACK,
+                    payment_gateway=Checkout.PaymentGateway.PAYSTACK,
                     payment_method=Checkout.PaymentMethod.CREDIT_CARD, # TODO: get the payment method from the request
                 )
         except Exception as e:
-            return Response({ "error": str(e) }, status=HTTP_400_BAD_REQUEST)
+            return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
 
         return Response(status=HTTP_200_OK)

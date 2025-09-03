@@ -3,6 +3,12 @@ from django.utils import timezone
 from base.apps.marketplace.models import Order
 from base.celery import app
 
+# Time constants
+PAYMENT_TIMEOUT_HOURS = 1
+
+# Log message templates
+ORDER_COMPUTE_ERROR_MESSAGE = "Failed to compute order {order_id}: {error}"
+
 
 @app.task
 def expire_unpaid_orders():
@@ -16,7 +22,7 @@ def expire_unpaid_orders():
     It is scheduled to run every minute.
     """
     # Calculate cutoff time: orders that haven't been updated in the last hour
-    cutoff_time = timezone.now() - timezone.timedelta(hours=1)
+    cutoff_time = timezone.now() - timezone.timedelta(hours=PAYMENT_TIMEOUT_HOURS)
     
     # Filter orders that are still pending payment and not updated within the past hour
     orders = Order.objects.filter(
@@ -36,5 +42,5 @@ def expire_unpaid_orders():
             # Now call compute with the updated order
             order.compute(save=True, compute_dependencies=True)
         except Exception as e:
-            print(f"Failed to compute order {order.id}: {e}")
+            print(ORDER_COMPUTE_ERROR_MESSAGE.format(order_id=order.id, error=e))
             pass

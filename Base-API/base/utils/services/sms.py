@@ -1,5 +1,15 @@
 from base.settings import DEBUG, ENVIRONMENT, SERVICE_SID, TWILIO_AUTH, TWILIO_SID
 
+# SMS History constants
+DEFAULT_MAX_SIZE = 10
+
+# Environment constants  
+DEVELOPMENT_ENV = "development"
+E2E_ENV = "e2e"
+
+# Twilio status constants
+TWILIO_STATUS_ACCEPTED = "accepted"
+
 
 # -----------------------------------------------------------------------------
 # SMSHistory Class
@@ -12,7 +22,7 @@ class SMSHistory:
     a limited history (default maximum of 10 messages per phone number) of SMS
     messages that would otherwise be sent out.
     """
-    def __init__(self, max_size=10):
+    def __init__(self, max_size=DEFAULT_MAX_SIZE):
         super().__init__()
         
         # Initialize an empty dictionary to store messages and set the maximum number.
@@ -45,19 +55,26 @@ class SMSHistory:
 # Singleton instances for development environments
 # -----------------------------------------------------------------------------
 # Use the in-memory SMSHistory only in development or E2E environments.
-history = SMSHistory(max_size=10) if ENVIRONMENT in ("development", "e2e") else None
+history = SMSHistory(max_size=DEFAULT_MAX_SIZE) if ENVIRONMENT in (DEVELOPMENT_ENV, E2E_ENV) else None
 client = None
 
 # Initialize the Twilio Client if the required credentials are provided.
 if TWILIO_SID and TWILIO_AUTH:
-    from twilio.rest import Client
-    client = Client(TWILIO_SID, TWILIO_AUTH)
+    try:
+        from twilio.rest import Client
+        client = Client(TWILIO_SID, TWILIO_AUTH)
+    except ImportError as e:
+        print(f"Failed to import Twilio client: {e}")
+        client = None
+    except Exception as e:
+        print(f"Failed to initialize Twilio client: {e}")
+        client = None
 
 
 # -----------------------------------------------------------------------------
 # SMS Functions
 # -----------------------------------------------------------------------------
-def send_sms(phoneNumber, message):
+def send_sms(phone_number, message):
     """
     Sends an SMS message to the specified phone number.
     
@@ -69,27 +86,30 @@ def send_sms(phoneNumber, message):
     """
     # Record the SMS in history if we're in a development/E2E environment.
     if history:
-        history.add_item(phoneNumber, message)
+        history.add_item(phone_number, message)
 
     # In development/E2E or if the Twilio client is not available, print and skip sending.
-    if ENVIRONMENT in ("development", "e2e") or DEBUG or not client:
-        print(f"Skipping sending message to {phoneNumber}.")
+    if ENVIRONMENT in (DEVELOPMENT_ENV, E2E_ENV) or DEBUG or not client:
+        print(f"Skipping sending message to {phone_number}.")
         print(f"Message content:\n{message}")
         return
 
     # Send the SMS using Twilio's API.
-    sent_message = client.messages.create(
-        messaging_service_sid=SERVICE_SID,
-        body=message,
-        to=str(phoneNumber)
-    )
+    try:
+        sent_message = client.messages.create(
+            messaging_service_sid=SERVICE_SID,
+            body=message,
+            to=str(phone_number)
+        )
 
-    # Check the message status; if not accepted, raise an exception.
-    if sent_message.status != "accepted":
-        raise Exception(f"Twilio message failed with status: {sent_message.error_message}")
+        # Check the message status; if not accepted, raise an exception.
+        if sent_message.status != TWILIO_STATUS_ACCEPTED:
+            raise Exception(f"Twilio message failed with status: {sent_message.error_message}")
+    except Exception as e:
+        raise Exception(f"Failed to send SMS to {phone_number}: {str(e)}")
 
 
-def get_last_sms_sent(phoneNumber):
+def get_last_sms_sent(phone_number):
     """
     Retrieves the most recent SMS message sent to the specified phone number.
     
@@ -97,5 +117,5 @@ def get_last_sms_sent(phoneNumber):
         The most recent message if available (development/E2E only), or None.
     """
     if history:
-        return history.get_most_recent(phoneNumber)
+        return history.get_most_recent(phone_number)
     return None

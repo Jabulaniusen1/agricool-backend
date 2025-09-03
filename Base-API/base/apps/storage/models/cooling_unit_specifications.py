@@ -4,6 +4,9 @@ from django.utils.translation import gettext_lazy as _
 
 from .cooling_unit import CoolingUnit
 
+# Field length constants
+SPECIFICATION_TYPE_MAX_LENGTH = 32
+
 
 class CoolingUnitSpecifications(models.Model):
     class SpecificationType(models.TextChoices):
@@ -16,7 +19,7 @@ class CoolingUnitSpecifications(models.Model):
     set_point_value = models.FloatField(null=True)
 
     specification_type = models.CharField(
-        max_length=32, choices=SpecificationType.choices
+        max_length=SPECIFICATION_TYPE_MAX_LENGTH, choices=SpecificationType.choices
     )
 
     datetime_stamp = models.DateTimeField(default=timezone.now)

@@ -72,12 +72,12 @@ class BuyerCartSerializer(serializers.ModelSerializer):
     currency = serializers.CharField()
 
     # Computed
-    total_produce_amount = serializers.FloatField(source="cmp_total_produce_amount",read_only=True)
-    total_cooling_fees_amount = serializers.FloatField(source="cmp_total_cooling_fees_amount",read_only=True)
-    total_coldtivate_amount = serializers.FloatField(source="cmp_total_coldtivate_amount",read_only=True)
-    total_discount_amount = serializers.FloatField(source="cmp_total_discount_amount",read_only=True)
-    total_payment_fees_amount = serializers.FloatField(source="cmp_total_payment_fees_amount",read_only=True)
-    total_amount = serializers.FloatField(source="cmp_total_amount",read_only=True)
+    total_produce_amount = serializers.FloatField(source="cmp_total_produce_amount", read_only=True)
+    total_cooling_fees_amount = serializers.FloatField(source="cmp_total_cooling_fees_amount", read_only=True)
+    total_coldtivate_amount = serializers.FloatField(source="cmp_total_coldtivate_amount", read_only=True)
+    total_discount_amount = serializers.FloatField(source="cmp_total_discount_amount", read_only=True)
+    total_payment_fees_amount = serializers.FloatField(source="cmp_total_payment_fees_amount", read_only=True)
+    total_amount = serializers.FloatField(source="cmp_total_amount", read_only=True)
 
     class Meta:
         model = Order
@@ -110,15 +110,15 @@ class BuyerOrderSerializer(serializers.ModelSerializer):
     created_by_user = serializers.PrimaryKeyRelatedField(read_only=True)  # Assuming it's a ForeignKey to User
 
     payment_paid_at = serializers.DateTimeField(source="paid_at", allow_null=True, required=False)  # Optional field
-    payment_amount_paid = serializers.FloatField(source="amount_paid",allow_null=True, required=False)  # Optional field
+    payment_amount_paid = serializers.FloatField(source="amount_paid", allow_null=True, required=False)  # Optional field
 
     # Computed
-    total_produce_amount = serializers.FloatField(source="cmp_total_produce_amount",read_only=True)
-    total_cooling_fees_amount = serializers.FloatField(source="cmp_total_cooling_fees_amount",read_only=True)
-    total_coldtivate_amount = serializers.FloatField(source="cmp_total_coldtivate_amount",read_only=True)
-    total_discount_amount = serializers.FloatField(source="cmp_total_discount_amount",read_only=True)
-    total_payment_fees_amount = serializers.FloatField(source="cmp_total_payment_fees_amount",read_only=True)
-    total_amount = serializers.FloatField(source="cmp_total_amount",read_only=True)
+    total_produce_amount = serializers.FloatField(source="cmp_total_produce_amount", read_only=True)
+    total_cooling_fees_amount = serializers.FloatField(source="cmp_total_cooling_fees_amount", read_only=True)
+    total_coldtivate_amount = serializers.FloatField(source="cmp_total_coldtivate_amount", read_only=True)
+    total_discount_amount = serializers.FloatField(source="cmp_total_discount_amount", read_only=True)
+    total_payment_fees_amount = serializers.FloatField(source="cmp_total_payment_fees_amount", read_only=True)
+    total_amount = serializers.FloatField(source="cmp_total_amount", read_only=True)
 
     class Meta:
         model = Order

@@ -1,5 +1,5 @@
 from django.db.models import Q
-from rest_framework import permissions
+from rest_framework import permissions, status
 from rest_framework.decorators import action
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
@@ -7,6 +7,11 @@ from rest_framework.viewsets import GenericViewSet
 
 from base.apps.operation.models import Movement
 from base.apps.operation.serializers import MovementSerializer
+
+
+def parse_comma_separated_params(param_string):
+    """Helper function to parse comma-separated query parameters."""
+    return param_string.split(",") if param_string else []
 
 
 class MovementViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
@@ -47,13 +52,15 @@ class MovementViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
 
     def list(self, request, *args, **kwargs):
         serializer = MovementSerializer.optimized_init(self.get_queryset())
-        return Response(serializer.data, status=200)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=["get"], url_path="revenue")
     def get_checkouts_revenue(self, request, *args, **kwargs):
-        cooling_units = self.request.query_params.get("cooling_units", "").split(",")
-        payment_methods = self.request.query_params.get("payment_methods", "").split(
-            ","
+        cooling_units = parse_comma_separated_params(
+            self.request.query_params.get("cooling_units", "")
+        )
+        payment_methods = parse_comma_separated_params(
+            self.request.query_params.get("payment_methods", "")
         )
 
         serializer = MovementSerializer.optimized_init(
@@ -70,11 +77,13 @@ class MovementViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
             )
         )
 
-        return Response(serializer.data, status=200)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=["get"], url_path="usage")
     def get_checkouts_usage(self, request, *args, **kwargs):
-        cooling_units = self.request.query_params.get("cooling_units", "").split(",")
+        cooling_units = parse_comma_separated_params(
+            self.request.query_params.get("cooling_units", "")
+        )
         serializer = MovementSerializer.optimized_init(
             (
                 self.model.objects.filter(
@@ -83,4 +92,4 @@ class MovementViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
             )
         )
 
-        return Response(serializer.data, status=200)
+        return Response(serializer.data, status=status.HTTP_200_OK)

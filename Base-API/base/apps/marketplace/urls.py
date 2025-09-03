@@ -15,6 +15,10 @@ from base.apps.marketplace.views.seller import (SellerCouponsViewSet,
                                                 SellerPaystackAccountViewSet)
 from base.settings import ENVIRONMENT
 
+# Environment constants
+DEVELOPMENT_ENV = 'development'
+E2E_ENV = 'e2e'
+
 # Create a router and register the MarketListingViewSet
 router = DefaultRouter()
 
@@ -39,7 +43,7 @@ router.register(r'webhooks/paystack', WebhooksPaystackViewSet, basename='webhook
 router.register(r'data', MarketplaceDataViewSet, basename='data')
 
 # Development test endpoints
-if ENVIRONMENT == 'development' or ENVIRONMENT == 'e2e':
+if ENVIRONMENT == DEVELOPMENT_ENV or ENVIRONMENT == E2E_ENV:
     from base.apps.marketplace.views.development import DevelopmentViewSet
 
     router.register(r'development', DevelopmentViewSet, basename='development')

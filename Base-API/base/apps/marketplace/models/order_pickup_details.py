@@ -5,6 +5,9 @@ from base.apps.storage.models import CoolingUnit
 
 from .order import Order
 
+# Constants
+PICKUP_METHOD_MAX_LENGTH = 16
+
 
 class OrderPickupDetails(models.Model):
     """
@@ -21,7 +24,7 @@ class OrderPickupDetails(models.Model):
 
     order = models.ForeignKey(Order, on_delete=models.CASCADE, verbose_name=_("pickup_details"), related_name='pickup_details')
     cooling_unit = models.ForeignKey(CoolingUnit, on_delete=models.PROTECT, null=False, verbose_name=_("order_item_pickup_details"), related_name='order_item_pickup_details')
-    pickup_method = models.CharField(_("pickup_method"), max_length=16, null=False, blank=False, choices=PickUpMethod.choices)
+    pickup_method = models.CharField(_("pickup_method"), max_length=PICKUP_METHOD_MAX_LENGTH, null=False, blank=False, choices=PickUpMethod.choices)
 
     class Meta:
         indexes = [

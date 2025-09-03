@@ -4,6 +4,16 @@ from django.utils import timezone
 from base.apps.marketplace.models import MarketListedCrate
 from base.celery import app
 
+# Time constants
+DAY_START_HOUR = 0
+DAY_START_MINUTE = 0
+DAY_START_SECOND = 0
+DAY_START_MICROSECOND = 0
+
+# Log message templates
+RECOMPUTE_SUCCESS_MESSAGE = "Recomputed fields for listing ID {listing_id}."
+RECOMPUTE_ERROR_MESSAGE = "Error recomputing fields for listing ID {listing_id}: {error}"
+
 
 @app.task
 def recompute_computed_fields():
@@ -17,7 +27,12 @@ def recompute_computed_fields():
     Errors are printed (and are captured by Sentry).
     """
     # Determine the start of today (midnight) in the current timezone
-    today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    today_start = timezone.now().replace(
+        hour=DAY_START_HOUR,
+        minute=DAY_START_MINUTE,
+        second=DAY_START_SECOND,
+        microsecond=DAY_START_MICROSECOND
+    )
 
     # Retrieve active market listings that need recomputation:
     listings = MarketListedCrate.objects.filter(
@@ -29,6 +44,6 @@ def recompute_computed_fields():
     for listing in listings.iterator():
         try:
             listing.compute()
-            print(f"Recomputed fields for listing ID {listing.id}.")
+            print(RECOMPUTE_SUCCESS_MESSAGE.format(listing_id=listing.id))
         except Exception as e:
-            print(f"Error recomputing fields for listing ID {listing.id}: {e}")
+            print(RECOMPUTE_ERROR_MESSAGE.format(listing_id=listing.id, error=e))

@@ -85,13 +85,13 @@ class SensorIntegrationBase(Generic[T]):
     @transaction.atomic
     def set_sensor_error_notifications(self):
         Notification.objects.update_or_create(
-            event_type="SENSOR_ERROR", specific_id=self.cooling_unit.id
+            event_type=Notification.NotificationType.SENSOR_ERROR, specific_id=self.cooling_unit.id
         )
 
     @transaction.atomic
     def clear_sensor_error_notifications(self):
         Notification.objects.filter(
-            event_type="SENSOR_ERROR", specific_id=self.cooling_unit.id
+            event_type=Notification.NotificationType.SENSOR_ERROR, specific_id=self.cooling_unit.id
         ).delete()
 
     @transaction.atomic

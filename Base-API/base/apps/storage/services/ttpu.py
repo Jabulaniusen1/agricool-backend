@@ -3,6 +3,25 @@ from django.utils import timezone
 
 from ..models import CoolingUnitSpecifications, Crate, Produce
 
+# Physical constants
+UNIVERSAL_GAS_CONSTANT = 8.31451
+TEMPERATURE_KELVIN_OFFSET = 273.15
+SECONDS_PER_DAY = 24 * 60 * 60
+
+# Temperature constants
+DEFAULT_OUTSIDE_TEMP = 30
+QUALITY_THRESHOLD_BASE = 20
+
+# Time constants
+HOURS_LOOKBACK = 6
+
+# Quality constants
+DEFAULT_SL_BUFFER = 0.5
+QUALITY_DIVISOR = 100
+
+# Specification type constants
+TEMPERATURE_SPEC_TYPE = "TEMPERATURE"
+
 
 def _kinetic_constant(k0: float, Ea: float, R: float, T: float):
     """
@@ -14,7 +33,7 @@ def _kinetic_constant(k0: float, Ea: float, R: float, T: float):
         - T: temperature [Kelvin].
     """
 
-    return k0 * np.exp(-Ea / (R * (T + 273.15))) * 24 * 60 * 60
+    return k0 * np.exp(-Ea / (R * (T + TEMPERATURE_KELVIN_OFFSET))) * SECONDS_PER_DAY
 
 
 def initial_TTPU(
@@ -31,8 +50,8 @@ def initial_TTPU(
 
     # TODO Hardcoded the parameters here, but they should be moved into the database by changing the models and adding to the fixtures
     PARAMETERS = {
-        "T_out": 30,
-        "R": 8.31451,
+        "T_out": DEFAULT_OUTSIDE_TEMP,
+        "R": UNIVERSAL_GAS_CONSTANT,
     }
 
     R = PARAMETERS["R"]  # air gas constant
@@ -46,7 +65,7 @@ def initial_TTPU(
     k_in = _kinetic_constant(
         k0, Ea, R, T_room
     )  # kinetic constant rate, inside conditions
-    q_th = 20 * np.exp(k_out * SL_buffer)  # quality threshold inside
+    q_th = QUALITY_THRESHOLD_BASE * np.exp(k_out * SL_buffer)  # quality threshold inside
     ttpu = max(
         0, round(-np.log(q_th / initial_quality) / k_in, 2)
     )  # "time to pick-up" for the commodity to have SL_buffer days of shelf-life remaining
@@ -60,13 +79,16 @@ def get_set_t(crate_id):
     # option 3: last set point value
     # option 4: last value
 
-    crate = Crate.objects.get(id=crate_id)
+    try:
+        crate = Crate.objects.get(id=crate_id)
+    except Crate.DoesNotExist:
+        return None
 
     cooling_unit = crate.cooling_unit
 
     results_from_last_6_hours = CoolingUnitSpecifications.objects.filter(
-            cooling_unit=cooling_unit, specification_type="TEMPERATURE",
-            datetime_stamp__gte = timezone.now() - timezone.timedelta(hours=6)
+            cooling_unit=cooling_unit, specification_type=TEMPERATURE_SPEC_TYPE,
+            datetime_stamp__gte = timezone.now() - timezone.timedelta(hours=HOURS_LOOKBACK)
         )
 
     if results_from_last_6_hours:
@@ -79,23 +101,26 @@ def get_set_t(crate_id):
         return sum ([float(i.value) for i in results_from_last_6_hours]) /  len(results_from_last_6_hours)
 
     if crate.cooling_unit.sensor and CoolingUnitSpecifications.objects.filter(
-            cooling_unit=cooling_unit, specification_type="TEMPERATURE"
+            cooling_unit=cooling_unit, specification_type=TEMPERATURE_SPEC_TYPE
         ).latest("datetime_stamp").set_point_value:
         return CoolingUnitSpecifications.objects.filter(
-            cooling_unit=cooling_unit, specification_type="TEMPERATURE"
+            cooling_unit=cooling_unit, specification_type=TEMPERATURE_SPEC_TYPE
         ).latest("datetime_stamp").set_point_value
 
 
     return CoolingUnitSpecifications.objects.filter(
-                cooling_unit=cooling_unit, specification_type="TEMPERATURE"
+                cooling_unit=cooling_unit, specification_type=TEMPERATURE_SPEC_TYPE
             ).latest("datetime_stamp").value
 
 
 def compute_initial_ttpu_checkin(produce_id, crate_id):
 
     # 1. Get current produce, crate, crop id
-    produce = Produce.objects.get(id=produce_id)
-    crate = Crate.objects.get(id=crate_id)
+    try:
+        produce = Produce.objects.get(id=produce_id)
+        crate = Crate.objects.get(id=crate_id)
+    except (Produce.DoesNotExist, Crate.DoesNotExist):
+        return None
     k0 = produce.crop.dependent_constant
     Ea = produce.crop.activation_energy_constant
 
@@ -110,11 +135,11 @@ def compute_initial_ttpu_checkin(produce_id, crate_id):
 
     # 4. Parse the last temperature, add the initial quality and SL_buffer as a magic number
     initial_quality = produce.harvest_date
-    SL_buffer = 0.5
+    SL_buffer = DEFAULT_SL_BUFFER
 
     # 5. Compute the TTPU
     computed_initial_TTPU = initial_TTPU(last_temp, initial_quality, SL_buffer, k0, Ea)
-    initial_quality /= 100
+    initial_quality /= QUALITY_DIVISOR
 
     # 6. Update the crates properties
     Crate.objects.filter(produce=produce).update(

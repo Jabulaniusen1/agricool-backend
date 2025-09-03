@@ -4,6 +4,7 @@ from .views import (
     ComsolCallbackViewSet,
     CoolingUnitCapacityViewSet,
     CoolingUnitCropViewSet,
+    CoolingUnitProduceViewSet,
     CoolingUnitSpecificationsViewSet,
     CoolingUnitTemperatureViewSet,
     CoolingUnitViewSet,
@@ -11,6 +12,7 @@ from .views import (
     CropTypeViewSet,
     CropViewSet,
     EcozenViewSet,
+    FarmerCoolingUnitProduceViewSet,
     LocationViewSet,
     MobileAppMinimumVersionCodesViewSet,
     NextCheckoutViewSet,
@@ -67,6 +69,18 @@ router.register(
 
 router.register(
     r"(?P<version>(v1))/comsol", ComsolCallbackViewSet, basename="comsol-callback"
+)
+
+router.register(
+    r"(?P<version>(v1))/cooling-units/(?P<cooling_unit_id>\d+)/produces",
+    CoolingUnitProduceViewSet,
+    basename="cooling-unit-produces"
+)
+
+router.register(
+    r"(?P<version>(v1))/cooling-units/(?P<cooling_unit_id>\d+)/farmers/(?P<farmer_id>\d+)/produces",
+    FarmerCoolingUnitProduceViewSet,
+    basename="farmer-cooling-unit-produces"
 )
 
 urlpatterns = router.urls

@@ -5,6 +5,15 @@ from base.utils.services.sms import send_sms
 from base.celery import app
 from base.apps.operation.serializers import MovementSerializer
 
+# Constants
+DEFAULT_LANGUAGE = 'en'
+DEFAULT_VALUE_NA = "N/A"
+DATE_FORMAT_SMS = "%Y-%m-%d %H:%M"
+CROP_NAME_SEPARATOR = ', '
+ERROR_CHECKOUT_NOT_FOUND = "Checkout {checkout_id} does not exist."
+ERROR_USER_NOT_FOUND = "User {user_id} does not exist."
+SUCCESS_SMS_SENT = "SMS sent to {phone}"
+
 @app.task
 def send_sms_checkout_movement_report(checkout_id, user_id):
     try:
@@ -20,8 +29,9 @@ def send_sms_checkout_movement_report(checkout_id, user_id):
         owner = ""
         sum_weight = 0
 
-        if movement.initiated_for == Movement.InitiatedFor.CHECK_IN or movement.initiated_for == Movement.InitiatedFor.MARKERPLACE_ORDER:
-            checkin =  movement.checkins.first()
+        if (movement.initiated_for == Movement.InitiatedFor.CHECK_IN or 
+            movement.initiated_for == Movement.InitiatedFor.MARKETPLACE_ORDER):
+            checkin = movement.checkins.first()
             crates = [
                 crate
                 for produce in checkin.produces.all()
@@ -39,8 +49,12 @@ def send_sms_checkout_movement_report(checkout_id, user_id):
                 partial_checkout.crate
                 for partial_checkout in partial_checkouts
             ]
-            owner_user = crates[0].produce.checkin.owned_by_user
-            owner_company = crates[0].produce.checkin.owned_on_behalf_of_company
+            if crates:
+                owner_user = crates[0].produce.checkin.owned_by_user
+                owner_company = crates[0].produce.checkin.owned_on_behalf_of_company
+            else:
+                owner_user = None
+                owner_company = None
             sum_weight = sum(partial_checkout.weight_in_kg for partial_checkout in partial_checkouts)
 
         movement_crops = list({
@@ -54,12 +68,15 @@ def send_sms_checkout_movement_report(checkout_id, user_id):
             owner = f"{owner_user.first_name} {owner_user.last_name}"
 
         # Get cooling unit and company
+        if not crates:
+            return "No crates found for this movement"
+        
         company = crates[0].cooling_unit.location.company
 
         # Get all the affected crates by filtering the affected order items
-        with translation.override(user.language or 'en'):
-            movement_type = "N/A"
-            movement_type_for_date = "N/A"
+        with translation.override(user.language or DEFAULT_LANGUAGE):
+            movement_type = DEFAULT_VALUE_NA
+            movement_type_for_date = DEFAULT_VALUE_NA
 
             if movement.initiated_for == Movement.InitiatedFor.CHECK_IN:
                 movement_type = translation.gettext("movement_type_checkin")
@@ -74,21 +91,23 @@ def send_sms_checkout_movement_report(checkout_id, user_id):
                 movement_type=movement_type,
                 movement_type_for_date=movement_type_for_date,
                 code=movement.code,
-                crops=', '.join([crop['name'] for crop in movement_crops]),
+                crops=CROP_NAME_SEPARATOR.join([crop['name'] for crop in movement_crops]),
                 weight=sum_weight,
-                date=movement.date.strftime("%Y-%m-%d %H:%M"),
-                price=total_price or "N/A",
+                date=movement.date.strftime(DATE_FORMAT_SMS),
+                price=total_price or DEFAULT_VALUE_NA,
                 farmers_name=owner,
             )
 
         # Send the message
         send_sms(user.phone, message)
 
-        return f"SMS sent to {user.phone}"
+        return SUCCESS_SMS_SENT.format(phone=user.phone)
 
     except Checkout.DoesNotExist:
-        return f"Checkout {checkout_id} does not exist."
+        return ERROR_CHECKOUT_NOT_FOUND.format(checkout_id=checkout_id)
     except User.DoesNotExist:
-        return f"User {user_id} does not exist."
+        return ERROR_USER_NOT_FOUND.format(user_id=user_id)
+    except (AttributeError, IndexError) as e:
+        return f"Data structure error: {str(e)}"
     except Exception as e:
-        return str(e)
+        return f"Unexpected error: {str(e)}"
