@@ -13,6 +13,14 @@ from base.apps.operation.models import (
 )
 from base.apps.storage.models import Crate
 
+# Constants
+MINIMUM_STORAGE_DAYS = 1
+
+
+def zero_time_fields(dt):
+    """Utility function to zero out time fields from datetime."""
+    return dt.replace(hour=0, minute=0, second=0, microsecond=0)
+
 
 class MovementCrateSerializer(serializers.ModelSerializer):
     crop_id = serializers.PrimaryKeyRelatedField(
@@ -40,29 +48,26 @@ class MovementCrateSerializer(serializers.ModelSerializer):
         ]
 
     def get_days_in_storage(self, crate):
-        checkin_date = crate.produce.checkin.movement.date.replace(tzinfo=None).replace(
-            hour=0, minute=0, second=0, microsecond=0
+        checkin_date = zero_time_fields(
+            crate.produce.checkin.movement.date.replace(tzinfo=None)
         )
 
         if crate.cmp_fully_checked_out:
             # get checkout date
-            checkout_date = (
+            checkout_date = zero_time_fields(
                 crate.partial_checkouts.last()
                 .checkout.movement.date.replace(tzinfo=None)
-                .replace(hour=0, minute=0, second=0, microsecond=0)
             )
 
             duration = (checkout_date - checkin_date).days
-            current_storage_days = 1 if duration == 0 else duration
+            current_storage_days = MINIMUM_STORAGE_DAYS if duration == 0 else duration
 
             return current_storage_days
 
-        midnight = datetime.datetime.now().replace(
-            hour=0, minute=0, second=0, microsecond=0
-        )
+        midnight = zero_time_fields(datetime.datetime.now())
 
         duration = (midnight - checkin_date).days
-        current_storage_days = 1 if duration == 0 else duration
+        current_storage_days = MINIMUM_STORAGE_DAYS if duration == 0 else duration
 
         return current_storage_days
 
@@ -290,7 +295,7 @@ class MovementSerializer(serializers.ModelSerializer):
     def __init__(self, *args, **kwargs):
         # Don't accept instance that is not a queryset
         if not isinstance(args[0], QuerySet):
-            raise Exception("instance must be a queryset")
+            raise TypeError("instance must be a queryset")
 
         super().__init__(*args, **kwargs)
 

@@ -1,7 +1,7 @@
 from datetime import date
 
 from django.shortcuts import get_object_or_404
-from rest_framework import permissions
+from rest_framework import permissions, status
 from rest_framework.decorators import action
 from rest_framework.mixins import CreateModelMixin, ListModelMixin
 from rest_framework.response import Response
@@ -13,6 +13,7 @@ from base.apps.storage.models import Crate
 from base.apps.user.models import Operator
 from base.celery import app
 
+SEND_SMS_CHECKOUT_REPORT_TASK = "base.apps.operation.tasks.sms.send_sms_checkout_movement_report"
 
 class CheckoutViewSet(ListModelMixin, CreateModelMixin, GenericViewSet):
     model = Checkout
@@ -31,7 +32,7 @@ class CheckoutViewSet(ListModelMixin, CreateModelMixin, GenericViewSet):
                     partial_checkouts__checkout_id=checkout.id
                 )
                 return crates
-            except:
+            except Checkout.DoesNotExist:
                 return None
         else:
             return self.model.objects.all()
@@ -41,7 +42,13 @@ class CheckoutViewSet(ListModelMixin, CreateModelMixin, GenericViewSet):
 
         code = Movement.generate_code()
         movement_date = date.today()
-        operator = Operator.objects.get(user_id=self.request.user.id)
+        try:
+            operator = Operator.objects.get(user_id=self.request.user.id)
+        except Operator.DoesNotExist:
+            return Response(
+                {"error": "Operator not found for current user"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
         movement_instance = Movement.objects.create(
             code=code,
             date=movement_date,
@@ -54,19 +61,19 @@ class CheckoutViewSet(ListModelMixin, CreateModelMixin, GenericViewSet):
             data=request_data, context={"request": request}
         )
         if not serializer.is_valid():
-            return Response(serializer.errors, status=400)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         serializer.save()
-        return Response(serializer.data, status=200)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["POST"], url_path="send_sms_report")
     def send_sms_report(self, request, movement_id=None):
-        """GET /operation/checkouts/:movement_id/send_sms_report - sends an SMS report to a user"""
+        """POST /operation/checkouts/:movement_id/send_sms_report - sends an SMS report to a user"""
 
         checkout = get_object_or_404(Checkout, movement_id=movement_id)
         app.send_task(
-            "base.apps.operation.tasks.sms.send_sms_checkout_movement_report",
+            SEND_SMS_CHECKOUT_REPORT_TASK,
             args=[checkout.id, request.user.id],
         )
 
-        return Response(status=200)
+        return Response(status=status.HTTP_200_OK)

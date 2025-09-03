@@ -171,7 +171,7 @@ def update_temperature():
                 )
 
                 Notification.objects.filter(
-                    event_type="SENSOR_ERROR", specific_id=cu.id
+                    event_type=Notification.NotificationType.SENSOR_ERROR, specific_id=cu.id
                 ).delete()
 
         print(f"Cooling Unit [{cu.id}]: Temperature data updated")

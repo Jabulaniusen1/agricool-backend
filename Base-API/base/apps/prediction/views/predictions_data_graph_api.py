@@ -9,6 +9,13 @@ from rest_framework.views import APIView
 
 from base.apps.prediction.models import MLMarketDataIndia, MLPredictionData
 
+# Time period constants
+NUMBER_OF_PAST_DAYS = 28
+NUMBER_OF_FORECASTS_DAYS = 14
+
+# Default values
+DEFAULT_PRICE_VALUE = None
+
 
 class PredictionsDataGraphAPIView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
@@ -18,8 +25,6 @@ class PredictionsDataGraphAPIView(APIView):
         params = json.loads(request.body)
         today = datetime.date.today()
 
-        NUMBER_OF_PAST_DAYS = 28
-        NUMBER_OF_FORECASTS_DAYS = 14
 
         ########################################### PAST ##########################################
         # get the values from DB from the past starting date till date. In ML4, this should be past starting month till date
@@ -45,7 +50,7 @@ class PredictionsDataGraphAPIView(APIView):
                     break
 
             if not found:
-                past_values_array.append({"date": lookup_date, "price": None})
+                past_values_array.append({"date": lookup_date, "price": DEFAULT_PRICE_VALUE})
 
         ######################################## PAST END #########################################
 

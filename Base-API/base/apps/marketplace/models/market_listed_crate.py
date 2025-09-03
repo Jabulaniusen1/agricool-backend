@@ -11,6 +11,10 @@ from base.utils.currencies import validate_currency
 
 from .order import Order
 
+# Constants
+CURRENCY_FIELD_MAX_LENGTH = 3
+DEFAULT_CURRENCY = "NGN"
+
 
 class MarketListedCrate(models.Model):
     """
@@ -26,7 +30,7 @@ class MarketListedCrate(models.Model):
     created_at = models.DateTimeField(_("created_at"), auto_now_add=True)
     delisted_at = models.DateTimeField(_("delisted_at"), null=True, blank=True)  # Allow null/blank for active listings
     crate = models.ForeignKey(Crate, on_delete=models.CASCADE, related_name='market_listed_crates')
-    currency = models.CharField(_("currency"), max_length=3, default="NGN", validators=[validate_currency])
+    currency = models.CharField(_("currency"), max_length=CURRENCY_FIELD_MAX_LENGTH, default=DEFAULT_CURRENCY, validators=[validate_currency])
 
     # Computed fields
     cmp_last_updated_at = models.DateTimeField(_("cmp_last_updated_at"), null=True, blank=True)

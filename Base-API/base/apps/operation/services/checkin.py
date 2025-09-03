@@ -4,7 +4,14 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 
 from base.apps.operation.models import Checkin
-from base.apps.storage.models import CoolingUnit, CoolingUnitCrop, Crate, Crop, Produce
+from base.apps.storage.models import (
+    CoolingUnit,
+    CoolingUnitCrop,
+    Crate,
+    Crop,
+    Pricing,
+    Produce,
+)
 from base.apps.storage.services.ttpu import compute_initial_ttpu_checkin
 from base.apps.user.models import (
     Farmer,
@@ -13,6 +20,9 @@ from base.apps.user.models import (
     Notification,
     ServiceProvider,
 )
+
+# Constants
+ERROR_CHECKIN_NOT_EDITABLE = "Check in is not editable."
 
 
 @transaction.atomic
@@ -29,11 +39,16 @@ def handle_produces_for_checkin(checkin, produces_payload, operator):
     produces_for_DT = []
 
     for produce_data in produces_payload:
-        crop = Crop.objects.get(id=produce_data["crop"]["id"])
+        try:
+            crop = Crop.objects.get(id=produce_data["crop"]["id"])
+        except Crop.DoesNotExist:
+            raise ValidationError(
+                f"Crop with ID {produce_data['crop']['id']} not found"
+            )
 
         # Remove fields we handle manually
         produce_data.pop("crop")
-        has_picture = produce_data.pop("hasPicture", False)
+        has_picture = produce_data.pop("has_picture", False)
 
         crates_data = produce_data.pop("crates")
 
@@ -51,18 +66,30 @@ def handle_produces_for_checkin(checkin, produces_payload, operator):
 
         # Create the crates and calculate price
         for crate_data in crates_data:
-            cooling_unit = CoolingUnit.objects.get(id=crate_data["cooling_unit_id"])
+            try:
+                cooling_unit = CoolingUnit.objects.get(id=crate_data["cooling_unit_id"])
+            except CoolingUnit.DoesNotExist:
+                raise ValidationError(
+                    f"Cooling unit with ID {crate_data['cooling_unit_id']} not found"
+                )
             metric_multiplier = (
-                crate_data["weight"] if cooling_unit.metric == "KILOGRAMS" else 1
+                crate_data["weight"]
+                if cooling_unit.metric == CoolingUnit.CoolingUnitMetric.KILOGRAMS
+                else 1
             )
 
-            cu_crop = CoolingUnitCrop.objects.get(
-                cooling_unit=cooling_unit,
-                crop=crop,
-            )
+            try:
+                cu_crop = CoolingUnitCrop.objects.get(
+                    cooling_unit=cooling_unit,
+                    crop=crop,
+                )
+            except CoolingUnitCrop.DoesNotExist:
+                raise ValidationError(
+                    f"Cooling unit {cooling_unit.id} does not accept crop {crop.id}"
+                )
             price = (
                 metric_multiplier * cu_crop.pricing.fixed_rate
-                if cu_crop.pricing.pricing_type == "FIXED"
+                if cu_crop.pricing.pricing_type == Pricing.PricingType.FIXED
                 else metric_multiplier * cu_crop.pricing.daily_rate
             )
 
@@ -90,17 +117,17 @@ def handle_produces_for_checkin(checkin, produces_payload, operator):
             Notification.objects.create(
                 user=checkin.owned_by_user,
                 specific_id=produce_instance.id,
-                event_type="FARMER_SURVEY",
+                event_type=Notification.NotificationType.FARMER_SURVEY,
             )
             Notification.objects.create(
                 user=operator.user,
                 specific_id=produce_instance.id,
-                event_type="FARMER_SURVEY",
+                event_type=Notification.NotificationType.FARMER_SURVEY,
             )
 
     # Handle DTs and TTPU
     if produces_for_DT:
-        Crate.objects.filter(produce__in=produces_for_DT).update(runDT=True)
+        Crate.objects.filter(produce__in=produces_for_DT).update(run_dt=True)
         for produce in produces_for_DT:
             compute_initial_ttpu_checkin(produce.id, produce.crates.first().id)
 
@@ -113,8 +140,15 @@ def update_checkin(checkin_id, payload):
     payload can contain: farmer_id, crop_id, planned_days
     """
 
-    checkin = Checkin.objects.select_related("movement").get(id=checkin_id)
-    produce = Produce.objects.get(checkin_id=checkin_id)
+    try:
+        checkin = Checkin.objects.select_related("movement").get(id=checkin_id)
+    except Checkin.DoesNotExist:
+        raise ValidationError(f"Checkin with ID {checkin_id} not found")
+
+    try:
+        produce = Produce.objects.get(checkin_id=checkin_id)
+    except Produce.DoesNotExist:
+        raise ValidationError(f"No produce found for checkin {checkin_id}")
 
     # pick any crate attached to the produce (we just need cooling_unit + movement check)
     crate_example = Crate.objects.filter(produce=produce).first()
@@ -126,11 +160,14 @@ def update_checkin(checkin_id, payload):
         and movement_date.date() == datetime.today().date()
     )
     if not editable:
-        raise ValidationError("Check in is not editable.")
+        raise ValidationError(ERROR_CHECKIN_NOT_EDITABLE)
 
     # Update owner
     if payload.get("farmer_id"):
-        farmer = Farmer.objects.get(id=payload["farmer_id"])
+        try:
+            farmer = Farmer.objects.get(id=payload["farmer_id"])
+        except Farmer.DoesNotExist:
+            raise ValidationError(f"Farmer with ID {payload['farmer_id']} not found")
         checkin.owned_by_user_id = farmer.user_id
         checkin.save()
 
@@ -146,11 +183,14 @@ def update_checkin(checkin_id, payload):
         )
 
     # Notify all service providers
-    for sp in ServiceProvider.objects.filter(company=cooling_unit.location.company):
+    service_providers = ServiceProvider.objects.select_related("user").filter(
+        company=cooling_unit.location.company
+    )
+    for sp in service_providers:
         Notification.objects.create(
             user=sp.user,
             specific_id=checkin.id,
-            event_type="CHECKIN_EDITED",
+            event_type=Notification.NotificationType.CHECKIN_EDITED,
         )
 
     return checkin

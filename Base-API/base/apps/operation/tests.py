@@ -14,10 +14,24 @@ from base.apps.storage.models import Crate
 
 from base.utils.tests import clean_client, DummyFactory
 
+# Constants
+UNDEFINED_ID = "undefined"
+CHECKIN_URL = "/operation/checkins/"
+CHECKOUT_URL = "/operation/checkouts/"
+TEST_WEIGHT_LARGE = 20
+TEST_WEIGHT_SMALL = 10
+TEST_HARVEST_DATE_PLACEHOLDER = -1
+TEST_PLANNED_DAYS = "2"
+TEST_CURRENCY = "NGN"
+TEST_PAYMENT_TYPE = "CASH"
+INVALID_ID_RANGE_START = 300
+INVALID_ID_RANGE_END = 400
+HTTP_SUCCESS_STATUS = 200
+
 
 def get_checkin_payload(dummy_factory):
     payload = {
-        "id": "undefined",
+        "id": UNDEFINED_ID,
         "produces": json.dumps(
             [
                 {
@@ -26,21 +40,21 @@ def get_checkin_payload(dummy_factory):
                     "crates": [
                         {
                             "check_out": None,
-                            "weight": 20,
+                            "weight": TEST_WEIGHT_LARGE,
                             "cooling_unit_id": dummy_factory.cooling_unit.id,
-                            "planned_days": "2",
+                            "planned_days": TEST_PLANNED_DAYS,
                         },
                         {
                             "check_out": None,
-                            "weight": 10,
+                            "weight": TEST_WEIGHT_SMALL,
                             "cooling_unit_id": dummy_factory.cooling_unit.id,
-                            "planned_days": "2",
+                            "planned_days": TEST_PLANNED_DAYS,
                         },
                     ],
-                    "harvest_date": -1,
+                    "harvest_date": TEST_HARVEST_DATE_PLACEHOLDER,
                     "initial_grade": None,
                     "size": None,
-                    "hasPicture": False,
+                    "has_picture": False,
                 }
             ]
         ),
@@ -52,7 +66,7 @@ def get_checkin_payload(dummy_factory):
 class CheckinViewSetTest(TestCase):
 
     def setUp(self):
-        self.url = "/operation/checkins/"
+        self.url = CHECKIN_URL
 
         self.factory = APIRequestFactory()
 
@@ -64,7 +78,7 @@ class CheckinViewSetTest(TestCase):
 
     def test_invalid_user_type_fail(self):
 
-        # passing in wrong user time i.e !operator
+        # passing in wrong user type i.e !operator
 
         invalid_user_type = self.dummy_instance.user_farmer
         fails = False
@@ -100,7 +114,7 @@ class CheckinViewSetTest(TestCase):
             payload = get_checkin_payload(dummy_instance)
 
             # any random number will do
-            payload["farmer_id"] = random.randint(300, 400)
+            payload["farmer_id"] = random.randint(INVALID_ID_RANGE_START, INVALID_ID_RANGE_END)
 
             request = self.factory.post(self.url, data=payload)
 
@@ -132,88 +146,9 @@ class CheckinViewSetTest(TestCase):
         response = self.view_for_post(request)
 
         # check response status code
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, HTTP_SUCCESS_STATUS)
 
         self.assertEqual(response.data["farmer"], payload["farmer_id"])
-
-    # def get_create_body(self):
-    # not useful again
-    #     """
-    #     *** all must be same company
-    #
-    #     seed crop
-    #
-    #     create cooling unit
-    #
-    #     create farmer
-    #
-    #     assign cooling unit to a farmer
-    #
-    #     add to payload
-    #
-    #     # print("fields-list")
-    #     # fields = self.user_company._meta.get_fields()
-    #     # for field in fields:
-    #     #     print('field-name', field.name)
-    #
-    #     """
-    #
-    #     self.user_company = get_client('service_provider')
-    #
-    #     company = self.user_company.service_provider.company
-    #
-    #     self.user_operator = baker.make('user.Operator', company=company, make_m2m=True)
-    #
-    #     location = baker.make('storage.Location', company=company)
-    #
-    #     cooling_unit = baker.make('storage.CoolingUnit',
-    #                               operators=[self.user_operator.user], location=location, _fill_optional=True,
-    #                               food_capacity_in_metric_tons=float(random.randint(1, 400)),
-    #                               capacity_in_metric_tons=float(random.randint(1, 400)),
-    #                               capacity_in_number_crates=random.randint(1, 400)
-    #                               )
-    #
-    #     self.user_farmer = baker.make('user.Farmer', cooling_units=[cooling_unit],
-    #                                   companies=[company], make_m2m=True)
-    #
-    #     crop_instance = baker.make('storage.Crop', crop_type=baker.make('storage.CropType'))
-    #
-    #     pricing = baker.make('storage.Pricing', _fill_optional=True)
-    #
-    #     cuc = baker.make('storage.CoolingUnitCrop', crop=crop_instance, cooling_unit=cooling_unit, pricing=pricing)
-    #
-    #     print("pricing created", cuc.pricing)
-    #
-    #     payload = {
-    #         "id": "undefined",
-    #         "produces": json.dumps([
-    #             {
-    #                 "crop": {"id": crop_instance.id},
-    #                 "additional_info": str(time.time()),
-    #                 "crates": [
-    #                     {
-    #                         "check_out": None,
-    #                         "weight": 20,
-    #                         "cooling_unit_id": cooling_unit.id,
-    #                         "planned_days": "2"
-    #                     },
-    #                     {
-    #                         "check_out": None,
-    #                         "weight": 10,
-    #                         "cooling_unit_id": cooling_unit.id,
-    #                         "planned_days": "2"
-    #                     }
-    #                 ],
-    #                 "harvest_date": -1,
-    #                 "initial_grade": None,
-    #                 "size": None,
-    #                 "hasPicture": False
-    #             }
-    #         ]),
-    #         "farmer_id": self.user_farmer.id
-    #     }
-    #
-    #     return payload
 
 
 class MovementViewSetTest(TestCase):
@@ -237,7 +172,7 @@ class MovementViewSetTest(TestCase):
 class CheckoutViewSetTest(TestCase):
 
     def setUp(self):
-        self.url = "/operation/checkouts/"
+        self.url = CHECKOUT_URL
 
         self.factory = APIRequestFactory()
 
@@ -263,7 +198,7 @@ class CheckoutViewSetTest(TestCase):
 
         self.create_checkin_situation(dummy_instance)
 
-        self.assertEqual(200, 200)
+        self.assertEqual(HTTP_SUCCESS_STATUS, HTTP_SUCCESS_STATUS)
 
         # check creates in the db then checkout
 
@@ -276,8 +211,8 @@ class CheckoutViewSetTest(TestCase):
         payload = {
             "crates": [crate.id for crate in user_crates],
             "price_discount": 0,
-            "currency": "NGN",
-            "payment_type": "CASH",
+            "currency": TEST_CURRENCY,
+            "payment_type": TEST_PAYMENT_TYPE,
             "paid": True,
         }
 
@@ -293,7 +228,7 @@ class CheckoutViewSetTest(TestCase):
 
         # check response status code
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, HTTP_SUCCESS_STATUS)
 
     def create_checkin_situation(self, dummy_instance):
         """
@@ -302,7 +237,7 @@ class CheckoutViewSetTest(TestCase):
 
         payload = get_checkin_payload(dummy_instance)
 
-        url = "/operation/checkins/"
+        url = CHECKIN_URL
 
         factory = APIRequestFactory()
 
@@ -319,7 +254,7 @@ class CheckoutViewSetTest(TestCase):
 
 class CheckoutToCheckinViewSetTest(TestCase):
 
-    def SetUp(selfs):
+    def setUp(self):
         pass
 
     def test_1(self):
@@ -335,7 +270,7 @@ class CheckoutToCheckinViewSetTest(TestCase):
 
 class MarketSurveyViewSetTest(TestCase):
 
-    def SetUp(selfs):
+    def setUp(self):
         pass
 
     def test(self):

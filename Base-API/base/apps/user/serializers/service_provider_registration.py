@@ -130,7 +130,7 @@ class ServiceProviderRegistrationSerializer(serializers.Serializer):
 
         operator = Operator.objects.create(user=op_instance, company=company_instance)
 
-        Farmer.objects.create(user=farmer_instance, created_by=operator, isUnknown=True)
+        Farmer.objects.create(user=farmer_instance, created_by=operator, is_unknown=True)
 
         instance = ServiceProvider.objects.create(
             **validated_data, user=user_instance, company=company_instance

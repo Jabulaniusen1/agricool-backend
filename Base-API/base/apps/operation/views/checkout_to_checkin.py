@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from rest_framework import status
 from rest_framework.mixins import CreateModelMixin, ListModelMixin
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
@@ -8,6 +9,10 @@ from base.apps.operation.services.checkout_to_checkin import convert_checkout_to
 from base.apps.storage.models import Crate
 from base.apps.storage.serializers import CrateSerializer
 from base.apps.user.models import Farmer
+
+# Constants
+ERROR_CODE_ALREADY_USED = "This code has already been used for a check in."
+SUCCESS_CRATE_MOVED = "Successfully moved crate"
 
 
 class CheckoutToCheckinViewSet(ListModelMixin, CreateModelMixin, GenericViewSet):
@@ -33,21 +38,21 @@ class CheckoutToCheckinViewSet(ListModelMixin, CreateModelMixin, GenericViewSet)
                 # We're only interested to gather the latest checkout weight, so we will be patching this value just for the read aspect of it
                 for crate in crates:
                     latest_crate_partial_checkout = crate.partial_checkouts.latest("id")
-                    weight_to_be_considered_in_kg = (
+                    checkout_weight_kg = (
                         latest_crate_partial_checkout.weight_in_kg
                         if latest_crate_partial_checkout
                         else crate.initial_weight
                     )
 
-                    crate.weight = weight_to_be_considered_in_kg
-                    crate.initial_weight = weight_to_be_considered_in_kg
+                    crate.weight = checkout_weight_kg
+                    crate.initial_weight = checkout_weight_kg
 
                 serializer = CrateSerializer(crates, many=True)
                 return Response(serializer.data)
-            except:
+            except (Movement.DoesNotExist, Checkout.DoesNotExist):
                 return Response(
-                    {"message": "This code has already been used for a check in."},
-                    status=404,
+                    {"message": ERROR_CODE_ALREADY_USED},
+                    status=status.HTTP_404_NOT_FOUND,
                 )
         else:
             return None
@@ -55,7 +60,7 @@ class CheckoutToCheckinViewSet(ListModelMixin, CreateModelMixin, GenericViewSet)
     def create(self, request, *args, **kwargs):
         params = request.data["params"]
         checkout_code = params["code"]
-        cooling_unit_id = params["coolingUnitId"]
+        cooling_unit_id = params["cooling_unit_id"]
         days = params.get("days")
         tags = params.get("tags", [])
 
@@ -76,4 +81,4 @@ class CheckoutToCheckinViewSet(ListModelMixin, CreateModelMixin, GenericViewSet)
             operator_user_id=request.user.id,
         )
 
-        return Response({"message": "Successfully moved crate"}, status=200)
+        return Response({"message": SUCCESS_CRATE_MOVED}, status=status.HTTP_200_OK)

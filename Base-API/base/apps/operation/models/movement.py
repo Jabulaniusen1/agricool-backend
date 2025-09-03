@@ -9,7 +9,7 @@ class Movement(models.Model):
     class InitiatedFor(models.TextChoices):
         CHECK_IN = "ci", "Check-in"
         CHECK_OUT = "co", "Check-out"
-        MARKERPLACE_ORDER = "mo", "Markerplace order"
+        MARKETPLACE_ORDER = "mo", "Markerplace order"
 
     initiated_for = models.CharField(max_length=2, choices=InitiatedFor.choices, null=False)
     operator = models.ForeignKey(

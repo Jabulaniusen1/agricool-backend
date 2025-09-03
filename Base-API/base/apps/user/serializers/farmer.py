@@ -31,7 +31,7 @@ class FarmerSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         # Check User not exists
-        if "updateUser" in self.context["request"].data:
+        if "update_user" in self.context["request"].data:
             return {
                 "parent_name": data.pop("parent_name"),
                 "country": data.pop("country"),
@@ -58,9 +58,9 @@ class FarmerSerializer(serializers.ModelSerializer):
 
         user = data.pop("user")
         parent_name = data.pop("parent_name")
-        createUser = self.context["request"].data["createUser"]
+        create_user = self.context["request"].data["create_user"]
 
-        if createUser:
+        if create_user:
             if Farmer.objects.filter(
                 user__phone=user.get("phone", None), smartphone=True
             ).exists():
@@ -70,7 +70,7 @@ class FarmerSerializer(serializers.ModelSerializer):
             return {
                 "user": user,
                 "parent_name": parent_name,
-                "createUser": createUser,
+                "create_user": create_user,
             }
         else:
             if Farmer.objects.filter(user__phone=user.get("phone", None)).exists():
@@ -80,7 +80,7 @@ class FarmerSerializer(serializers.ModelSerializer):
             return {
                 "user": user,
                 "parent_name": parent_name,
-                "createUser": createUser,
+                "create_user": create_user,
             }
 
     def update(self, instance, validated_data):
@@ -118,14 +118,14 @@ class FarmerSerializer(serializers.ModelSerializer):
         user = validated_data.pop("user")
         if "language" in user.__dict__ and user["language"] == "":
             user["language"] = "en"
-        createUser = validated_data.pop("createUser")
+        create_user = validated_data.pop("create_user")
         serialized_user = UserSerializer(
             data=user, context={"request": self.context["request"]}
         )
         if not serialized_user.is_valid():
             raise serializers.ValidationError({"user": [_("Error creating the user")]})
 
-        if createUser:
+        if create_user:
             try:
                 farmer_instance = Farmer.objects.get(
                     user__phone=user.get("phone", None)

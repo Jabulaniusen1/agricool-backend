@@ -92,11 +92,11 @@ class CrateSerializer(serializers.ModelSerializer):
     def get_run_dt(self, instance):
         identifier = True if instance.produce.crop.digital_twin_identifier else False
         company = instance.cooling_unit.location.company.digital_twin
-        runDT = instance.runDT
-        return (identifier and company) and (runDT or instance.modified_dt != None)
+        run_dt = instance.run_dt
+        return (identifier and company) and (run_dt or instance.modified_dt != None)
 
     def get_remaining_shelf_life(self, instance):
-        if instance.runDT:
+        if instance.run_dt:
             if instance.remaining_shelf_life:
                 return instance.remaining_shelf_life
             crate_with_data = instance.produce.crates.filter(

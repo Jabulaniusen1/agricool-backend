@@ -6,25 +6,31 @@ import requests
 from base import settings
 from base.apps.prediction.models import Market, MLPredictionData, MLMarketDataIndia
 from base.apps.storage.models import Crop
-from base.apps.storage.models import Crop
 from base.celery import app
 from django.core.mail import send_mail
+
+# Prediction configuration constants
+USE_ONLY_AVAILABLE_VALUES_FOR_ERROR = 1
+COMMODITIES = ["Apple", "Banana", "Green Chilli", "Tomato"]
+DEFAULT_EMAIL_RECIPIENT = "app@yourvcca.org"
+
+# HTTP request constants
+HTTP_HEADERS = {"Content-Type": "application/json", "Cache-Control": "no-cache"}
+
+# Error message constants
+ERROR_EMAIL_SUBJECT_TEMPLATE = "{environment}-ENV: Scraping Module error"
 
 
 @app.task
 def prediction_calls():
     """Call the prediction API for all supported commodities and save the result in database"""
-    subject = f"{settings.ENVIRONMENT}-ENV: Scraping Module error"
+    subject = ERROR_EMAIL_SUBJECT_TEMPLATE.format(environment=settings.ENVIRONMENT)
     email_from = settings.DEFAULT_FROM_EMAIL
     recipient_list = [
-        "app@yourvcca.org"
+        DEFAULT_EMAIL_RECIPIENT
     ]  # TODO Improve it so the email is set as an environment variable
 
     print("prediction_calls task starting")
-    HEADERS = {"Content-Type": "application/json", "Cache-Control": "no-cache"}
-    # Set to one not to use interpolated values
-    USE_ONLY_AVAILABLE_VALUES_FOR_ERROR = 1
-    COMMODITIES = ["Apple", "Banana", "Green Chilli", "Tomato"]
     COMMODITIES_OBJECTS = Crop.objects.filter(name__in=COMMODITIES)
 
     markets = Market.objects.filter(used_for_predictions=True)
@@ -42,7 +48,7 @@ def prediction_calls():
 
                 response_content = json.loads(
                     requests.post(
-                        settings.PRICE_PREDICTION_URL_INDIA, headers=HEADERS, json=payload
+                        settings.PRICE_PREDICTION_URL_INDIA, headers=HTTP_HEADERS, json=payload
                     ).content
                 )
 

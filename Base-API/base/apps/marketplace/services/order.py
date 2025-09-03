@@ -7,6 +7,36 @@ from base.apps.user.models import Notification
 from base.celery import app
 from base.utils.currencies import quantitize_float
 
+# Currency constants
+SUPPORTED_CURRENCY = "NGN"
+
+# Payment constants
+DEFAULT_DISCOUNT_AMOUNT = 0.0
+MINIMUM_ORDER_AMOUNT = 100
+
+# Movement code templates
+MOVEMENT_CODE_TEMPLATE = "MO-#{order_id}-CU-#{cooling_unit_id}"
+PRODUCE_IDENTIFIER_TEMPLATE = "MO-#{order_id}-PI-#{produce_id}"
+
+# Celery task names
+SMS_NOTIFICATION_TASK = "base.apps.marketplace.tasks.sms.send_sms_notification_to_owner_on_order_completed"
+
+# Error messages
+ERROR_UNSUPPORTED_CURRENCY = "Only NGN currency is supported"
+ERROR_INVALID_ORDER_STATUS = "Invalid order status"
+ERROR_ORDER_AMOUNT_TOO_LOW = "Order total amount should be greater than 100"
+ERROR_ORDER_AMOUNT_CHANGED = "Order total amount changed during computation"
+ERROR_PICKUP_DETAILS_MISMATCH = "Number of pickup details does not match number of cooling units"
+ERROR_MISSING_PICKUP_DETAILS = "Missing pickup details for cooling unit {cu_id}"
+ERROR_COOLING_UNIT_NOT_FOUND = "Cooling unit with ID {cu_id} not found"
+
+# Date constants
+EPOCH_START = datetime(1970, 1, 1, tzinfo=timezone.utc)
+RECOMPUTE_THRESHOLD_DAYS = 1
+
+# Division safety constants
+MIN_DIVISOR = 1
+
 
 """
 Note:
@@ -104,11 +134,14 @@ def process_order_completion(order, payment_through=None, payment_gateway=None, 
     )
 
     for item in items.iterator():
-        code = f"MO-#{order.id}-CU-#{item.cooling_unit_id}"
+        code = MOVEMENT_CODE_TEMPLATE.format(order_id=order.id, cooling_unit_id=item.cooling_unit_id)
 
         # Retrieve or create CoolingUnit, Movement, Checkout, Checkin
         if code not in cached_cooling_units:
-            cached_cooling_units[code] = CoolingUnit.objects.get(id=item.cooling_unit_id)
+            try:
+                cached_cooling_units[code] = CoolingUnit.objects.get(id=item.cooling_unit_id)
+            except CoolingUnit.DoesNotExist:
+                raise ValueError(ERROR_COOLING_UNIT_NOT_FOUND.format(cu_id=item.cooling_unit_id))
         cooling_unit = cached_cooling_units[code]
 
         if code not in cached_movements:
@@ -116,7 +149,7 @@ def process_order_completion(order, payment_through=None, payment_gateway=None, 
                 date=order.created_at,
                 order=order,
                 code=code,
-                initiated_for=Movement.InitiatedFor.MARKERPLACE_ORDER,
+                initiated_for=Movement.InitiatedFor.MARKETPLACE_ORDER,
             )
         movement = cached_movements[code]
 
@@ -124,7 +157,7 @@ def process_order_completion(order, payment_through=None, payment_gateway=None, 
             cached_checkouts[code] = Checkout.objects.create(
                 movement=movement,
                 paid=True,
-                discount_amount=0.0,
+                discount_amount=DEFAULT_DISCOUNT_AMOUNT,
                 payment_through=payment_through or Checkout.PaymentThrough.DIRECT,
                 payment_gateway=payment_gateway,
                 payment_method=payment_method or Checkout.PaymentMethod.CASH,
@@ -144,15 +177,15 @@ def process_order_completion(order, payment_through=None, payment_gateway=None, 
             cached_cu_notifications[code] = Notification.notify_cooling_unit_operators(
                 cooling_unit=cooling_unit,
                 specific_id=movement.id,
-                event_type="ORDER_REQUIRES_MOVEMENT",
+                event_type=Notification.NotificationType.ORDER_REQUIRES_MOVEMENT,
             )
 
-        market_listing_crate = item.market_listed_crate
-        crate = market_listing_crate.crate
+        market_listed_crate = item.market_listed_crate
+        crate = market_listed_crate.crate
         produce = crate.produce
 
         # Check if ordering an entire crate
-        ordering_entire_crate = item.ordered_produce_weight == crate.weight
+        ordered_entire_crate = item.ordered_produce_weight == crate.weight
 
         checkout_item = create_partial_checkout(
             crate=crate,
@@ -161,7 +194,7 @@ def process_order_completion(order, payment_through=None, payment_gateway=None, 
             cooling_fees=item.cmp_cooling_fees_amount
         )
 
-        produce_common_identifier = f"MO-#{order.id}-PI-#{produce.id}"
+        produce_common_identifier = PRODUCE_IDENTIFIER_TEMPLATE.format(order_id=order.id, produce_id=produce.id)
         if produce_common_identifier not in cached_post_produces:
             cached_post_produces[produce_common_identifier] = Produce.objects.create(
                 crop=produce.crop,
@@ -175,7 +208,7 @@ def process_order_completion(order, payment_through=None, payment_gateway=None, 
         remaining_kg = checkout_item.weight_in_kg
         max_capacity = cooling_unit.crate_weight
 
-        if ordering_entire_crate and remaining_kg == max_capacity:
+        if ordered_entire_crate and remaining_kg == max_capacity:
             latest_crate = Crate.objects.create(
                 produce=cached_post_produces[produce_common_identifier],
                 initial_weight=remaining_kg,
@@ -185,7 +218,7 @@ def process_order_completion(order, payment_through=None, payment_gateway=None, 
                 currency=crate.currency,
                 price_per_crate_per_pricing_type=crate.price_per_crate_per_pricing_type,
                 remaining_shelf_life=crate.remaining_shelf_life,
-                runDT=crate.runDT,
+                run_dt=crate.run_dt,
                 quality_dt=crate.quality_dt,
                 temperature_dt=crate.temperature_dt,
                 modified_dt=crate.modified_dt,
@@ -211,7 +244,7 @@ def process_order_completion(order, payment_through=None, payment_gateway=None, 
                         currency=crate.currency,
                         price_per_crate_per_pricing_type=crate.price_per_crate_per_pricing_type,
                         remaining_shelf_life=related_crate.remaining_shelf_life,
-                        runDT=related_crate.runDT,
+                        run_dt=related_crate.run_dt,
                         quality_dt=related_crate.quality_dt,
                         temperature_dt=related_crate.temperature_dt,
                         modified_dt=related_crate.modified_dt,
@@ -227,7 +260,7 @@ def process_order_completion(order, payment_through=None, payment_gateway=None, 
                 if not item.resulting_crates.filter(id=latest_crate.id).exists():
                     item.resulting_crates.add(latest_crate)
 
-        listings_to_be_computed.append((market_listing_crate, ordering_entire_crate))
+        listings_to_be_computed.append((market_listed_crate, ordered_entire_crate))
 
     order.status = order.Status.PAID
     order.status_changed_at = timezone.now()
@@ -235,11 +268,11 @@ def process_order_completion(order, payment_through=None, payment_gateway=None, 
     order.save()
 
     # Recompute market listing crates after order completion
-    for market_listing_crate, ordering_entire_crate in listings_to_be_computed:
-        if market_listing_crate.delisted_at is None:
-            if ordering_entire_crate:
-                market_listing_crate.delisted_at = timezone.now()
-            market_listing_crate.compute(save=True)
+    for market_listed_crate, ordered_entire_crate in listings_to_be_computed:
+        if market_listed_crate.delisted_at is None:
+            if ordered_entire_crate:
+                market_listed_crate.delisted_at = timezone.now()
+            market_listed_crate.compute(save=True)
 
     # Send SMS notifications to sellers
     owned_by_users_ids = order.items.values_list(
@@ -247,7 +280,7 @@ def process_order_completion(order, payment_through=None, payment_gateway=None, 
     ).distinct()
     for user_id in owned_by_users_ids:
         app.send_task(
-            "base.apps.marketplace.tasks.sms.send_sms_notification_to_owner_on_order_completed",
+            SMS_NOTIFICATION_TASK,
             args=[order.id, user_id]
         )
 
@@ -261,30 +294,30 @@ def validate_order_payment_conditions(order):
     from base.apps.marketplace.models.order_pickup_details import \
         OrderPickupDetails
 
-    if order.currency != "NGN":
-        raise Exception("Only NGN currency is supported")
+    if order.currency != SUPPORTED_CURRENCY:
+        raise Exception(ERROR_UNSUPPORTED_CURRENCY)
 
     if order.status not in [order.Status.CART, order.Status.PAYMENT_PENDING]:
-        raise Exception("Invalid order status")
+        raise Exception(ERROR_INVALID_ORDER_STATUS)
 
-    if order.currency == "NGN" and (order.cmp_total_produce_amount + order.cmp_total_cooling_fees_amount) < 100:
-        raise Exception("Order total amount should be greater than 100")
+    if order.currency == SUPPORTED_CURRENCY and (order.cmp_total_produce_amount + order.cmp_total_cooling_fees_amount) < MINIMUM_ORDER_AMOUNT:
+        raise Exception(ERROR_ORDER_AMOUNT_TOO_LOW)
 
     pre_compute_total = order.cmp_total_amount
     order.compute(save=True, compute_dependencies=True)
     post_compute_total = order.cmp_total_amount
     if pre_compute_total != post_compute_total:
-        raise Exception("Order total amount changed during computation")
+        raise Exception(ERROR_ORDER_AMOUNT_CHANGED)
 
     cooling_units = order.get_cooling_unit_ids()
     order_pickup_details = OrderPickupDetails.objects.filter(order=order)
     if len(order_pickup_details) != len(cooling_units):
-        raise Exception("Number of pickup details does not match number of cooling units")
+        raise Exception(ERROR_PICKUP_DETAILS_MISMATCH)
 
     pickup_cu_ids = [detail.cooling_unit_id for detail in order_pickup_details]
     for cu_id in cooling_units:
         if cu_id not in pickup_cu_ids:
-            raise Exception(f"Missing pickup details for cooling unit {cu_id}")
+            raise Exception(ERROR_MISSING_PICKUP_DETAILS.format(cu_id=cu_id))
 
 def compute_order_crate_item(order_crate_item, compute_dependencies=True):
     """
@@ -313,9 +346,9 @@ def compute_order_crate_item(order_crate_item, compute_dependencies=True):
 
     # Check if the market listed crate needs to be recomputed.
     if compute_dependencies or not market_listed_crate.cmp_last_updated_at:
-        comparison_updated_at = order_crate_item.order.cmp_last_updated_at or datetime(1970, 1, 1, tzinfo=timezone.utc)
+        comparison_updated_at = order_crate_item.order.cmp_last_updated_at or EPOCH_START
         if (market_listed_crate.cmp_last_updated_at < comparison_updated_at or
-            (market_listed_crate.cmp_last_updated_at - comparison_updated_at) > timedelta(days=1)):
+            (market_listed_crate.cmp_last_updated_at - comparison_updated_at) > timedelta(days=RECOMPUTE_THRESHOLD_DAYS)):
             market_listed_crate.compute(save=True)
 
     # Retrieve the latest produce price per kg.
@@ -327,7 +360,7 @@ def compute_order_crate_item(order_crate_item, compute_dependencies=True):
 
     # Calculate cooling fee per kg, ensuring no division by zero.
     cooling_fee_per_kg = quantitize_float(
-        market_listed_crate.cmp_pending_in_cooling_fees / max(1, crate_available_weight),
+        market_listed_crate.cmp_pending_in_cooling_fees / max(MIN_DIVISOR, crate_available_weight),
         currency
     )
 

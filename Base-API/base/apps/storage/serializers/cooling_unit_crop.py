@@ -12,4 +12,7 @@ class CoolingUnitCropSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def get_full_crop(self, instance):
-        return Crop.objects.filter(id=instance.crop.id).values()[0]
+        try:
+            return Crop.objects.filter(id=instance.crop.id).values()[0]
+        except (IndexError, AttributeError):
+            return None

@@ -21,6 +21,11 @@ class UserViewSet(GenericViewSet):
     def get_queryset(self):
         return self.model.objects.all()
 
+    def list(self, request, *args, **kwargs):
+        qs = self.get_queryset()
+        data = self.serializer_class(qs, many=True, context={"request": request}).data
+        return Response(data, status=status.HTTP_200_OK)
+
     def update(self, request, *args, **kwargs):
         instance = get_object_or_404(User, pk=self.kwargs.get("pk"))
         serializer = self.serializer_class(
@@ -34,7 +39,12 @@ class UserViewSet(GenericViewSet):
             return Response(serializer.data, status=200)
         return Response(serializer.errors, status=400)
 
-    def delete(self, request, *args, **kwargs):
+    def retrieve(self, request, pk=None, *args, **kwargs):
+        instance = get_object_or_404(User, pk=pk)
+        data = self.serializer_class(instance, context={"request": request}).data
+        return Response(data, status=status.HTTP_200_OK)
+    
+    def destroy(self, request, *args, **kwargs):
         """
         Allows a user to delete (deactivate) their own account.
         """

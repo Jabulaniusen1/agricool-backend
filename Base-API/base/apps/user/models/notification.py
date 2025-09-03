@@ -2,6 +2,13 @@ from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
 from .user import User
 
+# Field length constants
+EVENT_TYPE_MAX_LENGTH = 32
+
+# Default values
+DEFAULT_SEEN = False
+DEFAULT_SPECIFIC_ID = None
+
 
 class Notification(models.Model):
     class NotificationType(models.TextChoices):
@@ -11,8 +18,10 @@ class Notification(models.Model):
         CHECKIN_EDITED = "CHECKIN_EDITED", "Checkin edited"
         ORDER_REQUIRES_MOVEMENT = "ORDER_REQUIRES_MOVEMENT", "Operational movement required" # specific_id > Order
         LISTING_PRICE_UPDATED = "LISTING_PRICE_UPDATED", "Listing price updated" # specific_id > MarketListedCratePrice
-
-    seen = models.BooleanField(default=False)
+        FARMER_SURVEY = "FARMER_SURVEY", "Farmer survey"
+        CHECKOUT_EDITED = "CHECKOUT_EDITED", "Checkout edited" # specific_id
+        
+    seen = models.BooleanField(default=DEFAULT_SEEN)
 
     user = models.ForeignKey(
         User,
@@ -23,13 +32,13 @@ class Notification(models.Model):
 
     date = models.DateTimeField(auto_now=True)
 
-    event_type = models.CharField(max_length=32, choices=NotificationType.choices)
+    event_type = models.CharField(max_length=EVENT_TYPE_MAX_LENGTH, choices=NotificationType.choices)
 
     # NOTE:
     # This seems to be a polymorphic relation, but without the relation model definition.
     # Instead, the original author of this model used the event_type field to determine the entity tha this relates to.
     # In our additions to the NotificationType, we've added which entity relates to this notification event_type.
-    specific_id = models.IntegerField(default=None, null=True)
+    specific_id = models.IntegerField(default=DEFAULT_SPECIFIC_ID, null=True)
 
     @staticmethod
     @transaction.atomic

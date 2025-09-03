@@ -15,6 +15,21 @@ from base.apps.storage.models import CoolingUnit, Crate, Produce
 from base.apps.storage.serializers import CoolingUnitSerializer
 from base.apps.user.models import Farmer, Operator, ServiceProvider
 
+# Default values
+DEFAULT_WEIGHT_THRESHOLD = 0
+DEFAULT_OCCUPANCY_THRESHOLD = 0
+DEFAULT_DELETED = False
+DEFAULT_PUBLIC = True
+
+# Error messages
+ERROR_COOLING_UNIT_ID_REQUIRED = "Cooling unit ID is required"
+ERROR_ACCESS_DENIED = "Access denied"
+ERROR_CANNOT_DELETE_ACTIVE_CHECKINS = "This cooling unit cannot be deleted because it has active check-ins"
+ERROR_NO_PERMISSION_SENSOR_DATA = "You do not have permission to view sensor data for this cooling unit."
+
+# Success messages
+SUCCESS_DELETED_COOLING_UNIT = "Successfully deleted cooling unit"
+
 
 class CoolingUnitViewSet(
     CreateModelMixin,
@@ -29,15 +44,19 @@ class CoolingUnitViewSet(
 
     def get_queryset(self):
         if self.request.query_params.get("not_empty"):
-            is_farmer = self.request.query_params.get("is_farmer").lower() == "true"
+            is_farmer_param = self.request.query_params.get("is_farmer")
+            is_farmer = is_farmer_param and is_farmer_param.lower() == "true"
             if is_farmer:
-                farmer = Farmer.objects.get(
-                    user__id=self.request.query_params.get("user")
-                )
+                try:
+                    farmer = Farmer.objects.get(
+                        user__id=self.request.query_params.get("user")
+                    )
+                except Farmer.DoesNotExist:
+                    return CoolingUnit.objects.none()
 
                 crates = Crate.objects.filter(
                     produce__checkin__owned_by_user__farmer=farmer,
-                    weight__gt=0,
+                    weight__gt=DEFAULT_WEIGHT_THRESHOLD,
                 ).distinct("cooling_unit")
 
                 cooling_unit_ids = crates.values_list("cooling_unit", flat=True)
@@ -65,8 +84,8 @@ class CoolingUnitViewSet(
                 return self.model.objects.annotate(op=Count("name")).filter(
                     op__lte=1,
                     operators=self.request.query_params.get("operator"),
-                    occupancy__gt=0,
-                    deleted=False,
+                    occupancy__gt=DEFAULT_OCCUPANCY_THRESHOLD,
+                    deleted=DEFAULT_DELETED,
                 )
         if self.request.query_params.get("company"):
             return self.model.objects.filter(
@@ -78,9 +97,12 @@ class CoolingUnitViewSet(
                 operators=self.request.query_params.get("operator"), deleted=False
             )
         elif self.request.query_params.get("farmer_id"):
-            farmer = Farmer.objects.get(id=self.request.query_params.get("farmer_id"))
+            try:
+                farmer = Farmer.objects.get(id=self.request.query_params.get("farmer_id"))
+            except Farmer.DoesNotExist:
+                return CoolingUnit.objects.none()
             return self.model.objects.filter(
-                (Q(public=True) | Q(pk__in=farmer.cooling_units.all())), deleted=False
+                (Q(public=DEFAULT_PUBLIC) | Q(pk__in=farmer.cooling_units.all())), deleted=DEFAULT_DELETED
             )
         return self.model.objects.filter(deleted=False)
 
@@ -96,8 +118,8 @@ class CoolingUnitViewSet(
         )
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=200)
-        return Response(serializer.errors, status=400)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
         instance = get_object_or_404(CoolingUnit, pk=self.kwargs.get("pk", None))
@@ -109,8 +131,8 @@ class CoolingUnitViewSet(
         )
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=200)
-        return Response(serializer.errors, status=400)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, *args, **kwargs):
         user = request.user
@@ -118,7 +140,7 @@ class CoolingUnitViewSet(
 
         if not cooling_unit_id:
             return Response(
-                {"error": "Cooling unit ID is required"},
+                {"error": ERROR_COOLING_UNIT_ID_REQUIRED},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -127,7 +149,7 @@ class CoolingUnitViewSet(
 
         if not ServiceProvider.is_employee_of_company(user, company):
             return Response(
-                {"error": "Access denied"}, status=status.HTTP_403_FORBIDDEN
+                {"error": ERROR_ACCESS_DENIED}, status=status.HTTP_403_FORBIDDEN
             )
 
         if Produce.objects.filter(
@@ -136,7 +158,7 @@ class CoolingUnitViewSet(
         ).exists():
             return Response(
                 {
-                    "error": "This cooling unit cannot be deleted because it has active check-ins"
+                    "error": ERROR_CANNOT_DELETE_ACTIVE_CHECKINS
                 },
                 status=status.HTTP_409_CONFLICT,
             )
@@ -145,7 +167,7 @@ class CoolingUnitViewSet(
         cooling_unit.save()
 
         return Response(
-            {"success": "Successfully deleted cooling unit"}, status=status.HTTP_200_OK
+            {"success": SUCCESS_DELETED_COOLING_UNIT}, status=status.HTTP_200_OK
         )
 
     # TODO: move this to a dedicated sensor viewset when/if we implement the multiple sensors support
@@ -165,7 +187,7 @@ class CoolingUnitViewSet(
         if not operator and not service_provider:
             return Response(
                 {
-                    "error": "You do not have permission to view sensor data for this cooling unit."
+                    "error": ERROR_NO_PERMISSION_SENSOR_DATA
                 },
                 status=status.HTTP_403_FORBIDDEN,
             )
@@ -182,6 +204,7 @@ class CoolingUnitViewSet(
                         "source_id": sensor.source_id,
                         "type": sensor.type,
                         "username": sensor.username,
+                        "date_sensor_first_linked": sensor.date_sensor_first_linked,
                     }
                     for sensor in sensor_data
                 ]

@@ -62,8 +62,8 @@ class EcozenIntegration(SensorIntegrationBase):
             },
         )
 
-        jsonBody = res.json()
-        if not jsonBody:
+        json_body = res.json()
+        if not json_body:
             raise Exception("Error: Unexpected response from Ecozen")
 
         return res.json()[0]["data"]

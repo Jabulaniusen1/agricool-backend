@@ -6,6 +6,9 @@ from base.utils.currencies import validate_currency
 
 from .movement import Movement
 
+# Constants
+PAYMENT_FIELD_MAX_LENGTH = 20
+
 
 class Checkout(models.Model):
     class PaymentThrough(models.TextChoices):
@@ -13,7 +16,7 @@ class Checkout(models.Model):
         COLDTIVATE = "COLDTIVATE", "Coldtivate app"
 
     class PaymentGateway(models.TextChoices):
-        PAYTACK = "PAYTACK", "Paystack"
+        PAYSTACK = "PAYSTACK", "Paystack"
         STRIPE = "STRIPE", "Stripe"
 
     class PaymentMethod(models.TextChoices):
@@ -27,21 +30,21 @@ class Checkout(models.Model):
 
 
     payment_through = models.CharField(
-        max_length=20,
+        max_length=PAYMENT_FIELD_MAX_LENGTH,
         choices=PaymentThrough.choices,
         default=None,
         blank=True,
         null=True,
     )
     payment_gateway = models.CharField(
-        max_length=20,
+        max_length=PAYMENT_FIELD_MAX_LENGTH,
         choices=PaymentGateway.choices,
         default=None,
         blank=True,
         null=True,
     )
     payment_method = models.CharField(
-        max_length=20,
+        max_length=PAYMENT_FIELD_MAX_LENGTH,
         choices=PaymentMethod.choices,
         default=None,
         blank=True,

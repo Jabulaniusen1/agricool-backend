@@ -64,22 +64,22 @@ class NotificationSerializer(serializers.ModelSerializer):
             produce = None
 
             if (
-                instance.event_type == "TIME_TO_PICKUP"
-                or instance.event_type == "FARMER_SURVEY"
+                instance.event_type == Notification.NotificationType.TIME_TO_PICKUP
+                or instance.event_type == Notification.NotificationType.FARMER_SURVEY
             ):
                 produce = Produce.objects.get(id=instance.specific_id)
 
-            elif instance.event_type == "MARKET_SURVEY":
+            elif instance.event_type == Notification.NotificationType.MARKET_SURVEY:
                 produce = Produce.objects.filter(
                     crates__partial_checkouts__checkout_id=instance.specific_id
                 ).first()
 
-            elif instance.event_type == "CHECKOUT_EDITED":
+            elif instance.event_type == Notification.NotificationType.CHECKOUT_EDITED:
                 produce = Produce.objects.filter(
                     checkin_id=instance.specific_id
                 ).first()
 
-            elif instance.event_type == "ORDER_REQUIRES_MOVEMENT":
+            elif instance.event_type == Notification.NotificationType.ORDER_REQUIRES_MOVEMENT:
                 produce = Produce.objects.filter(
                     checkin__movement_id=instance.specific_id
                 ).first()
@@ -122,20 +122,20 @@ class NotificationSerializer(serializers.ModelSerializer):
 
     def get_movement_code(self, instance):
         try:
-            if instance.event_type == "MARKET_SURVEY":
+            if instance.event_type == Notification.NotificationType.MARKET_SURVEY:
                 movement_code = Checkout.objects.get(
                     id=instance.specific_id
                 ).movement.code
                 return movement_code
             elif (
-                instance.event_type == "TIME_TO_PICKUP"
-                or instance.event_type == "FARMER_SURVEY"
+                instance.event_type == Notification.NotificationType.TIME_TO_PICKUP
+                or instance.event_type == Notification.NotificationType.FARMER_SURVEY
             ):
                 movement_code = Produce.objects.get(
                     id=instance.specific_id
                 ).checkin.movement.code
                 return movement_code
-            elif instance.event_type == "CHECKIN_EDITED":
+            elif instance.event_type == Notification.NotificationType.CHECKIN_EDITED:
                 movement_code = Checkin.objects.get(
                     id=instance.specific_id
                 ).movement.code

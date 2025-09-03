@@ -11,5 +11,5 @@ from .crop import CropViewSet
 from .crop_type import CropTypeViewSet
 from .location import LocationViewSet
 from .next_checkout import NextCheckoutViewSet
-from .produce import ProduceViewSet
+from .produce import ProduceViewSet, CoolingUnitProduceViewSet, FarmerCoolingUnitProduceViewSet
 from .sensors import EcozenViewSet, SensorIntegrationViewSet

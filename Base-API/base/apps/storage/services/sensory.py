@@ -1,5 +1,7 @@
 import logging
+from sqlite3 import IntegrityError
 
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
 
@@ -16,7 +18,7 @@ def load_temperature(cooling_unit, specification_type="TEMPERATURE"):
     # Gather credentials
     try:
         credentials = SensorIntegration.objects.filter(cooling_unit=cooling_unit).values()[0]
-    except:
+    except (IndexError, SensorIntegration.DoesNotExist):
         raise Exception(f"Credentials for cooling unit {cooling_unit.id} were not found")
 
     # Special handling for Ecozen.
@@ -61,28 +63,28 @@ def load_temperature(cooling_unit, specification_type="TEMPERATURE"):
                 cooling_unit=cooling_unit,
             )
 
-            Notification.objects.filter(event_type="SENSOR_ERROR", specific_id=cooling_unit.id).delete()
+            Notification.objects.filter(event_type=Notification.NotificationType.SENSOR_ERROR, specific_id=cooling_unit.id).delete()
 
         else:
-            if not Notification.objects.filter(specific_id=cooling_unit.id, event_type="SENSOR_ERROR").exists():
+            if not Notification.objects.filter(specific_id=cooling_unit.id, event_type=Notification.NotificationType.SENSOR_ERROR).exists():
                 Notification.notify_cooling_unit_operators(
                     cooling_unit=cooling_unit,
-                    event_type="SENSOR_ERROR",
+                    event_type=Notification.NotificationType.SENSOR_ERROR,
                     specific_id=cooling_unit.id,
                 )
                 Notification.notify_cooling_unit_service_providers(
                     cooling_unit=cooling_unit,
-                    event_type="SENSOR_ERROR",
+                    event_type=Notification.NotificationType.SENSOR_ERROR,
                     specific_id=cooling_unit.id,
                 )
     else:
         try:
             CoolingUnitSpecifications.objects.create(
                 datetime_stamp=updated_date,
-                specification_type="TEMPERATURE",
+                specification_type=CoolingUnitSpecifications.SpecificationType.TEMPERATURE,
                 value=updated_value,
                 set_point_value=updated_point_value,
                 cooling_unit=cooling_unit,
             )
-        except:
-            print("Error in setting cooling unit specification")
+        except (IntegrityError, ValidationError) as e:
+            print(f"Error in setting cooling unit specification: {e}")

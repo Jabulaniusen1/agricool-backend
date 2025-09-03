@@ -6,6 +6,13 @@ from base.apps.operation.models.checkin import Checkin
 
 from .crop import Crop
 
+# Field length constants
+ADDITIONAL_INFO_MAX_LENGTH = 255
+
+# Default values
+DEFAULT_CHECKOUT_COMPLETED = False
+DEFAULT_WEIGHT_THRESHOLD = 0
+
 
 class Produce(models.Model):
     crop = models.ForeignKey(
@@ -16,7 +23,7 @@ class Produce(models.Model):
         null=True,
     )
 
-    additional_info = models.CharField(_("additional_info"), max_length=255, null=True)
+    additional_info = models.CharField(_("additional_info"), max_length=ADDITIONAL_INFO_MAX_LENGTH, null=True)
 
     checkin = models.ForeignKey(
         Checkin,
@@ -44,11 +51,11 @@ class Produce(models.Model):
 
     # Computed fields
     cmp_last_updated_at = models.DateTimeField(_("cmp_last_updated_at"), null=True, blank=True)
-    cmp_checkout_completed = models.BooleanField(default=False)
+    cmp_checkout_completed = models.BooleanField(default=DEFAULT_CHECKOUT_COMPLETED)
 
     def compute(self, save=True):
         self.cmp_last_updated_at = timezone.now()
-        self.cmp_checkout_completed = self.crates.filter(weight__gt=0).count() == 0
+        self.cmp_checkout_completed = self.crates.filter(weight__gt=DEFAULT_WEIGHT_THRESHOLD).count() == 0
 
         if save:
             self.save()

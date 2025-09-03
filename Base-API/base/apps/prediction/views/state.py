@@ -48,16 +48,16 @@ class StateViewSet(
             .order_by("state__name", "district", "name")
         )
 
-        marketsDict = {}
+        markets_dict = {}
 
         for market in markets:
-            if not market.state.name in marketsDict:
-                marketsDict[market.state.name] = {}
+            if not market.state.name in markets_dict:
+                markets_dict[market.state.name] = {}
 
-            if not market.district in marketsDict[market.state.name]:
-                marketsDict[market.state.name][market.district] = []
+            if not market.district in markets_dict[market.state.name]:
+                markets_dict[market.state.name][market.district] = []
 
-            marketsDict[market.state.name][market.district].append(
+            markets_dict[market.state.name][market.district].append(
                 {"id": market.id, "name": market.name}
             )
 
@@ -69,5 +69,5 @@ class StateViewSet(
         )
 
         return JsonResponse(
-            {"available_crops": available_crops, "available_markets": marketsDict}
+            {"available_crops": available_crops, "available_markets": markets_dict}
         )

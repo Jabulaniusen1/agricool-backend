@@ -5,6 +5,29 @@ from base.apps.storage.models import CoolingUnit, Location
 from base.apps.user.models import Operator, ServiceProvider, User
 from base.settings import ENVIRONMENT
 
+# Environment constants
+DEVELOPMENT_ENV = "development"
+
+# Email constants
+USER_DELETION_SUBJECT = "User deletion"
+ADMIN_EMAIL = "app@yourvcca.org"
+
+# Default values
+DEFAULT_IS_ACTIVE = True
+DEFAULT_DELETED = False
+DEFAULT_COORDINATE = 0
+
+# Anonymization constants
+ANONYMOUS_FIRST_NAME = "User"
+ANONYMOUS_LAST_NAME = "Disable"
+DELETED_COMPANY_NAME_TEMPLATE = "Deleted company {}"
+DELETED_COOLING_UNIT_NAME = "Deleted cooling unit"
+EMPTY_STRING = ""
+DEFAULT_COORDINATES = [0, 0]
+
+# Error message templates
+MAIL_ERROR_TEMPLATE = "Error sending mail: {}"
+
 
 def delete_user_account(user: User) -> None:
     """
@@ -17,7 +40,7 @@ def delete_user_account(user: User) -> None:
         company = service_provider.company
         remaining_count = (
             service_provider.company.service_provider_company.filter(
-                user__is_active=True
+                user__is_active=DEFAULT_IS_ACTIVE
             ).count()
             - 1
         )
@@ -31,26 +54,26 @@ def delete_user_account(user: User) -> None:
 
         # if last service provider, anonymize/delete company information
         if remaining_count == 0:
-            company.name = f"Deleted company {company.id}"
+            company.name = DELETED_COMPANY_NAME_TEMPLATE.format(company.id)
             company.logo.delete()
             company.save()
             CoolingUnit.objects.filter(
-                location__company_id=company.id, deleted=False
-            ).update(name="Deleted cooling unit", deleted=True)
-            Location.objects.filter(company_id=company.id, deleted=False).update(
+                location__company_id=company.id, deleted=DEFAULT_DELETED
+            ).update(name=DELETED_COOLING_UNIT_NAME, deleted=True)
+            Location.objects.filter(company_id=company.id, deleted=DEFAULT_DELETED).update(
                 deleted=True,
                 name=None,
-                state="",
-                city="",
-                street="",
+                state=EMPTY_STRING,
+                city=EMPTY_STRING,
+                street=EMPTY_STRING,
                 street_number=None,
-                zip_code="",
-                point=[0, 0],
+                zip_code=EMPTY_STRING,
+                point=DEFAULT_COORDINATES,
             )
-            Operator.objects.filter(company_id=company.id, user__is_active=True).update(
+            Operator.objects.filter(company_id=company.id, user__is_active=DEFAULT_IS_ACTIVE).update(
                 user__is_active=False,
-                user__first_name="User",
-                user__last_name="Disable",
+                user__first_name=ANONYMOUS_FIRST_NAME,
+                user__last_name=ANONYMOUS_LAST_NAME,
                 user__phone=None,
                 user__email=None,
             )
@@ -60,7 +83,7 @@ def delete_user_account(user: User) -> None:
     if operator:
         remaining_operators = (
             Operator.objects.filter(
-                company=operator.company, user__is_active=True
+                company=operator.company, user__is_active=DEFAULT_IS_ACTIVE
             ).count()
             - 1
         )
@@ -76,21 +99,21 @@ def delete_user_account(user: User) -> None:
         CoolingUnit.objects.filter(operators=user).update(operators=None)
 
     # Send email unless in development
-    if ENVIRONMENT != "development":
+    if ENVIRONMENT != DEVELOPMENT_ENV:
         try:
             send_mail(
-                "User deletion",
+                USER_DELETION_SUBJECT,
                 message,
                 settings.DEFAULT_FROM_EMAIL,
-                ["app@yourvcca.org"],
+                [ADMIN_EMAIL],
             )
         except Exception as e:
-            print(f"Error sending mail: {e}")
+            print(MAIL_ERROR_TEMPLATE.format(e))
 
     # Finally, anonymize user
     user.is_active = False
-    user.first_name = "User"
-    user.last_name = "Disable"
+    user.first_name = ANONYMOUS_FIRST_NAME
+    user.last_name = ANONYMOUS_LAST_NAME
     user.phone = None
     user.email = None
     user.save()
@@ -108,8 +131,8 @@ def operator_delete_farmer(target_user):
 
     # soft delete user
     target_user.is_active = False
-    target_user.first_name = "User"
-    target_user.last_name = "Disable"
+    target_user.first_name = ANONYMOUS_FIRST_NAME
+    target_user.last_name = ANONYMOUS_LAST_NAME
     target_user.phone = None
     target_user.email = None
     target_user.save()

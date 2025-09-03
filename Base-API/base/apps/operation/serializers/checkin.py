@@ -29,7 +29,10 @@ class CheckinSerializer(serializers.ModelSerializer):
         checkin_instance = Checkin.objects.create(**validated_data)
         produces_payload = json.loads(self.context["request"].data["produces"])
 
-        operator = Operator.objects.get(user=self.context["request"].user)
+        try:
+            operator = Operator.objects.get(user=self.context["request"].user)
+        except Operator.DoesNotExist:
+            raise serializers.ValidationError("Operator not found for current user")
         from base.apps.operation.services.checkin import handle_produces_for_checkin
 
         handle_produces_for_checkin(checkin_instance, produces_payload, operator)

@@ -3,6 +3,29 @@ from base.apps.marketplace.models.order import Order
 from base.apps.marketplace.models.order_crate_item import OrderCrateItem
 from base.apps.user.models.company import Company
 
+# Error message constants
+ERROR_COMPANY_ID_REQUIRED = "Expecting company_id in query params."
+ERROR_COMPANY_NOT_FOUND = "Company with id {company_id} not found."
+
+
+def safe_int_conversion(value, field_name="value"):
+    """Safely convert a value to integer.
+    
+    Args:
+        value: The value to convert
+        field_name: Name of the field for error reporting
+        
+    Returns:
+        int: The converted integer value
+        
+    Raises:
+        ValueError: If conversion fails
+    """
+    try:
+        return int(value)
+    except (ValueError, TypeError) as e:
+        raise ValueError(f"Invalid {field_name}: {value}. Must be a valid integer.") from e
+
 
 def get_cart_prefetched(user):
     """
@@ -84,11 +107,15 @@ def get_company(request, company_id=None):
     # If company_id is not passed as an argument, attempt to fetch it from query parameters.
     company_id = company_id or request.query_params.get('company_id', None)
     if not company_id:
-        raise ValueError("Expecting company_id in query params.")
+        raise ValueError(ERROR_COMPANY_ID_REQUIRED)
 
     # Find the matching company from the filtered list.
-    for company in companies:
-        if int(company.id) == int(company_id):
-            return company
+    try:
+        company_id_int = safe_int_conversion(company_id, "company_id")
+        for company in companies:
+            if company.id == company_id_int:
+                return company
+    except ValueError:
+        raise ValueError(ERROR_COMPANY_NOT_FOUND.format(company_id=company_id))
 
-    raise ValueError(f"Company with id {company_id} not found.")
+    raise ValueError(ERROR_COMPANY_NOT_FOUND.format(company_id=company_id))

@@ -4,6 +4,23 @@ from django.contrib.auth.models import (
 )
 from django.utils.functional import cached_property
 
+# Error message constants
+ERROR_INVALID_PERMISSION_STRING = "Invalid permissions string {perm_string}"
+
+# Role names
+ROLE_SERVICE_PROVIDER = "ServiceProvider"
+ROLE_OPERATOR = "Operator"
+ROLE_FARMER = "Farmer"
+
+# Permission constants
+PERMISSION_VIEW_ALL_USERS = "user.view_all_users"
+PERMISSION_ADD_INVITATION_SERVICEPROVIDER = "user.add_invitation_serviceprovider"
+PERMISSION_ADD_INVITATION_OPERATOR = "user.add_invitation_operator"
+PERMISSION_VIEW_ALL_INVITATIONS = "user.view_all_invitations"
+PERMISSION_VIEW_SERVICEPROVIDER_INVITATIONS = "user.view_serviceprovider_invitations"
+PERMISSION_VIEW_OPERATOR_INVITATIONS = "user.view_operator_invitations"
+PERMISSION_ADD_FARMER = "user.add_farmer"
+
 
 class GroupConfig:
 
@@ -28,7 +45,7 @@ class GroupConfig:
             try:
                 app_label, code = perm_string.split(".")
             except ValueError:
-                raise Exception(f"Invalid permissions string {perm_string}")
+                raise Exception(ERROR_INVALID_PERMISSION_STRING.format(perm_string=perm_string))
             permission_objects.add(
                 Permission.objects.get(content_type__app_label=app_label, codename=code)
             )
@@ -50,26 +67,26 @@ roles = [
     #     )
     # ),
     GroupConfig(
-        name="ServiceProvider",
+        name=ROLE_SERVICE_PROVIDER,
         permissions=(
-            "user.view_all_users",
-            "user.add_invitation_serviceprovider",
-            "user.add_invitation_operator",
-            "user.view_all_invitations",
-            "user.view_serviceprovider_invitations",
-            "user.view_operator_invitations",
-            "user.add_farmer",
+            PERMISSION_VIEW_ALL_USERS,
+            PERMISSION_ADD_INVITATION_SERVICEPROVIDER,
+            PERMISSION_ADD_INVITATION_OPERATOR,
+            PERMISSION_VIEW_ALL_INVITATIONS,
+            PERMISSION_VIEW_SERVICEPROVIDER_INVITATIONS,
+            PERMISSION_VIEW_OPERATOR_INVITATIONS,
+            PERMISSION_ADD_FARMER,
         ),
     ),
     GroupConfig(
-        name="Operator",
+        name=ROLE_OPERATOR,
         permissions=(
-            "user.add_farmer",
-            "user.view_all_users",
+            PERMISSION_ADD_FARMER,
+            PERMISSION_VIEW_ALL_USERS,
         ),
     ),
     GroupConfig(
-        name="Farmer",
+        name=ROLE_FARMER,
         permissions=[],
     ),
 ]

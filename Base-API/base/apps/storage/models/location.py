@@ -4,15 +4,25 @@ from django.utils.translation import gettext_lazy as _
 
 from base.apps.user.models import Company
 
+# Field length constants
+LOCATION_NAME_MAX_LENGTH = 255
+STATE_MAX_LENGTH = 255
+CITY_MAX_LENGTH = 255
+STREET_MAX_LENGTH = 255
+ZIP_CODE_MAX_LENGTH = 255
+
+# Default values
+DEFAULT_DELETED = False
+
 
 class Location(models.Model):
-    name = models.CharField(_("name"), max_length=255, blank=True, null=True)
+    name = models.CharField(_("name"), max_length=LOCATION_NAME_MAX_LENGTH, blank=True, null=True)
 
-    state = models.CharField(_("state"), max_length=255, blank=True)
-    city = models.CharField(_("city"), max_length=255, blank=True)
-    street = models.CharField(_("street"), max_length=255, blank=True)
+    state = models.CharField(_("state"), max_length=STATE_MAX_LENGTH, blank=True)
+    city = models.CharField(_("city"), max_length=CITY_MAX_LENGTH, blank=True)
+    street = models.CharField(_("street"), max_length=STREET_MAX_LENGTH, blank=True)
     street_number = models.IntegerField(_("street_number"), blank=True, null=True)
-    zip_code = models.CharField(_("zipCode"), max_length=255, blank=True)
+    zip_code = models.CharField(_("zipCode"), max_length=ZIP_CODE_MAX_LENGTH, blank=True)
     point = gis_models.PointField(geography=True, null=False, blank=False)
 
     company = models.ForeignKey(
@@ -23,7 +33,7 @@ class Location(models.Model):
         null=True,
     )
 
-    deleted = models.BooleanField(default=False)
+    deleted = models.BooleanField(default=DEFAULT_DELETED)
 
     date_creation = models.DateTimeField(
         blank=True,

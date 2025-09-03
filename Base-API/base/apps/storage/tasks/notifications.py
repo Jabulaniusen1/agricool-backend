@@ -29,13 +29,13 @@ def time_to_pick_up_notifications():
             and 2 > Crate.objects.filter(produce=produce).first().remaining_shelf_life
         ):
             notification_instance = Notification.objects.filter(
-                specific_id=produce.id, event_type="TIME_TO_PICKUP"
+                specific_id=produce.id, event_type=Notification.NotificationType.TIME_TO_PICKUP
             )
             if not notification_instance:
                 Notification.objects.create(
                     user=produce.checkin.movement.operator.user,
                     specific_id=produce.id,
-                    event_type="TIME_TO_PICKUP",
+                    event_type=Notification.NotificationType.TIME_TO_PICKUP,
                 )
 
                 user = produce.checkin.owned_by_user
@@ -60,14 +60,14 @@ def time_to_pick_up_notifications():
                         Notification.objects.create(
                             user=farmer.user,
                             specific_id=produce.id,
-                            event_type="TIME_TO_PICKUP",
+                            event_type=Notification.NotificationType.TIME_TO_PICKUP,
                         )
 
     for produce in checked_out_produces:
         notification_instance = Notification.objects.filter(specific_id=produce.id)
         if notification_instance:
             Notification.objects.filter(
-                specific_id=produce.id, event_type="TIME_TO_PICK_UP"
+                specific_id=produce.id, event_type=Notification.NotificationType.TIME_TO_PICKUP
             ).delete()
 
 
@@ -138,20 +138,20 @@ def market_survey_checks():
     for i in valid_combinations:
         # Avoid duplication
         if not Notification.objects.filter(
-            specific_id=i.checkout.id, event_type="MARKET_SURVEY"
+            specific_id=i.checkout.id, event_type=Notification.NotificationType.MARKET_SURVEY
         ).exists():
             if i.farmer:
                 Notification.objects.create(
                     user=i.farmer.user,
                     specific_id=i.checkout.id,
-                    event_type="MARKET_SURVEY",
+                    event_type=Notification.NotificationType.MARKET_SURVEY,
                 )
 
             if i.operator:
                 Notification.objects.create(
                     user=i.operator.user,
                     specific_id=i.checkout.id,
-                    event_type="MARKET_SURVEY",
+                    event_type=Notification.NotificationType.MARKET_SURVEY,
                 )
 
 
@@ -159,5 +159,5 @@ def market_survey_checks():
     # get notifications older than 14 days ago and delete
 
     Notification.objects.filter(
-        date__lte=fourteen_days_ago, event_type="MARKET_SURVEY"
+        date__lte=fourteen_days_ago, event_type=Notification.NotificationType.MARKET_SURVEY
     ).delete()

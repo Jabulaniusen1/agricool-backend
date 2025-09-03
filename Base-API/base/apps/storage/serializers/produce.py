@@ -114,7 +114,7 @@ class ProduceSerializer(serializers.ModelSerializer):
         first_crate = instance.crates.filter(weight__gt=0).first()
         if first_crate:
             company = first_crate.cooling_unit.location.company.digital_twin
-            return identifier and company and (first_crate.runDT or first_crate.modified_dt)
+            return identifier and company and (first_crate.run_dt or first_crate.modified_dt)
         return None
 
     def get_planned_days(self, instance):

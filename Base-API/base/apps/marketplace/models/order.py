@@ -16,6 +16,12 @@ from base.apps.user.models import Company, Operator, ServiceProvider, User
 from base.settings import MARKETPLACE_COLDTIVATE_EXPONENT
 from base.utils.currencies import quantitize_float, validate_currency
 
+# Constants
+PAYMENT_REFERENCE_MAX_LENGTH = 12
+CURRENCY_FIELD_MAX_LENGTH = 3
+PAYSTACK_SPLIT_CODE_MAX_LENGTH = 16
+DEFAULT_CURRENCY = "NGN"
+
 
 class Order(models.Model):
     class Status(models.TextChoices):
@@ -29,7 +35,7 @@ class Order(models.Model):
     status = models.CharField(_("status"), max_length=20, choices=Status.choices, default=Status.CART)
     status_changed_at = models.DateTimeField(_("status_changed_at"), auto_now=True)
     payment_references = ArrayField(
-        models.CharField(_("payment_reference"), max_length=12, null=True),
+        models.CharField(_("payment_reference"), max_length=PAYMENT_REFERENCE_MAX_LENGTH, null=True),
         default=list,
         blank=True,
         null=False,
@@ -39,10 +45,10 @@ class Order(models.Model):
     owned_on_behalf_of_company = models.ForeignKey(
         Company, on_delete=models.PROTECT, null=True, blank=True, related_name='orders'
     )
-    currency = models.CharField(_("currency"), max_length=3, default="NGN", validators=[validate_currency])
+    currency = models.CharField(_("currency"), max_length=CURRENCY_FIELD_MAX_LENGTH, default=DEFAULT_CURRENCY, validators=[validate_currency])
 
     # Payment related
-    paystack_split_code = models.CharField(_("paystack_split_code"), max_length=16, null=True, blank=True)
+    paystack_split_code = models.CharField(_("paystack_split_code"), max_length=PAYSTACK_SPLIT_CODE_MAX_LENGTH, null=True, blank=True)
     paid_at = models.DateTimeField(_("paid_at"), null=True, blank=True)
     amount_paid = models.FloatField(_("amount_paid"), default=0)
 

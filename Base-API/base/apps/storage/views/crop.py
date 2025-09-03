@@ -6,6 +6,9 @@ from base.apps.storage.models import Crop
 from base.apps.storage.serializers import CropSerializer
 from base.apps.user.models import Country, Farmer, Operator, ServiceProvider
 
+# Filter exclusions
+EXCLUDE_CROP_NAME = "Other"
+
 
 class CropViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
     model = Crop
@@ -18,19 +21,22 @@ class CropViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
         # For some countries we want to filter crops only specific to them
         try:
             country = ServiceProvider.objects.get(user=user).company.country.name
-        except:
+        except ServiceProvider.DoesNotExist:
             try:
                 country = Operator.objects.get(user=user).company.country.name
-            except:
-                country = Farmer.objects.get(user=user).country
+            except Operator.DoesNotExist:
+                try:
+                    country = Farmer.objects.get(user=user).country
+                except Farmer.DoesNotExist:
+                    country = None
 
-        isFilterCountry = False
+        is_filter_country = False
         for c in Country.objects.all():
             if c.country.name == country:
-                isFilterCountry = True
+                is_filter_country = True
                 break
 
-        if isFilterCountry:
+        if is_filter_country:
             if "crop" in self.request.data:
                 return self.model.objects.filter(
                     crop_type__id=self.request.query_params.get("crop"),
@@ -39,7 +45,7 @@ class CropViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
             else:
                 return (
                     self.model.objects.filter(countryRelated__country__name=country)
-                    .exclude(name="Other")
+                    .exclude(name=EXCLUDE_CROP_NAME)
                     .order_by("name")
                 )
 

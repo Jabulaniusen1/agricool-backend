@@ -3,6 +3,11 @@ from django.utils.translation import gettext_lazy as _
 from base.utils.currencies import validate_currency
 from .checkout import Checkout
 
+# Constants
+STANDARD_FIELD_MAX_LENGTH = 255
+CURRENCY_FIELD_MAX_LENGTH = 3
+SELLING_UNIT_MAX_LENGTH = 32
+
 class MarketSurvey(models.Model):
     class SellingMetric(models.TextChoices):
         KILOGRAMS = "KILOGRAMS", "Kilograms"
@@ -19,7 +24,7 @@ class MarketSurvey(models.Model):
         on_delete=models.CASCADE,
     )
 
-    selling_place = models.CharField(_("selling_place"), max_length=255)
+    selling_place = models.CharField(_("selling_place"), max_length=STANDARD_FIELD_MAX_LENGTH)
 
     market = models.ForeignKey(
         "prediction.Market",
@@ -33,12 +38,12 @@ class MarketSurvey(models.Model):
     price = models.FloatField(_("estimated_price"), default=0)
 
     currency = models.CharField(
-        _("currency"), max_length=3, default=None, blank=True, null=True,
+        _("currency"), max_length=CURRENCY_FIELD_MAX_LENGTH, default=None, blank=True, null=True,
         validators=[validate_currency]
     )
 
     selling_unit = models.CharField(
-        max_length=32, choices=SellingMetric.choices, null=True
+        max_length=SELLING_UNIT_MAX_LENGTH, choices=SellingMetric.choices, null=True
     )
 
     selling_date = models.DateTimeField(
@@ -64,7 +69,7 @@ class MarketSurvey(models.Model):
         other_reason = "other"
 
     reason_for_loss = models.CharField(
-        choices=ReasonForLoss.choices, max_length=255, null=True, blank=True
+        choices=ReasonForLoss.choices, max_length=STANDARD_FIELD_MAX_LENGTH, null=True, blank=True
     )
 
     crop = models.ForeignKey(
