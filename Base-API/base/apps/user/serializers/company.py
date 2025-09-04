@@ -6,13 +6,45 @@ from base.apps.storage.models import CoolingUnit, CoolingUnitCrop, Crop, Pricing
 from base.apps.user.models import BankAccount, Company
 
 
+class CompanyPublicSerializer(CountryFieldMixin, serializers.ModelSerializer):
+    """
+    Public serializer for company data - only exposes non-sensitive fields
+    Used for marketplace listings and public endpoints
+    """
+    
+    class Meta:
+        model = Company
+        fields = [
+            'id',
+            'name', 
+            'country',
+            'logo',
+            'currency',
+            'crop',
+            'flag_opt_out_from_marketplace_filter'
+        ]
+
+
 class CompanySerializer(CountryFieldMixin, serializers.ModelSerializer):
     has_cooling_units = serializers.SerializerMethodField()
-    bank_details = serializers.SerializerMethodField()
 
     class Meta:
         model = Company
-        fields = "__all__"
+        fields = [
+            'id',
+            'name',
+            'country',
+            'logo',
+            'currency',
+            'digital_twin',
+            'ML4_market',
+            'ML4_quality',
+            'ML4_farmers',
+            'crop',
+            'date_joined',
+            'flag_opt_out_from_marketplace_filter',
+            'has_cooling_units'
+        ]
 
     def get_has_cooling_units(self, instance):
         if CoolingUnit.objects.filter(location__company=instance, deleted=False):
@@ -20,14 +52,6 @@ class CompanySerializer(CountryFieldMixin, serializers.ModelSerializer):
         else:
             return False
 
-    def get_bank_details(self, instance):
-        if instance.bank_account:
-            return {
-                "id": instance.bank_account.id,
-                "bank_name": instance.bank_account.bank_name,
-                "account_name": instance.bank_account.account_name,
-                "account_number": instance.bank_account.account_number,
-            }
 
     def create(self, validated_data):
         if validated_data["country"] == "IN" or validated_data["country"] == "NG":
