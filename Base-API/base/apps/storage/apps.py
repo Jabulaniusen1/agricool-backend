@@ -15,6 +15,5 @@ class StorageConfig(AppConfig):
         global ANDROID_VERSION_CODE
         global IOS_VERSION_CODE
 
-        # Changed to the first react native version code with the market linkage features
-        ANDROID_VERSION_CODE = 70321
-        IOS_VERSION_CODE = 70321
+        ANDROID_VERSION_CODE = 70347
+        IOS_VERSION_CODE = 70347
