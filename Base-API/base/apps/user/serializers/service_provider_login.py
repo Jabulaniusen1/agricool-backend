@@ -10,23 +10,34 @@ from base.apps.user.serializers.company import CompanySerializer
 
 class ServiceProviderLoginSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
-
         sp = ServiceProvider.objects.filter(
             Q(user__phone__iexact=attrs[self.username_field])
             | Q(user__email__iexact=attrs[self.username_field])
         ).first()
 
         if not sp:
-            print("Service Provider Login Error", attrs[self.username_field])
             raise serializers.ValidationError({"user": [_("User not exists")]})
         attrs[self.username_field] = sp.user.username
-        data = super().validate(attrs)
+        
+        try:
+            data = super().validate(attrs)
+        except Exception as e:
+            raise
 
-        company = Company.objects.get(id=sp.company.id)
-        company_serializer = CompanySerializer(company)
-        if sp.user.language is not self.initial_data["language"]:
-            sp.user.language = self.initial_data["language"]
-            sp.user.save()
+        try:
+            company = Company.objects.get(id=sp.company.id)
+            company_serializer = CompanySerializer(company)
+        except Exception as e:
+            raise
+            
+        try:
+            if sp.user.language is not self.initial_data["language"]:
+                sp.user.language = self.initial_data["language"]
+                sp.user.save()
+        except KeyError as e:
+            pass
+        except Exception as e:
+            raise
         refresh = self.get_token(self.user)
         data["refresh"] = str(refresh)
         data["access"] = str(refresh.access_token)

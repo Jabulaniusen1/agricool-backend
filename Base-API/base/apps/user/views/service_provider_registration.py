@@ -7,6 +7,7 @@ from base.apps.user.serializers.service_provider_registration import (
     ServiceProviderRegistrationSerializer,
     ServiceProviderRegistrationWithInvitationSerializer,
 )
+from base.utils.recaptcha import validate_recaptcha_field
 
 
 class ServiceProviderRegistrationViewSet(GenericViewSet):
@@ -14,6 +15,11 @@ class ServiceProviderRegistrationViewSet(GenericViewSet):
     permission_classes = (permissions.AllowAny,)
 
     def create(self, request, *args, **kwargs):
+        try:
+            # Validate reCAPTCHA before processing signup
+            validate_recaptcha_field(request.data)
+        except Exception as e:
+            raise
 
         # TODO : have cleaner way to do this
         if "bank_account" in request.data["company"]:
@@ -41,6 +47,9 @@ class ServiceProviderRegistrationWithInvitationViewSet(GenericViewSet):
     permission_classes = (permissions.AllowAny,)
 
     def create(self, request, *args, **kwargs):
+        # Validate reCAPTCHA before processing signup
+        validate_recaptcha_field(request.data)
+        
         serializer = self.serializer_class(
             data=request.data, context={"request": request}
         )

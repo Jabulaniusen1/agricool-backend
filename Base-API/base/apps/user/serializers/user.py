@@ -70,6 +70,10 @@ class UserSerializer(serializers.ModelSerializer):
             if instance == user:
                 return
 
+            # Skip visibility logic for anonymous users (e.g., during signup)
+            if not user.is_authenticated:
+                return
+
             # Check Operator, Employee, or Farmer logic
             operator = Operator.objects.filter(user=user).first()
             employee = ServiceProvider.objects.filter(user=user).first()
@@ -129,6 +133,10 @@ class UserSerializer(serializers.ModelSerializer):
         - Employee (ServiceProvider): Only visible to themselves (already handled above)
         - Operator: Visible to employees from same company
         """
+        # Anonymous users cannot view PII
+        if not viewing_user or viewing_user.is_anonymous:
+            return False
+            
         # Get the roles of the viewing user
         viewing_operator = Operator.objects.filter(user=viewing_user).first()
         viewing_employee = ServiceProvider.objects.filter(user=viewing_user).first()
