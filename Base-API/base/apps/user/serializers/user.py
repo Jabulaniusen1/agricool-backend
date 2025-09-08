@@ -117,13 +117,15 @@ class UserSerializer(serializers.ModelSerializer):
         if instance == user:
             return
 
-        # last_login is only visible to the user themselves
-        data.pop("last_login", None)
-
-        # Check if the viewing user can see gender and language
+        # Check if the viewing user can see PII (including last_login for operators)
         if not self._can_view_pii(instance, user):
             data.pop("gender", None)
             data.pop("language", None)
+            data.pop("last_login", None)
+        else:
+            # Can view PII, but check specific rules for last_login
+            if not self._can_view_last_login(instance, user):
+                data.pop("last_login", None)
 
     def _can_view_pii(self, instance, viewing_user):
         """
@@ -167,6 +169,31 @@ class UserSerializer(serializers.ModelSerializer):
             return target_operator.company_id == viewing_company_id
 
         # If target is an employee, no one else can see their PII (handled above)
+        return False
+
+    def _can_view_last_login(self, instance, viewing_user):
+        """
+        Determine if viewing_user can see last_login of instance
+        Rules:
+        - ServiceProviders (REs) can see last_login of operators from the same company
+        - All other cases follow general PII rules
+        """
+        # Anonymous users cannot view last_login
+        if not viewing_user or viewing_user.is_anonymous:
+            return False
+        
+        # Get the roles of the viewing user
+        viewing_employee = ServiceProvider.objects.filter(user=viewing_user).first()
+        
+        if viewing_employee:
+            # ServiceProvider (RE) viewing someone
+            target_operator = Operator.objects.filter(user=instance).first()
+            
+            # RE can see operator's last_login if they're from the same company
+            if target_operator and target_operator.company_id == viewing_employee.company_id:
+                return True
+        
+        # For all other cases, return False (last_login not visible)
         return False
 
     @atomic
