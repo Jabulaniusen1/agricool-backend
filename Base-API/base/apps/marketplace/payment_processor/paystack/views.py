@@ -5,6 +5,7 @@ from rest_framework.viewsets import ViewSet
 
 from base.apps.marketplace.models import Order
 from base.utils.currencies import flat_int_to_float
+from base.utils.secure_errors import handle_internal_error
 
 # Webhook event types
 WEBHOOK_EVENT_CHARGE_SUCCESS = "charge.success"
@@ -100,6 +101,6 @@ class WebhooksPaystackViewSet(ViewSet):
                     payment_method=Checkout.PaymentMethod.CREDIT_CARD, # TODO: get the payment method from the request
                 )
         except Exception as e:
-            return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
+            return handle_internal_error(e, "paystack payment processing")
 
         return Response(status=HTTP_200_OK)
