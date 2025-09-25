@@ -66,6 +66,10 @@ class UserSerializer(serializers.ModelSerializer):
     def _handle_contact_info_visibility(self, data, instance, user):
         """Handle phone and email visibility based on existing logic"""
         if not instance.is_phone_public and not instance.is_email_public:
+            # Skip visibility logic for anonymous users (e.g., during signup)
+            if not user.is_authenticated:
+                return
+                
             # Check if it's the user's own profile
             if instance == user:
                 return
@@ -109,6 +113,10 @@ class UserSerializer(serializers.ModelSerializer):
 
     def _handle_pii_visibility(self, data, instance, user):
         """Handle PII fields visibility (gender, language, last_login)"""
+        # Skip visibility logic for anonymous users (e.g., during signup)
+        if not user.is_authenticated:
+            return
+            
         # Always allow users to see their own PII
         if instance == user:
             return
