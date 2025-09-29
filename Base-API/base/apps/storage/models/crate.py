@@ -68,6 +68,9 @@ class Crate(models.Model):
         self.cmp_total_in_cooling_fees = get_total_in_cooling_fees(self)
         self.cmp_total_paid_in_cooling_fees = get_total_paid_in_cooling_fees(self)
         self.cmp_total_due_in_cooling_fees = self.cmp_total_in_cooling_fees - self.cmp_total_paid_in_cooling_fees
+        
+        # Calculate consistent pricing per crate using the same logic as cooling fees
+        self.price_per_crate_per_pricing_type = self.cmp_total_in_cooling_fees
 
         if save:
             self.save()

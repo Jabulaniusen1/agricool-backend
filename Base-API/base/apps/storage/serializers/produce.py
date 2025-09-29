@@ -135,6 +135,7 @@ class ProduceSerializer(serializers.ModelSerializer):
         return sum(crate.weight for crate in instance.crates.filter(weight__gt=0))
 
     def get_crates_combined_cost(self, instance):
+        # Use the backend-calculated price for consistency
         return sum(crate.price_per_crate_per_pricing_type for crate in instance.crates.filter(weight__gt=0))
 
     def get_current_storage_days(self, instance):
