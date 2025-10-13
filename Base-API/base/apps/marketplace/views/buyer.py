@@ -37,6 +37,7 @@ from base.apps.marketplace.serializers.common import (
     CompanyDeliveryContactSerializer,
     MarketListedCrateSerializer,
 )
+from base.utils.secure_errors import handle_validation_error, handle_internal_error
 from base.apps.marketplace.views.utils import (
     get_cart,
     get_cart_prefetched,
@@ -437,7 +438,7 @@ class BuyerCartViewSet(ViewSet):
         try:
             cart.check_if_valid_to_proceed_to_payment()
         except Exception as e:
-            return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
+            return handle_validation_error(e, "cart payment validation")
 
         try:
             # Set the order as pending payment by configuring the split group
@@ -693,7 +694,7 @@ class BuyerOrdersViewSet(ViewSet):
         try:
             authorization_url = get_checkout_url_for_order(order)
         except Exception as e:
-            return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
+            return handle_internal_error(e, "checkout URL generation")
 
         return Response(
             {

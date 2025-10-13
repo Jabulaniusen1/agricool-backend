@@ -8,6 +8,7 @@ from rest_framework.viewsets import ViewSet
 
 from base.apps.marketplace.models import Order
 from base.apps.operation.models import Checkout
+from base.utils.secure_errors import handle_internal_error
 
 
 class DevelopmentViewSet(ViewSet):
@@ -54,7 +55,7 @@ class DevelopmentViewSet(ViewSet):
                     payment_method=Checkout.PaymentMethod.CREDIT_CARD, # TODO: get the payment method from the request
                 )
         except Exception as e:
-            return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
+            return handle_internal_error(e, "mark order as paid")
 
         return Response(status=HTTP_200_OK)
 
@@ -79,7 +80,7 @@ class DevelopmentViewSet(ViewSet):
             if order.status == Order.Status.PAYMENT_PENDING:
                 order.expire_payment_pending_order()
         except Exception as e:
-            return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
+            return handle_internal_error(e, "mark order as paid")
 
         return Response(status=HTTP_200_OK)
 
@@ -103,6 +104,6 @@ class DevelopmentViewSet(ViewSet):
             if order.status == Order.Status.PAYMENT_PENDING:
                 order.cancel_payment_pending_order()
         except Exception as e:
-            return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
+            return handle_internal_error(e, "mark order as paid")
 
         return Response(status=HTTP_200_OK)

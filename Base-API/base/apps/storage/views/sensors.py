@@ -10,6 +10,12 @@ from rest_framework.viewsets import GenericViewSet
 from base.apps.storage.models import SensorIntegration
 from base.apps.storage.serializers.sensors import SensorIntegrationSerializer
 from base.apps.storage.services.sensors.utils import build_integration
+from base.utils.secure_errors import (
+    handle_authentication_error,
+    handle_external_service_error,
+    handle_internal_error,
+    handle_authorization_error
+)
 
 
 class EcozenViewSet(GenericViewSet):
@@ -45,8 +51,8 @@ class EcozenViewSet(GenericViewSet):
 
         try:
             access_token = login_request.json().get("accessToken")
-        except ValueError:
-            return Response({"error": "Invalid response from Ecozen API"}, status=500)
+        except ValueError as e:
+            return handle_external_service_error(e, "Ecozen API token parsing")
 
         if not access_token:
             return Response(
@@ -115,10 +121,7 @@ class SensorIntegrationViewSet(GenericViewSet, CreateModelMixin, DestroyModelMix
         try:
             integration.authorize()
         except Exception as e:
-            return Response(
-                {"error": f"Authentication failed: {str(e)}"},
-                status=status.HTTP_401_UNAUTHORIZED,
-            )
+            return handle_authentication_error(e, "sensor integration authorization")
 
         try:
             raw_sources = integration.list_sources()
@@ -133,23 +136,20 @@ class SensorIntegrationViewSet(GenericViewSet, CreateModelMixin, DestroyModelMix
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 )
         except Exception as e:
-            return Response(
-                {"error": f"Failed to retrieve sources: {str(e)}"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+            return handle_external_service_error(e, "sensor sources retrieval")
 
     def destroy(self, request, *args, **kwargs):
         user = self.request.user
 
         try:
             sensor = self.model.objects.get(id=kwargs.get("pk"))
-        except:
-            return Response({"error": "DOES NOT EXIST"}, status=400)
+        except Exception as e:
+            return handle_internal_error(e, "sensor lookup")
 
         if not user.service_provider or not (
             sensor.cooling_unit.location.company == user.service_provider.company
         ):
-            return Response({"error": "CANNOT PERFORM OPERATION"}, status=400)
+            return Response({"error": "Access denied"}, status=status.HTTP_403_FORBIDDEN)
 
         # delete the sensor passed in
         sensor.delete()

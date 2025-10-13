@@ -25,6 +25,7 @@ from base.apps.storage.models import Crate
 from base.apps.user.models import (Company, Notification, Operator,
                                    ServiceProvider, User)
 from base.celery import app
+from base.utils.secure_errors import handle_internal_error
 
 
 # -----------------------------------------------------------------------------
@@ -483,7 +484,7 @@ class SellerPaystackAccountViewSet(ViewSet):
                 account_name=input_serializer.validated_data['account_name'],
             )
         except Exception as e:
-            return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
+            return handle_internal_error(e, "paystack account creation")
 
         serializer = PaystackAccountSerializer(paystack_account)
         return Response(serializer.data, status=HTTP_201_CREATED)
