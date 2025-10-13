@@ -39,7 +39,7 @@ def get_total_in_cooling_fees(crate, storage_duration_days=None, **kwargs):
         )
 
     metric_multiplier = (
-        crate.initial_weight
+        crate.weight
         if crate.cooling_unit.metric == CoolingUnit.CoolingUnitMetric.KILOGRAMS
         else MINIMUM_WEIGHT_DIVISOR
     )

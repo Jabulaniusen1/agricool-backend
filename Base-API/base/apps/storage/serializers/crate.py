@@ -20,6 +20,12 @@ class CrateSerializer(serializers.ModelSerializer):
     tag = serializers.CharField(max_length=255)
     listed_in_the_marketplace = serializers.SerializerMethodField()
     locked_within_pending_orders = serializers.SerializerMethodField()
+    
+    # Calculated pricing fields
+    calculated_total_price = serializers.SerializerMethodField()
+    calculated_daily_rate = serializers.SerializerMethodField()
+    calculated_fixed_rate = serializers.SerializerMethodField()
+    effective_pricing_type = serializers.SerializerMethodField()
 
     class Meta:
         model = Crate
@@ -44,6 +50,12 @@ class CrateSerializer(serializers.ModelSerializer):
             "listed_in_the_marketplace",
             "locked_within_pending_orders",
             "cmp_fully_checked_out",
+            
+            # Calculated pricing fields
+            "calculated_total_price",
+            "calculated_daily_rate", 
+            "calculated_fixed_rate",
+            "effective_pricing_type",
         )
 
     def get_cooling_unit_metric(self, instance):
@@ -135,3 +147,28 @@ class CrateSerializer(serializers.ModelSerializer):
             )
             .exists()
         )
+    
+    def get_calculated_total_price(self, instance):
+        """Return the backend-calculated total price for this crate"""
+        return instance.price_per_crate_per_pricing_type
+    
+    def get_calculated_daily_rate(self, instance):
+        """Return the daily rate from the pricing configuration"""
+        pricing = self.get_pricing(instance)
+        if pricing and len(pricing) > 0:
+            return pricing[0].get('daily_rate', 0)
+        return 0
+        
+    def get_calculated_fixed_rate(self, instance):
+        """Return the fixed rate from the pricing configuration"""  
+        pricing = self.get_pricing(instance)
+        if pricing and len(pricing) > 0:
+            return pricing[0].get('fixed_rate', 0)
+        return 0
+        
+    def get_effective_pricing_type(self, instance):
+        """Return the pricing type (FIXED or PERIODICITY) for this crate"""
+        pricing = self.get_pricing(instance)
+        if pricing and len(pricing) > 0:
+            return pricing[0].get('pricing_type')
+        return None

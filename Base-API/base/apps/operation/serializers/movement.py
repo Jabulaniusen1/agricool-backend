@@ -31,6 +31,9 @@ class MovementCrateSerializer(serializers.ModelSerializer):
     )
     fully_checked_out = serializers.BooleanField(source="cmp_fully_checked_out")
     days_in_storage = serializers.SerializerMethodField()
+    calculated_total_price = serializers.FloatField(
+        source="price_per_crate_per_pricing_type", read_only=True
+    )
 
     class Meta:
         model = Crate
@@ -45,6 +48,7 @@ class MovementCrateSerializer(serializers.ModelSerializer):
             "tag",
             "fully_checked_out",
             "days_in_storage",
+            "calculated_total_price",
         ]
 
     def get_days_in_storage(self, crate):

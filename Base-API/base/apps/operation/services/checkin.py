@@ -100,6 +100,7 @@ def handle_produces_for_checkin(checkin, produces_payload, operator):
                 weight=crate_data["weight"],
                 price_per_crate_per_pricing_type=price,
                 currency=company.currency,
+                planned_days=crate_data.get("planned_days"),
             )
 
         # DT / FarmerSurvey logic

@@ -88,7 +88,7 @@ class MovementViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
             (
                 self.model.objects.filter(
                     Q(checkins__produces__crates__cooling_unit__in=cooling_units)
-                )
+                ).distinct()
             )
         )
 
