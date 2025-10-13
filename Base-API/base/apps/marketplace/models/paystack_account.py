@@ -169,10 +169,10 @@ class PaystackAccount(models.Model):
     @staticmethod
     def user_has_default_account(owned_by_user_id):
         """
-        Check if a default Paystack account exists for a specific company.
+        Check if a default Paystack account exists for a specific user.
 
-        :param owned_by_user_id: The ID of the company to check.
-        :return: Boolean indicating if a default account exists for the company.
+        :param owned_by_user_id: The ID of the user to check.
+        :return: Boolean indicating if a default account exists for the user.
         """
         return PaystackAccount.objects.filter(
             owned_by_user=owned_by_user_id,
@@ -198,7 +198,7 @@ class PaystackAccount(models.Model):
         """
         Get the default Paystack account for a user.
 
-        :param owned_by_user_id: The ID of the company.
+        :param owned_by_user_id: The ID of the user.
         :return: The default Paystack account for the user.
         """
         return PaystackAccount.objects.filter(

@@ -9,6 +9,7 @@ from rest_framework.viewsets import GenericViewSet
 
 from base.apps.user.models import Farmer, Operator
 from base.apps.user.serializers.farmer import FarmerSerializer, FarmerWithPublicUserSerializer
+from base.utils.recaptcha import validate_recaptcha_field
 
 # Request parameter constants
 USER_ID_PARAM = "user_id"
@@ -50,6 +51,10 @@ class FarmerViewSet(
         return self.model.objects.all()
 
     def create(self, request, *args, **kwargs):
+        # Validate reCAPTCHA for farmer signup
+        if request.data.get(CREATE_USER_PARAM):
+            validate_recaptcha_field(request.data)
+            
         if not request.data[CREATE_USER_PARAM] and (
             not request.user or not request.user.is_authenticated
         ):

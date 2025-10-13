@@ -10,12 +10,16 @@ from rest_framework.viewsets import GenericViewSet
 from base.apps.user.models import GenericUserCode, User
 from base.celery import app
 from base.settings import AUTH_PASSWORD_URL, FRONTEND_URL
+from base.utils.recaptcha import validate_recaptcha_field
 
 
 class ResetPasswordViewSet(GenericViewSet):
     permission_classes = (permissions.AllowAny,)
 
     def create(self, request, *args, **kwargs):
+        # Validate reCAPTCHA for all password reset operations
+        validate_recaptcha_field(request.data)
+        
         if "phoneNumber" in request.data:
             # this is for requesting the reset
             phone_number = request.data["phoneNumber"]

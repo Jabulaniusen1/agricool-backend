@@ -16,6 +16,7 @@ from base.settings import (
     INVITATION_OPERATOR_URL,
     INVITATION_SERVICE_PROVIDER_URL,
 )
+from base.utils.recaptcha import validate_recaptcha_field
 
 
 class InviteServiceProviderViewSet(
@@ -55,6 +56,9 @@ class InviteServiceProviderViewSet(
         return invitation
 
     def create(self, request, *args, **kwargs):
+        # Validate reCAPTCHA for service provider invitations  
+        validate_recaptcha_field(request.data)
+        
         if (
             not request.user
             or not request.user.is_authenticated
@@ -140,6 +144,9 @@ class InviteOperatorViewSet(
         return invitation
 
     def create(self, request, *args, **kwargs):
+        # Validate reCAPTCHA for operator invitations
+        validate_recaptcha_field(request.data)
+        
         if (
             not request.user
             or not request.user.is_authenticated
