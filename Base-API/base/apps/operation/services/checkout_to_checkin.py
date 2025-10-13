@@ -43,7 +43,6 @@ def convert_checkout_to_checkin(
         checkout = Checkout.objects.get(movement__code=checkout_code)
     except Checkout.DoesNotExist:
         raise ValidationError(f"Checkout with code '{checkout_code}' not found")
-
     crates = Crate.objects.filter(partial_checkouts__checkout_id=checkout.id)
 
     # Determine operator and cooling unit
@@ -51,7 +50,6 @@ def convert_checkout_to_checkin(
         operator = Operator.objects.get(user_id=operator_user_id)
     except Operator.DoesNotExist:
         raise ValidationError(f"Operator for user {operator_user_id} not found")
-
     try:
         cooling_unit = CoolingUnit.objects.get(id=cooling_unit_id)
     except CoolingUnit.DoesNotExist:

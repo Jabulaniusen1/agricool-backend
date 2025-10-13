@@ -145,7 +145,6 @@ def update_checkin(checkin_id, payload):
         checkin = Checkin.objects.select_related("movement").get(id=checkin_id)
     except Checkin.DoesNotExist:
         raise ValidationError(f"Checkin with ID {checkin_id} not found")
-
     try:
         produce = Produce.objects.get(checkin_id=checkin_id)
     except Produce.DoesNotExist:

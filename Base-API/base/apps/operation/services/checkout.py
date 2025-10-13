@@ -25,7 +25,6 @@ def zero_time_fields(dt):
     """Utility function to zero out time fields from datetime."""
     return dt.replace(hour=0, minute=0, second=0, microsecond=0)
 
-
 def get_total_in_cooling_fees(crate, storage_duration_days=None, **kwargs):
     from base.apps.storage.models.cooling_unit_crop import CoolingUnitCrop
 

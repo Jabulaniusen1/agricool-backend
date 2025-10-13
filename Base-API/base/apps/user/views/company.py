@@ -9,7 +9,7 @@ from rest_framework.mixins import (
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from base.apps.user.models import Company, Operator, ServiceProvider
+from base.apps.user.models import Company
 from base.apps.user.serializers.company import (
     CompanyPublicSerializer,
     CompanySerializer,

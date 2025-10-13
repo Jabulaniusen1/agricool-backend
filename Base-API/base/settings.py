@@ -103,6 +103,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "base.middleware.csp.CSPMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -351,3 +352,25 @@ COMSOL_CALLBACK_KEY = os.getenv("COMSOL_CALLBACK_KEY") or "cH4ng3_m3"
 URL_COMSOL_DT_API = (
     os.getenv("COMSOL_DT_API_URL") or "http://comsol_dt_service:5900/api/"
 )
+
+##
+# reCAPTCHA Configuration
+##
+# Disable reCAPTCHA for E2E testing environments
+if ENVIRONMENT == "e2e":
+    RECAPTCHA_ENABLED = False
+else:
+    RECAPTCHA_ENABLED = str_to_bool(os.getenv("RECAPTCHA_ENABLED", "false"))
+
+RECAPTCHA_SECRET_KEY = os.getenv("RECAPTCHA_SECRET_KEY", None)
+RECAPTCHA_SITE_KEY = os.getenv("RECAPTCHA_SITE_KEY", None)
+
+##
+# Security Headers and CSP Configuration
+##
+
+# Additional security headers to complement CSP
+SECURE_CONTENT_TYPE_NOSNIFF = True  # Prevent MIME type sniffing
+X_FRAME_OPTIONS = 'DENY'            # Prevent clickjacking attacks
+
+# CSP Configuration - handled by custom middleware
