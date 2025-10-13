@@ -13,6 +13,7 @@ from base.apps.operation.serializers import CheckinSerializer
 from base.apps.operation.services.checkin import update_checkin
 from base.apps.storage.models import CoolingUnit, Produce
 from base.apps.user.models import Farmer, Operator
+from base.utils.secure_errors import handle_validation_error
 
 # Constants
 ERROR_MISSING_OWNER = "Please pass on the 'owned_by_user_id' and optionally the 'on_behalf_of_company_id'"
@@ -93,7 +94,7 @@ class CheckinViewSet(
         try:
             update_checkin(checkin_id, request.data)
         except ValidationError as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return handle_validation_error(e, "checkin update")
 
         return Response({"success": SUCCESS_CHECKIN_UPDATED})
 

@@ -37,6 +37,11 @@ from base.apps.marketplace.serializers.company_responses import CompanyOrderSeri
 from base.apps.marketplace.views.utils import get_company
 from base.apps.storage.models import CoolingUnit
 from base.apps.user.models import Operator, ServiceProvider, User
+from base.utils.secure_errors import (
+    handle_authorization_error,
+    handle_internal_error,
+    handle_validation_error
+)
 
 # -----------------------------------------------------------------------------
 # Orders
@@ -114,10 +119,8 @@ class CompanyDeliveryContactsViewSet(ViewSet):
 
         try:
             company = get_company(request)
-        except Exception:
-            return Response(
-                {"error": ERROR_COMPANY_ACCESS_FAILED}, status=status.HTTP_403_FORBIDDEN
-            )
+        except Exception as e:
+            return handle_authorization_error(e, "company access validation")
 
         company_delivery_contacts = self.get_queryset(company)
         serializer = self.serializer_class(company_delivery_contacts, many=True)
@@ -134,10 +137,8 @@ class CompanyDeliveryContactsViewSet(ViewSet):
 
         try:
             company = get_company(request)
-        except Exception:
-            return Response(
-                {"error": ERROR_COMPANY_ACCESS_FAILED}, status=status.HTTP_403_FORBIDDEN
-            )
+        except Exception as e:
+            return handle_authorization_error(e, "company access validation")
 
         try:
             delivery_contact = CompanyDeliveryContact.objects.create(
@@ -150,12 +151,9 @@ class CompanyDeliveryContactsViewSet(ViewSet):
                 phone=input_serializer.validated_data["phone"],
             )
         except ValidationError as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception:
-            return Response(
-                {"error": ERROR_DELIVERY_CONTACT_CREATION_FAILED},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+            return handle_validation_error(e, "delivery contact validation")
+        except Exception as e:
+            return handle_internal_error(e, "delivery contact creation")
 
         serializer = self.serializer_class(delivery_contact)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -165,10 +163,8 @@ class CompanyDeliveryContactsViewSet(ViewSet):
 
         try:
             company = get_company(request)
-        except Exception:
-            return Response(
-                {"error": ERROR_COMPANY_ACCESS_FAILED}, status=status.HTTP_403_FORBIDDEN
-            )
+        except Exception as e:
+            return handle_authorization_error(e, "company access validation")
 
         company_delivery_contacts = self.get_details(
             company, company_delivery_contact_id
@@ -183,10 +179,8 @@ class CompanyDeliveryContactsViewSet(ViewSet):
 
         try:
             company = get_company(request)
-        except Exception:
-            return Response(
-                {"error": ERROR_COMPANY_ACCESS_FAILED}, status=status.HTTP_403_FORBIDDEN
-            )
+        except Exception as e:
+            return handle_authorization_error(e, "company access validation")
 
         company_delivery_contacts = self.get_details(
             company, company_delivery_contact_id
@@ -304,16 +298,13 @@ class CompanySetupViewSet(ViewSet):
                 account_name=input_ser.validated_data["account_name"],
             )
         except (DjangoValidationError, DRFValidationError) as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return handle_validation_error(e, "paystack account validation")
         except IntegrityError:
             return Response(
                 {"error": "Account already exists"}, status=status.HTTP_409_CONFLICT
             )
-        except Exception:
-            return Response(
-                {"error": ERROR_ACCOUNT_SETUP_FAILED},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+        except Exception as e:
+            return handle_internal_error(e, "paystack account setup")
 
         return Response(
             PaystackAccountSerializer(acct).data, status=status.HTTP_201_CREATED

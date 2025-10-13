@@ -1,3 +1,4 @@
+import logging
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from base.apps.user.serializers.farmer_login import FarmerLoginSerializer
@@ -6,6 +7,8 @@ from base.apps.user.serializers.service_provider_login import (
     ServiceProviderLoginSerializer,
 )
 from base.utils.recaptcha import validate_recaptcha_field
+
+logger = logging.getLogger(__name__)
 
 # User type constants
 USER_TYPE_SERVICE_PROVIDER = "sp"
@@ -24,12 +27,14 @@ class LoginViewSet(TokenObtainPairView):
             # Validate reCAPTCHA before processing login
             validate_recaptcha_field(request.data)
         except Exception as e:
+            logger.error("reCAPTCHA validation failed")
             raise
         
         try:
             serializer_class = self.get_serializer_class()
             return super().post(request, *args, **kwargs)
         except Exception as e:
+            logger.error("Login processing error")
             raise
 
     def get_serializer_class(self):
