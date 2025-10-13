@@ -103,6 +103,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "base.middleware.csp.CSPMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -363,3 +364,13 @@ else:
 
 RECAPTCHA_SECRET_KEY = os.getenv("RECAPTCHA_SECRET_KEY", None)
 RECAPTCHA_SITE_KEY = os.getenv("RECAPTCHA_SITE_KEY", None)
+
+##
+# Security Headers and CSP Configuration
+##
+
+# Additional security headers to complement CSP
+SECURE_CONTENT_TYPE_NOSNIFF = True  # Prevent MIME type sniffing
+X_FRAME_OPTIONS = 'DENY'            # Prevent clickjacking attacks
+
+# CSP Configuration - handled by custom middleware
