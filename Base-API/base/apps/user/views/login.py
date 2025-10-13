@@ -27,11 +27,16 @@ class LoginViewSet(TokenObtainPairView):
             # Validate reCAPTCHA before processing login
             validate_recaptcha_field(request.data)
         except Exception as e:
+<<<<<<< HEAD
             logger.error(f"reCAPTCHA validation failed: {str(e)}")
+=======
+            logger.error("reCAPTCHA validation failed")
+>>>>>>> development
             raise
         
         try:
             serializer_class = self.get_serializer_class()
+<<<<<<< HEAD
             
             if serializer_class is None:
                 logger.error("No serializer class found - invalid user_type or missing user_type")
@@ -39,6 +44,11 @@ class LoginViewSet(TokenObtainPairView):
             return super().post(request, *args, **kwargs)
         except Exception as e:
             logger.error(f"Login processing error: {str(e)}")
+=======
+            return super().post(request, *args, **kwargs)
+        except Exception as e:
+            logger.error("Login processing error")
+>>>>>>> development
             raise
 
     def get_serializer_class(self):
