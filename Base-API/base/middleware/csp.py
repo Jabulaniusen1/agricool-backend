@@ -43,6 +43,11 @@ class CSPMiddleware:
            "Content-Security-Policy-Report-Only" in response.headers:
             return response
 
+        # Ensure Content-Type is always set (prevents MIME-sniffing attacks)
+        if "Content-Type" not in response.headers:
+            # Default to JSON for API responses without Content-Type
+            response.headers["Content-Type"] = "application/json; charset=utf-8"
+
         ctype = response.headers.get("Content-Type", "")
         if ctype.startswith("text/html"):
             response.headers.setdefault(
