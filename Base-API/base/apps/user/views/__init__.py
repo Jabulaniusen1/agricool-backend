@@ -5,6 +5,7 @@ from .farmer_survey import FarmerSurveyViewSet
 from .generic_code import GenericCodeViewSet
 from .invitation import InviteOperatorViewSet, InviteServiceProviderViewSet
 from .login import LoginViewSet
+from .logout import LogoutView
 from .notification import NotificationViewSet
 from .operator import OperatorViewSet
 from .operator_registration import OperatorRegistrationWithInvitationViewSet

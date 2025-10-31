@@ -15,5 +15,5 @@ class StorageConfig(AppConfig):
         global ANDROID_VERSION_CODE
         global IOS_VERSION_CODE
 
-        ANDROID_VERSION_CODE = 70347
-        IOS_VERSION_CODE = 70347
+        ANDROID_VERSION_CODE = 70354
+        IOS_VERSION_CODE = 70354

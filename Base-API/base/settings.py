@@ -91,6 +91,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "django_celery_beat",
     "rest_framework",
+    "rest_framework_simplejwt.token_blacklist",
     # apps
     "base.apps.user",
     "base.apps.storage",
@@ -185,9 +186,9 @@ REST_FRAMEWORK = {
 # Simple JSON Web Token configuration
 # https://django-rest-framework-simplejwt.readthedocs.io/en/latest/
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=30),  # 1 month
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=365),  # 1 year
-    "ROTATE_REFRESH_TOKENS": False,
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7), 
+    "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": False,
     "ALGORITHM": "HS256",

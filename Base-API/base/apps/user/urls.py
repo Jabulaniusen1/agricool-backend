@@ -12,6 +12,7 @@ from .views import (
     InviteOperatorViewSet,
     InviteServiceProviderViewSet,
     LoginViewSet,
+    LogoutView,
     NotificationViewSet,
     OperatorRegistrationWithInvitationViewSet,
     OperatorViewSet,
@@ -84,4 +85,5 @@ urlpatterns = router.urls + [
     path("token/obtain/", jwt_views.TokenObtainPairView.as_view(), name="token_create"),
     path("token/refresh/", jwt_views.TokenRefreshView.as_view(), name="token_refresh"),
     path("v1/login/", LoginViewSet.as_view(), name="login"),
+    path("v1/logout/", LogoutView.as_view(), name="logout"),
 ]
