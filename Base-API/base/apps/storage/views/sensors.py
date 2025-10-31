@@ -19,7 +19,7 @@ from base.utils.secure_errors import (
 
 
 class EcozenViewSet(GenericViewSet):
-    permission_classes = (permissions.AllowAny,)
+    permission_classes = (permissions.IsAuthenticated,)
 
     @action(detail=False, methods=["POST"], url_path="test-connection")
     def test_connection(self, request, *args, **kwargs):
@@ -81,7 +81,7 @@ class EcozenViewSet(GenericViewSet):
 
 class SensorIntegrationViewSet(GenericViewSet, CreateModelMixin, DestroyModelMixin):
     model = SensorIntegration
-    permission_classes = (permissions.AllowAny,)
+    permission_classes = (permissions.IsAuthenticated,)
 
     @action(detail=False, methods=["POST"], url_path="sources")
     def list_sources(self, request, *args, **kwargs):
@@ -141,15 +141,34 @@ class SensorIntegrationViewSet(GenericViewSet, CreateModelMixin, DestroyModelMix
     def destroy(self, request, *args, **kwargs):
         user = self.request.user
 
+        # Check if user has service_provider role
+        if not hasattr(user, 'service_provider') or user.service_provider is None:
+            return Response(
+                {"error": "Access denied. User must have ServiceProvider role."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # Get the sensor
         try:
             sensor = self.model.objects.get(id=kwargs.get("pk"))
+        except self.model.DoesNotExist:
+            return Response(
+                {"error": "Sensor not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
         except Exception as e:
             return handle_internal_error(e, "sensor lookup")
 
-        if not user.service_provider or not (
-            sensor.cooling_unit.location.company == user.service_provider.company
-        ):
-            return Response({"error": "Access denied"}, status=status.HTTP_403_FORBIDDEN)
+        # Check if user has permission to delete this sensor
+        try:
+            if sensor.cooling_unit.location.company != user.service_provider.company:
+                return Response(
+                    {"error": "Access denied"},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+        except AttributeError as e:
+            # If any of the chained attributes don't exist, it's a permission issue
+            return handle_authorization_error(e, "sensor permission check")
 
         # delete the sensor passed in
         sensor.delete()

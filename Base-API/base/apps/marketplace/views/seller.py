@@ -502,7 +502,14 @@ class SellerPaystackAccountViewSet(ViewSet):
         account = get_object_or_404(PaystackAccount, pk=pk)
 
         # Check if the user is allowed to access this account.
-        if account.created_by_user != user and not account.company.users.filter(id=user.id).exists():
+        # User has access if they created it OR if it's owned by their company
+        is_creator = account.created_by_user == user
+        is_company_member = (
+            account.owned_on_behalf_of_company is not None
+            and account.owned_on_behalf_of_company.users.filter(id=user.id).exists()
+        )
+
+        if not is_creator and not is_company_member:
             return Response({"error": "Access denied"}, status=HTTP_403_FORBIDDEN)
 
         serializer = PaystackAccountSerializer(account)

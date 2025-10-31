@@ -13,22 +13,30 @@ EXCLUDE_CROP_NAME = "Other"
 class CropViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
     model = Crop
     serializer_class = CropSerializer
-    permission_classes = (permissions.AllowAny,)
+    permission_classes = (permissions.IsAuthenticated,)
 
     def get_queryset(self):
         user = self.request.user
+        country = None
 
         # For some countries we want to filter crops only specific to them
-        try:
-            country = ServiceProvider.objects.get(user=user).company.country.name
-        except ServiceProvider.DoesNotExist:
+        if user.is_authenticated:
             try:
-                country = Operator.objects.get(user=user).company.country.name
-            except Operator.DoesNotExist:
+                service_provider = ServiceProvider.objects.get(user=user)
+                if service_provider.company and service_provider.company.country:
+                    country = service_provider.company.country.name
+            except (ServiceProvider.DoesNotExist, AttributeError):
                 try:
-                    country = Farmer.objects.get(user=user).country
-                except Farmer.DoesNotExist:
-                    country = None
+                    operator = Operator.objects.get(user=user)
+                    if operator.company and operator.company.country:
+                        country = operator.company.country.name
+                except (Operator.DoesNotExist, AttributeError):
+                    try:
+                        farmer = Farmer.objects.get(user=user)
+                        if farmer.country:
+                            country = farmer.country
+                    except (Farmer.DoesNotExist, AttributeError):
+                        pass
 
         is_filter_country = False
         for c in Country.objects.all():
