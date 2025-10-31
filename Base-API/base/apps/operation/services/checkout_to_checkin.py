@@ -101,15 +101,6 @@ def convert_checkout_to_checkin(
         if not cup_crop:
             raise ValidationError(ERROR_COOLING_UNIT_INCOMPATIBLE)
 
-        metric_multiplier = crate.weight if cooling_unit.metric == CoolingUnit.CoolingUnitMetric.KILOGRAMS else 1
-
-        if cup_crop.pricing.pricing_type == Pricing.PricingType.FIXED:
-            price = metric_multiplier * cup_crop.pricing.fixed_rate
-        elif days and int(days) > 0 and cup_crop.pricing.pricing_type == Pricing.PricingType.PERIODICITY:
-            price = metric_multiplier * int(days) * cup_crop.pricing.daily_rate
-        else:
-            price = 0
-
         # Take the last partial checkout weight (or initial weight)
         last_pc = crate.partial_checkouts.latest("id")
         weight = last_pc.weight_in_kg if last_pc else crate.initial_weight
@@ -118,10 +109,10 @@ def convert_checkout_to_checkin(
         idx = list(crates).index(crate)
         tag_value = tags[idx] if idx < len(tags) else None
 
-        Crate.objects.create(
+        # Create new crate and let compute() calculate the accurate price
+        new_crate = Crate.objects.create(
             produce=new_produce,
             cooling_unit=cooling_unit,
-            price_per_crate_per_pricing_type=price,
             currency=crate.currency,
             planned_days=days,
             tag=tag_value,
@@ -132,6 +123,9 @@ def convert_checkout_to_checkin(
             temperature_dt=crate.temperature_dt,
             modified_dt=crate.modified_dt,
         )
+
+        # Calculate accurate pricing using the compute method
+        new_crate.compute(save=True, compute_dependencies=False)
 
     # Mark the original movement as used
     checkout.movement.used_for_checkin = True

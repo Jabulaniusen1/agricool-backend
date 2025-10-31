@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 
 from base.apps.operation.services.checkout import (
     get_total_in_cooling_fees, get_total_paid_in_cooling_fees)
-from base.utils.currencies import validate_currency
+from base.utils.currencies import validate_currency, quantitize_float
 
 from .cooling_unit import CoolingUnit
 from .produce import Produce
@@ -67,10 +67,14 @@ class Crate(models.Model):
 
         self.cmp_total_in_cooling_fees = get_total_in_cooling_fees(self)
         self.cmp_total_paid_in_cooling_fees = get_total_paid_in_cooling_fees(self)
-        self.cmp_total_due_in_cooling_fees = self.cmp_total_in_cooling_fees - self.cmp_total_paid_in_cooling_fees
-        
-        # Calculate consistent pricing per crate using the same logic as cooling fees
-        self.price_per_crate_per_pricing_type = self.cmp_total_in_cooling_fees
+
+        # Calculate due fees with proper quantization and validation
+        due_fees = self.cmp_total_in_cooling_fees - self.cmp_total_paid_in_cooling_fees
+        self.cmp_total_due_in_cooling_fees = max(0, quantitize_float(due_fees, self.currency))
+
+        # Use due fees for pricing to reflect what's actually owed
+        # This ensures partial checkouts are properly accounted for
+        self.price_per_crate_per_pricing_type = self.cmp_total_due_in_cooling_fees
 
         if save:
             self.save()

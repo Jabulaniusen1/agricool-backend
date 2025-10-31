@@ -87,21 +87,21 @@ def handle_produces_for_checkin(checkin, produces_payload, operator):
                 raise ValidationError(
                     f"Cooling unit {cooling_unit.id} does not accept crop {crop.id}"
                 )
-            price = (
-                metric_multiplier * cu_crop.pricing.fixed_rate
-                if cu_crop.pricing.pricing_type == Pricing.PricingType.FIXED
-                else metric_multiplier * cu_crop.pricing.daily_rate
-            )
 
+            # Create crate with basic info first
             crate = Crate.objects.create(
                 produce=produce_instance,
                 cooling_unit=cooling_unit,
                 initial_weight=crate_data["weight"],
                 weight=crate_data["weight"],
-                price_per_crate_per_pricing_type=price,
                 currency=company.currency,
                 planned_days=crate_data.get("planned_days"),
             )
+
+            # Calculate accurate pricing using the compute method
+            # This ensures both FIXED and PERIODICITY pricing are calculated correctly
+            # PERIODICITY will charge for minimum 1 day on checkin (unless marketplace same-day)
+            crate.compute(save=True, compute_dependencies=False)
 
         # DT / FarmerSurvey logic
         if crop.digital_twin_identifier and cooling_unit.location.company.digital_twin:
