@@ -79,14 +79,19 @@ class PaystackAccount(models.Model):
 
     @transaction.atomic
     def set_as_default_account(self):
-        # Remove any prior default accounts
-        PaystackAccount.objects.filter(
-            owned_by_user=self.owned_by_user,
-            owned_on_behalf_of_company=self.owned_on_behalf_of_company,
-            is_default_account=True,
-        ).update(
-            is_default_account=False,
+        # Remove any prior default accounts with row-level locking to prevent race conditions
+        # Note: We must iterate and save() to properly use select_for_update() locks
+        existing_defaults = list(
+            PaystackAccount.objects.select_for_update().filter(
+                owned_by_user=self.owned_by_user,
+                owned_on_behalf_of_company=self.owned_on_behalf_of_company,
+                is_default_account=True,
+            )
         )
+
+        for account in existing_defaults:
+            account.is_default_account = False
+            account.save()
 
         self.is_default_account = True
         self.save()
@@ -103,7 +108,35 @@ class PaystackAccount(models.Model):
         account_number=None,
         account_name=None,
     ):
-        # Create a Paystack account
+        # Lock the parent resource AND unset existing defaults BEFORE creating the new account
+        # This prevents race conditions by ensuring atomicity
+        if owned_on_behalf_of_company:
+            Company.objects.select_for_update().filter(id=owned_on_behalf_of_company.id).first()
+            # Unset any existing company defaults while we have the lock
+            existing_defaults = list(
+                PaystackAccount.objects.select_for_update().filter(
+                    owned_on_behalf_of_company=owned_on_behalf_of_company,
+                    is_default_account=True,
+                )
+            )
+            for account in existing_defaults:
+                account.is_default_account = False
+                account.save()
+        else:
+            User.objects.select_for_update().filter(id=owned_by_user.id).first()
+            # Unset any existing user defaults while we have the lock
+            existing_defaults = list(
+                PaystackAccount.objects.select_for_update().filter(
+                    owned_by_user=owned_by_user,
+                    owned_on_behalf_of_company__isnull=True,
+                    is_default_account=True,
+                )
+            )
+            for account in existing_defaults:
+                account.is_default_account = False
+                account.save()
+
+        # Create a Paystack account with is_default_account=True (we've already cleared old defaults)
         paystack_account = PaystackAccount.objects.create(
             created_by_user=created_by_user or owned_by_user,
             owned_on_behalf_of_company=owned_on_behalf_of_company,
@@ -114,7 +147,7 @@ class PaystackAccount(models.Model):
             account_number=account_number,
             account_name=account_name,
             paystack_subaccount_code=INITIAL_PAYSTACK_SUBACCOUNT_CODE, # Will be set after the paystack subaccount is created
-            is_default_account=False,
+            is_default_account=True,  # Set as default immediately since we cleared old defaults
         )
 
         # Create a Paystack subaccount with 0 percent charge
@@ -136,7 +169,7 @@ class PaystackAccount(models.Model):
 
         if not paystack_response.get("status"):
             paystack_account.delete()
-            reason = paystack_response['message'] or ERROR_UNKNOWN_REASON
+            reason = paystack_response.get('message') or ERROR_UNKNOWN_REASON
             # return a 400 up the stack
             raise ValidationError(reason)
 
@@ -150,7 +183,8 @@ class PaystackAccount(models.Model):
                 "Malformed Paystack response: missing subaccount_code"
             )
 
-        paystack_account.set_as_default_account()  # persists
+        # Save the subaccount code (no need to call set_as_default_account since we created it as default)
+        paystack_account.save()
         return paystack_account
 
     @staticmethod
