@@ -29,7 +29,7 @@ msgstr ""
 "{details}"
 
 msgid "sms_marketplace_order_seller_notice_details"
-msgstr "{crop_name}: {weight_in_kg}kg fun {amount} {currency}"
+msgstr "Ikilọ Tita! {crop_name}: {weight_in_kg}kg fun {amount} {currency}. Fun alaye pipe lọ si Coltivate App labẹ iboju Awọn Tita Mi labẹ taabu Ọja."
 
 msgid "sms_history_sms_report"
 msgstr ""

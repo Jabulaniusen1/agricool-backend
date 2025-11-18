@@ -28,7 +28,7 @@ msgid "sms_marketplace_order_seller_notice"
 msgstr "لقد تم بيع منتجك بالطلب رقم #{order_id}:\n{details}"
 
 msgid "sms_marketplace_order_seller_notice_details"
-msgstr "{crop_name}: {weight_in_kg} كجم لـ {amount} {currency}"
+msgstr "تنبيه بيع! {crop_name}: {weight_in_kg}kg لـ {amount} {currency}. للحصول على تفاصيل كاملة انتقل إلى تطبيق Coltivate ضمن شاشة مبيعاتي ضمن علامة تبويب السوق."
 
 msgid "sms_history_sms_report"
 msgstr "{company_name} - إيصال {movement_type}:\nرمز الحركة: {code}\nالمحاصيل: {crops}\nالوزن الإجمالي: {weight} كجم\n{movement_type_for_date}: {date}\nالسعر: {price}\nتم الدفع بواسطة: {farmers_name}"

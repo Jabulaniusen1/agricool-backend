@@ -29,7 +29,7 @@ msgstr ""
 "{details}"
 
 msgid "sms_marketplace_order_seller_notice_details"
-msgstr "{crop_name}: {weight_in_kg} किलोग्राम के लिए {amount} {currency}"
+msgstr "बिक्री अलर्ट! {crop_name}: {weight_in_kg}kg के लिए {amount} {currency}। पूर्ण विवरण के लिए मार्केटप्लेस टैब में मेरी बिक्री स्क्रीन के तहत कोल्टिवेट ऐप पर जाएं।"
 
 msgid "sms_history_sms_report"
 msgstr ""
