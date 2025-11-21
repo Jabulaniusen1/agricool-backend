@@ -152,6 +152,9 @@ DATABASES = {
         "PASSWORD": getEnv("DB_PASSWORD", "postgres"),
         "HOST": getEnv("DB_HOST", "localhost"),
         "PORT": getEnv("DB_PORT", "5432"),
+        "OPTIONS": {
+            "options": "-c statement_timeout=300000 -c lock_timeout=30000 -c idle_in_transaction_session_timeout=120000"
+        },
     }
 }
 
