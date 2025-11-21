@@ -186,7 +186,18 @@ def update_cooling_unit_from_payload(payload, cooling_unit_id):
     cu.cooling_unit_type = payload.get("cooling_unit_type", cu.cooling_unit_type)
     cu.public = payload.get("public", cu.public)
     cu.editable_checkins = payload.get("editable_checkins", cu.editable_checkins)
-    
+
+    # Track changes that require crate recalculation
+    should_recalculate_crates = False
+
+    # Update metric field if provided
+    if "metric" in payload:
+        old_metric = cu.metric
+        new_metric = payload.get("metric")
+        if old_metric != new_metric:
+            should_recalculate_crates = True
+        cu.metric = new_metric
+
     # Update capacity and dimension fields if provided
     if "capacity_in_metric_tons" in payload:
         cu.capacity_in_metric_tons = payload.get("capacity_in_metric_tons")
@@ -210,7 +221,7 @@ def update_cooling_unit_from_payload(payload, cooling_unit_id):
         cu.crate_height = payload.get("crate_height")
     if "food_capacity_in_metric_tons" in payload:
         cu.food_capacity_in_metric_tons = payload.get("food_capacity_in_metric_tons")
-    
+
     cu.save()
 
     # 2) Power settings
@@ -287,11 +298,20 @@ def update_cooling_unit_from_payload(payload, cooling_unit_id):
                 pricing=pricing,
                 active=True,
             )
+            should_recalculate_crates = True
         else:
             try:
                 cuc = CoolingUnitCrop.objects.get(cooling_unit=cu, crop_id=crop_id)
                 cuc.active = True
                 cuc.save()
+
+                # Check if pricing changed
+                old_pricing = cuc.pricing
+                if (old_pricing.pricing_type != cu_data["pricing_type"] or
+                    old_pricing.fixed_rate != cu_data["fixed_rate"] or
+                    old_pricing.daily_rate != cu_data["daily_rate"]):
+                    should_recalculate_crates = True
+
                 Pricing.objects.filter(id=cuc.pricing.id).update(
                     pricing_type=cu_data["pricing_type"],
                     fixed_rate=cu_data["fixed_rate"],
@@ -321,11 +341,33 @@ def update_cooling_unit_from_payload(payload, cooling_unit_id):
     # update default pricing itself
     try:
         default_pricing = Pricing.objects.get(id=payload["pricing_id"])
-        default_pricing.pricing_type = Pricing.PricingType.FIXED if default_is_fixed else Pricing.PricingType.PERIODICITY
-        default_pricing.fixed_rate = default_price if default_is_fixed else DEFAULT_RATE_VALUE
-        default_pricing.daily_rate = default_price if not default_is_fixed else DEFAULT_RATE_VALUE
+        new_pricing_type = Pricing.PricingType.FIXED if default_is_fixed else Pricing.PricingType.PERIODICITY
+        new_fixed_rate = default_price if default_is_fixed else DEFAULT_RATE_VALUE
+        new_daily_rate = default_price if not default_is_fixed else DEFAULT_RATE_VALUE
+
+        # Check if default pricing changed
+        if (default_pricing.pricing_type != new_pricing_type or
+            default_pricing.fixed_rate != new_fixed_rate or
+            default_pricing.daily_rate != new_daily_rate):
+            should_recalculate_crates = True
+
+        default_pricing.pricing_type = new_pricing_type
+        default_pricing.fixed_rate = new_fixed_rate
+        default_pricing.daily_rate = new_daily_rate
         default_pricing.save()
     except Pricing.DoesNotExist:
         pass
+
+    # 5) Recalculate all crates if metric or pricing changed
+    if should_recalculate_crates:
+        from ..models import Crate
+
+        crates = Crate.objects.filter(
+            cooling_unit=cu,
+            weight__gt=0  # Only active crates
+        )
+
+        for crate in crates:
+            crate.compute(save=True)
 
     return cu

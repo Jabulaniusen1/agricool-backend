@@ -77,25 +77,6 @@ class PaystackAccount(models.Model):
             ),
         ]
 
-    @transaction.atomic
-    def set_as_default_account(self):
-        # Remove any prior default accounts with row-level locking to prevent race conditions
-        # Note: We must iterate and save() to properly use select_for_update() locks
-        existing_defaults = list(
-            PaystackAccount.objects.select_for_update().filter(
-                owned_by_user=self.owned_by_user,
-                owned_on_behalf_of_company=self.owned_on_behalf_of_company,
-                is_default_account=True,
-            )
-        )
-
-        for account in existing_defaults:
-            account.is_default_account = False
-            account.save()
-
-        self.is_default_account = True
-        self.save()
-
     @staticmethod
     @transaction.atomic
     def create(
@@ -108,33 +89,16 @@ class PaystackAccount(models.Model):
         account_number=None,
         account_name=None,
     ):
-        # Lock the parent resource AND unset existing defaults BEFORE creating the new account
-        # This prevents race conditions by ensuring atomicity
+        # Unset existing defaults in a single bulk update before creating the new account
         if owned_on_behalf_of_company:
-            Company.objects.select_for_update().filter(id=owned_on_behalf_of_company.id).first()
-            # Unset any existing company defaults while we have the lock
-            existing_defaults = list(
-                PaystackAccount.objects.select_for_update().filter(
-                    owned_on_behalf_of_company=owned_on_behalf_of_company,
-                    is_default_account=True,
-                )
-            )
-            for account in existing_defaults:
-                account.is_default_account = False
-                account.save()
+            PaystackAccount.objects.filter(
+                owned_on_behalf_of_company=owned_on_behalf_of_company,
+            ).update(is_default_account=False)
         else:
-            User.objects.select_for_update().filter(id=owned_by_user.id).first()
-            # Unset any existing user defaults while we have the lock
-            existing_defaults = list(
-                PaystackAccount.objects.select_for_update().filter(
-                    owned_by_user=owned_by_user,
-                    owned_on_behalf_of_company__isnull=True,
-                    is_default_account=True,
-                )
-            )
-            for account in existing_defaults:
-                account.is_default_account = False
-                account.save()
+            PaystackAccount.objects.filter(
+                owned_by_user=owned_by_user,
+                owned_on_behalf_of_company__isnull=True,
+            ).update(is_default_account=False)
 
         # Create a Paystack account with is_default_account=True (we've already cleared old defaults)
         paystack_account = PaystackAccount.objects.create(
@@ -183,7 +147,6 @@ class PaystackAccount(models.Model):
                 "Malformed Paystack response: missing subaccount_code"
             )
 
-        # Save the subaccount code (no need to call set_as_default_account since we created it as default)
         paystack_account.save()
         return paystack_account
 
