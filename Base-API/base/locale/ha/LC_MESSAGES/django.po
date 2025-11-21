@@ -29,7 +29,7 @@ msgstr ""
 "{details}"
 
 msgid "sms_marketplace_order_seller_notice_details"
-msgstr "{crop_name}: {weight_in_kg}kg don {amount} {currency}"
+msgstr "Faɗakarwar Siyarwa! {crop_name}: {weight_in_kg}kg don {amount} {currency}. Don cikakken bayani je Coltivate App a ƙarƙashin allon Tallace-tallacena a cikin shafin Kasuwa."
 
 msgid "sms_history_sms_report"
 msgstr ""

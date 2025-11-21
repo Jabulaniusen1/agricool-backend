@@ -29,7 +29,7 @@ msgstr ""
 "{details}"
 
 msgid "sms_marketplace_order_seller_notice_details"
-msgstr "{crop_name}: {weight_in_kg}kg maka {amount} {currency}"
+msgstr "Ọkwa Ahịa! {crop_name}: {weight_in_kg}kg maka {amount} {currency}. Maka nkọwa zuru ezu gaa na Coltivate App n'okpuru ihuenyo Ahịa m n'okpuru taabụ Ahịa."
 
 msgid "sms_history_sms_report"
 msgstr ""

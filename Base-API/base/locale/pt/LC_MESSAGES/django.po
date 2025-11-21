@@ -29,7 +29,7 @@ msgstr ""
 "{details}"
 
 msgid "sms_marketplace_order_seller_notice_details"
-msgstr "{crop_name}: {weight_in_kg}kg por {amount} {currency}"
+msgstr "Alerta de Venda! {crop_name}: {weight_in_kg}kg por {amount} {currency}. Para um detalhamento completo, vá para o App Coltivate na tela Minhas Vendas na aba Mercado."
 
 msgid "sms_history_sms_report"
 msgstr ""
