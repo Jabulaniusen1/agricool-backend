@@ -1,0 +1,9 @@
+[phases.setup]
+nixPkgs = ["python39", "pipenv"]
+
+[phases.install]
+cmds = ["pipenv install --dev"]
+
+[start]
+cmd = "pipenv run gunicorn base.wsgi:application --workers 2 --bind 0.0.0.0:$PORT --timeout 50 --log-level=warning"
+
