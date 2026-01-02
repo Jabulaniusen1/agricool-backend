@@ -16,7 +16,7 @@ ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$COMSOL_RO
 ENV LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$COMSOL_ROOT/lib/glnxa64:$COMSOL_ROOT/ext/graphicsmagick/glnxa64:$COMSOL_ROOT/ext/cadimport/glnxa64
 
 # Base system dependencies (requires BuildKit)
-RUN --mount=type=cache,target=/var/cache/apt <<EOF
+RUN --mount=type=cache,target=/var/cache/apt,id=comsol-dt-apt <<EOF
     apt-get update && apt-get install -y \
         build-essential \
         fuse libfuse2 libfuse-dev \

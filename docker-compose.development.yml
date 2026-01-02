@@ -7,7 +7,7 @@ services:
       URL_AIR_VCCA: http://air.coldtivate.localhost
       URL_FARMER_API: http://farmer.coldtivate.localhost
       URL_IMPACT_API: http://impact.coldtivate.localhost
-      URL_COMSOL_DT: http://comsol.coldtivate.localhost
+      # URL_COMSOL_DT: http://comsol.coldtivate.localhost
       ACME_SERVER: https://acme-staging-v02.api.letsencrypt.org/directory
 
   web:
@@ -81,8 +81,8 @@ services:
     ports:
       - "5102:5000"
 
-  comsol_dt_service:
-    build: ./Comsol-Digital-Twins
-    ports:
-      - "5900:5900"
-    env_file: ${DOT_ENV_PATH:-.env.development}
+  # comsol_dt_service:
+  #   build: ./Comsol-Digital-Twins
+  #   ports:
+  #     - "5900:5900"
+  #   env_file: ${DOT_ENV_PATH:-.env.development}

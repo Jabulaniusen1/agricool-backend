@@ -8,7 +8,7 @@ WORKDIR /app
 ENV DISPLAY=:1
 
 # Install base system dependencies
-RUN --mount=type=cache,target=/var/cache/apt <<EOF
+RUN --mount=type=cache,target=/var/cache/apt,id=base-api-apt <<EOF
   apt-get update && apt-get install -y \
     build-essential \
     libswt-gtk-4-jni \
