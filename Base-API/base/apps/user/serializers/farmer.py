@@ -116,7 +116,7 @@ class FarmerSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = validated_data.pop("user")
-        if user.get("language") == "":
+        if "language" in user.__dict__ and user["language"] == "":
             user["language"] = "en"
         create_user = validated_data.pop("create_user")
         serialized_user = UserSerializer(
