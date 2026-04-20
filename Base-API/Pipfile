@@ -24,6 +24,7 @@ django-sendgrid-v5 = "*"
 paystackapi = "*"
 iso4217 = "*"
 django-redis = "*"
+setuptools = ">=65,<80"
 sentry-sdk = {extras = ["django"], version = "*"}
 
 [requires]
