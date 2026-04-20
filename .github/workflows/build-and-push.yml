@@ -92,7 +92,8 @@ jobs:
       - name: Extract metadata
         id: meta
         run: |
-          REGISTRY_IMAGE=${{ env.REGISTRY }}/${{ github.repository_owner }}
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          REGISTRY_IMAGE=${{ env.REGISTRY }}/${OWNER}
           echo "registry_image=${REGISTRY_IMAGE}" >> $GITHUB_OUTPUT
           
           # Use 'latest' tag for all builds as per requirements
