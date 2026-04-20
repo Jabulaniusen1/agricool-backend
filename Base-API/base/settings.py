@@ -285,13 +285,22 @@ TWILIO_NUMBER = getEnv("TWILIO_NUMBER", "")
 # Email
 ##
 DEFAULT_FROM_EMAIL = "no-reply@coldtivate.org"
+
+EMAIL_USE_SSL = str_to_bool(getEnv("EMAIL_USE_SSL", "False"))
+EMAIL_USE_TLS = str_to_bool(getEnv("EMAIL_USE_TLS", "True"))
+EMAIL_HOST = getEnv("EMAIL_HOST", "***")
+EMAIL_PORT = getEnv("EMAIL_PORT", "***")
+
 if DEBUG:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 else:
-    EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"
-    SENDGRID_API_KEY = os.getenv(
-        "SENDGRID_API_KEY"
-    )  # Storing API key in environment variable
+    EMAIL_BACKEND = getEnv("EMAIL_BACKEND", "****")
+    # SENDGRID_API_KEY = os.getenv(
+    #     "SENDGRID_API_KEY"
+    # )  # Storing API key in environment variable
+    EMAIL_HOST_USER = getEnv("EMAIL_HOST_USER", "****")
+    EMAIL_HOST_PASSWORD = getEnv("EMAIL_HOST_PASSWORD", "***")
+    DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
 # Logging for testing

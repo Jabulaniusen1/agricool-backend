@@ -30,7 +30,7 @@ RUN pip install pipenv
 
 # Install dependencies
 COPY ./Pipfile ./Pipfile.lock /app/
-RUN pipenv install --dev
+RUN pipenv sync --dev
 
 # Copy app files
 COPY ./base /app/base

@@ -2,7 +2,7 @@
     # Global options block
     # set the email for ACME (Automatic Certificate Management Environment)
     email jmoreira@mosano.eu
-    acme_ca {$ACME_SERVER}
+#    acme_ca {$ACME_SERVER}
 }
 
 (cors) {
@@ -33,7 +33,7 @@
 # API proxy
 {$URL_BASE_API} {
     import cors
-    tls internal
+#    tls internal
 
     # Handle requests to /media separately
     handle_path /media* {
@@ -50,7 +50,7 @@
 
 # Air proxy
 {$URL_AIR_VCCA} {
-    tls internal
+#    tls internal
     import cors
     reverse_proxy {
         to http://air_api:5000
@@ -60,7 +60,7 @@
 
 # Farmer proxy
 {$URL_FARMER_API} {
-    tls internal
+#    tls internal
     import cors
     reverse_proxy {
         to http://farmer_api:80
@@ -70,7 +70,7 @@
 
 # Impact proxy
 {$URL_IMPACT_API} {
-    tls internal
+#    tls internal
     import cors
     reverse_proxy {
         to http://impact_api:80
@@ -79,14 +79,14 @@
 }
 
 # COMSOL DT proxy
-{$URL_COMSOL_DT_API} {
-    tls internal
-    import cors
-    reverse_proxy {
-        to http://comsol_dt_service:5900
-        import clear_reverse_proxy_cors_headers
-    }
-}
+#{$URL_COMSOL_DT_API} {
+#    tls internal
+#    import cors
+#    reverse_proxy {
+#        to http://comsol_dt_service:5900
+#        import clear_reverse_proxy_cors_headers
+#    }
+#}
 
 :80 {
     import cors
@@ -125,10 +125,10 @@
         }
     }
     
-    handle_path /comsol_dt/* {
-        reverse_proxy {
-            to http://comsol_dt_service:5900
-            import clear_reverse_proxy_cors_headers
-        }
-    }
+#   handle_path /comsol_dt/* {
+#       reverse_proxy {
+#            to http://comsol_dt_service:5900
+#            import clear_reverse_proxy_cors_headers
+#        }
+#    }
 }

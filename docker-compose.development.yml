@@ -3,11 +3,11 @@ services:
   gateway:
     build: ./Gateway
     environment:
-      URL_BASE_API: http://api.coldtivate.localhost
-      URL_AIR_VCCA: http://air.coldtivate.localhost
-      URL_FARMER_API: http://farmer.coldtivate.localhost
-      URL_IMPACT_API: http://impact.coldtivate.localhost
-      # URL_COMSOL_DT: http://comsol.coldtivate.localhost
+      URL_BASE_API: http://api.agrisens.localhost
+      URL_AIR_VCCA: http://air.agrisens.localhost
+      URL_FARMER_API: http://farmer.agrisens.localhost
+      URL_IMPACT_API: http://impact.agrisens.localhost
+      # URL_COMSOL_DT: http://comsol.agrisens.localhost
       ACME_SERVER: https://acme-staging-v02.api.letsencrypt.org/directory
 
   web:
