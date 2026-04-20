@@ -1,0 +1,125 @@
+name: Build and Push Docker Images to GHCR
+
+on:
+  push:
+    branches:
+      - main
+      - development
+    tags:
+      - '*'
+
+env:
+  REGISTRY: ghcr.io
+  BUILDKIT_PROGRESS: plain
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Gateway - Reverse proxy
+          - image_name: gateway
+            context: ./Gateway
+            dockerfile: Dockerfile
+
+          # Base API - Django application
+          - image_name: base-api
+            context: ./Base-API
+            dockerfile: Dockerfile
+
+          # Impact Dashboard Backend - Web service
+          - image_name: impact-dashboard-backend
+            context: ./Impact-Dashboard-Backend
+            dockerfile: Dockerfile
+
+          # Impact Dashboard Backend - Scheduler service
+          - image_name: impact-dashboard-backend-scheduler
+            context: ./Impact-Dashboard-Backend
+            dockerfile: Dockerfile.scheduler
+
+          # App Impact Reporting - Flask service
+          - image_name: app-impact-reporting
+            context: ./App-Impact-Reporting
+            dockerfile: Dockerfile
+
+          # Farmers Dashboard Backend - Web service
+          - image_name: farmers-dashboard-backend
+            context: ./Farmers-Dashboard-Backend
+            dockerfile: Dockerfile
+
+          # Farmers Dashboard Backend - Scheduler service
+          - image_name: farmers-dashboard-backend-scheduler
+            context: ./Farmers-Dashboard-Backend
+            dockerfile: Dockerfile.scheduler
+
+          # ML4 India - ML prediction service
+          - image_name: ml4-india
+            context: ./ML4-India
+            dockerfile: Dockerfile
+
+          # ML4 Nigeria - ML prediction service
+          - image_name: ml4-nigeria
+            context: ./ML4-Nigeria
+            dockerfile: Dockerfile
+
+          # Comsol Digital Twins - Comsol integration service
+          #- image_name: comsol-dt
+          #  context: ./Comsol-Digital-Twins
+          #  dockerfile: Dockerfile
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver-options: image=moby/buildkit:latest
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        run: |
+          REGISTRY_IMAGE=${{ env.REGISTRY }}/${{ github.repository_owner }}
+          echo "registry_image=${REGISTRY_IMAGE}" >> $GITHUB_OUTPUT
+          
+          # Use 'latest' tag for all builds as per requirements
+          echo "tag=latest" >> $GITHUB_OUTPUT
+          
+          # Construct full image name
+          IMAGE="${REGISTRY_IMAGE}/${{ matrix.image_name }}:latest"
+          echo "image=${IMAGE}" >> $GITHUB_OUTPUT
+          
+          echo "Building image: ${IMAGE}"
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.context }}/${{ matrix.dockerfile }}
+          push: true
+          tags: ${{ steps.meta.outputs.image }}
+          cache-from: type=registry,ref=${{ steps.meta.outputs.image }}
+          cache-to: type=registry,ref=${{ steps.meta.outputs.image }},mode=max
+          build-args: |
+            BUILDKIT_INLINE_CACHE=1
+
+      - name: Image digest
+        run: |
+          echo "Successfully pushed: ${{ steps.meta.outputs.image }}"
+          echo "Registry: ${{ env.REGISTRY }}"
+          echo "Image name: ${{ matrix.image_name }}"
+          echo "Dockerfile: ${{ matrix.dockerfile }}"
+          echo "Build context: ${{ matrix.context }}"
