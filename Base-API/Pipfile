@@ -26,9 +26,11 @@ iso4217 = "*"
 django-redis = "*"
 setuptools = ">=65,<80"
 sentry-sdk = {extras = ["django"], version = "*"}
+python-dateutil = "==2.8.2"
 
 [requires]
 python_version = "3.9"
 
 [dev-packages]
 pylint = "*"
+model-bakery = "*"
