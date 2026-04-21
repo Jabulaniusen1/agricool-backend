@@ -76,6 +76,21 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          lfs: true
+          fetch-depth: 0
+
+      - name: Verify required ML artifacts exist
+        run: |
+          set -e
+          git lfs ls-files
+
+          test -f ML4-India/data/Master_encoded.csv
+          test -f ML4-India/data/trained_model.pkl
+          test -f ML4-Nigeria/data/Master_encoded.csv
+          test -f ML4-Nigeria/data/models/model.pbz2
+
+          echo "All required ML artifacts are present."
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
