@@ -10,8 +10,8 @@ CURRENT_DIR=$(dirname -- "$0")
 MAIN_API_ROOT=$(realpath "$CURRENT_DIR/..")
 SCRIPTS_ROOT="$MAIN_API_ROOT/scripts"
 DOCKER_COMPOSE_ENV_FILENAME="docker-compose.${ENVIRONMENT}.yml"
-PROJECT_NAME="coldtivate-$ENVIRONMENT"
-DOCKER_COMPOSE_CMD="docker-compose --project-name=$PROJECT_NAME --project-directory=$MAIN_API_ROOT -f docker-compose.yml -f $DOCKER_COMPOSE_ENV_FILENAME --env-file=$DOT_ENV_FILENAME"
+PROJECT_NAME="agrisens-$ENVIRONMENT"
+DOCKER_COMPOSE_CMD="docker compose --project-directory=$MAIN_API_ROOT -f docker-compose.yml -f $DOCKER_COMPOSE_ENV_FILENAME --env-file=$DOT_ENV_FILENAME"
 
 # Export the DOT_ENV_PATH so the docker-compose configurations can refer to it
 export DOT_ENV_PATH="$MAIN_API_ROOT/$DOT_ENV_FILENAME"
@@ -38,9 +38,9 @@ _exit_with_error () {
 _print_head() {
     cat <<EOF
 
-Coldtivate's Environment Deployment Management script
+Agrisens Environment Deployment Management script
 
-This script handles several commands to manage a local or remote Coldtivate
+This script handles several commands to manage a local or remote Agrisens
 environment and is intended to be used by the dev team and the CI/CD pipeline
 to deploy to the existing environments.
 
@@ -78,10 +78,13 @@ case $1 in
     deploy)
         _print_head;
 
-        # This will probably only be needed by dev
-        $DOCKER_COMPOSE_CMD build
-        # Pull the most recent images based on the given configuration
-        $DOCKER_COMPOSE_CMD pull
+        if [ "$ENVIRONMENT" = "development" ]; then
+            echo "Environment is development: building images locally..."
+            $DOCKER_COMPOSE_CMD build
+        else
+            echo "Environment is $ENVIRONMENT: pulling images from registry..."
+            $DOCKER_COMPOSE_CMD pull
+        fi
 
         # Start production database if not running on production
         if [ "$ENVIRONMENT" != "production" ]; then
@@ -125,7 +128,7 @@ case $1 in
         # We should be ready to now rollout the rest of the dependencies
         exec $DOCKER_COMPOSE_CMD up -d;
 
-        echo "The environment was _coldtivated_ with great success! 👀"
+        echo "The environment was deployed by Agrisens with great success! 👀"
     ;;
 
 
@@ -182,12 +185,12 @@ case $1 in
         echo "    DOCKER_HOST=ssh://user@machine ENVIRONMENT=qa-01 $0 up";
         echo
         echo "Options:"
-        echo "  deploy      Deploys a Coldtivate's environment"
+        echo "  deploy      Deploys an Agrisens environment"
         echo "  compose     Passes all the args to docker-compose"
         echo "  sh          Interactive terminal into a container"
         echo "  manage      Gives you access to the manage.py CLI"
         echo "  call_task   Manually trigger a task with celery"
         echo
-        echo "© 2024 Coldtivate / YVCCA"
+        echo "© 2024 Agrisens / YVCCA"
     ;;
 esac;
