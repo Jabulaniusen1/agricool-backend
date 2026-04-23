@@ -3,7 +3,7 @@
 -- it's checkin movements (such as checkin date, operator, farmer that checked it in, etc)
 -- as well as checkout movement information (checkout date, operator, checkout survey loss and price, etc)
 
-DROP view analytics_crate_movements;
+DROP VIEW IF EXISTS analytics_crate_movements;
 
 CREATE OR REPLACE VIEW analytics_crate_movements AS
 WITH
