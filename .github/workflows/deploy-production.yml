@@ -1,0 +1,58 @@
+name: Deploy Production on Droplet
+
+on:
+  workflow_run:
+    workflows:
+      - Build and Push Docker Images to GHCR
+    types:
+      - completed
+  workflow_dispatch:
+
+env:
+  TARGET_ENVIRONMENT: production
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy-production:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.head_branch == 'main'
+      )
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Deploy to production droplet
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_SSH_USER }}
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
+          port: ${{ secrets.DROPLET_SSH_PORT || 22 }}
+          script_stop: true
+          script: |
+            set -euo pipefail
+
+            su - deploy -c '
+              set -euo pipefail
+              cd ~/apps/agricool-backend
+
+              git fetch origin main
+
+              CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+              if [ "$CURRENT_BRANCH" != "main" ]; then
+                git checkout main
+              fi
+
+              git pull --ff-only
+              ENVIRONMENT=production ./scripts/environment-deployment-management.sh deploy
+            '
