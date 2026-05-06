@@ -121,6 +121,12 @@ case $1 in
         # And load the necessary roles
         $DOCKER_COMPOSE_CMD run --rm web pipenv run python manage.py load_roles
 
+        # Load reference data (crops, countries, Nigerian states)
+        echo "Loading reference data..."
+        $DOCKER_COMPOSE_CMD run --rm web pipenv run python manage.py load_storage_data
+        $DOCKER_COMPOSE_CMD run --rm web pipenv run python manage.py load_user_data
+        $DOCKER_COMPOSE_CMD run --rm web pipenv run python manage.py load_prediction_data
+
         # Push Farmer and Impact dashboards views
         $DOCKER_COMPOSE_CMD run --rm impact_dashboard_web python create_view.py -v analytics_crate_movements
         $DOCKER_COMPOSE_CMD run --rm impact_dashboard_web python create_view.py -v create_relevant_checkins_view
