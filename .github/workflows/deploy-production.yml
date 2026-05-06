@@ -56,4 +56,4 @@ jobs:
 
             git pull --ff-only
             IMAGE_TAG="$IMAGE_TAG" ENVIRONMENT=production ./scripts/environment-deployment-management.sh deploy
-          EOF
+            EOF
