@@ -41,8 +41,9 @@ jobs:
           script_stop: true
           script: |
             set -euo pipefail
+            IMAGE_TAG='${{ github.event.workflow_run.head_sha || github.sha }}'
 
-            su - deploy -c '
+            su - deploy -c "
               set -euo pipefail
               cd ~/apps/agricool-backend
 
@@ -54,5 +55,5 @@ jobs:
               fi
 
               git pull --ff-only
-              ENVIRONMENT=production ./scripts/environment-deployment-management.sh deploy
-            '
+              IMAGE_TAG='${IMAGE_TAG}' ENVIRONMENT=production ./scripts/environment-deployment-management.sh deploy
+            "

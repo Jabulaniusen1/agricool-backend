@@ -110,14 +110,14 @@ jobs:
           OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
           REGISTRY_IMAGE=${{ env.REGISTRY }}/${OWNER}
           echo "registry_image=${REGISTRY_IMAGE}" >> $GITHUB_OUTPUT
-          
-          # Use 'latest' tag for all builds as per requirements
-          echo "tag=latest" >> $GITHUB_OUTPUT
-          
-          # Construct full image name
-          IMAGE="${REGISTRY_IMAGE}/${{ matrix.image_name }}:latest"
+          IMAGE_TAG="${{ github.sha }}"
+          echo "tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
+
+          # Construct the immutable image name used by production deploys.
+          IMAGE="${REGISTRY_IMAGE}/${{ matrix.image_name }}:${IMAGE_TAG}"
           echo "image=${IMAGE}" >> $GITHUB_OUTPUT
-          
+          echo "latest_image=${REGISTRY_IMAGE}/${{ matrix.image_name }}:latest" >> $GITHUB_OUTPUT
+
           echo "Building image: ${IMAGE}"
 
       - name: Build and push Docker image
@@ -126,7 +126,9 @@ jobs:
           context: ${{ matrix.context }}
           file: ${{ matrix.context }}/${{ matrix.dockerfile }}
           push: true
-          tags: ${{ steps.meta.outputs.image }}
+          tags: |
+            ${{ steps.meta.outputs.image }}
+            ${{ steps.meta.outputs.latest_image }}
           cache-from: type=registry,ref=${{ steps.meta.outputs.image }}
           cache-to: type=registry,ref=${{ steps.meta.outputs.image }},mode=max
           build-args: |
@@ -135,6 +137,7 @@ jobs:
       - name: Image digest
         run: |
           echo "Successfully pushed: ${{ steps.meta.outputs.image }}"
+          echo "Convenience tag: ${{ steps.meta.outputs.latest_image }}"
           echo "Registry: ${{ env.REGISTRY }}"
           echo "Image name: ${{ matrix.image_name }}"
           echo "Dockerfile: ${{ matrix.dockerfile }}"
