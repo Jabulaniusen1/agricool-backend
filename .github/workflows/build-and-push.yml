@@ -115,8 +115,8 @@ jobs:
           tags: |
             ${{ steps.meta.outputs.image }}
 
-          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.image_name }}:buildcache
-          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.image_name }}:buildcache,mode=max
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${OWNER}/${{ matrix.image_name }}:buildcache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${OWNER}/${{ matrix.image_name }}:buildcache,mode=max
 
           provenance: false
 
