@@ -95,6 +95,7 @@ jobs:
         run: |
           OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
           REGISTRY_IMAGE=${{ env.REGISTRY }}/${OWNER}
+
           echo "registry_image=${REGISTRY_IMAGE}" >> $GITHUB_OUTPUT
 
           IMAGE_TAG="${{ github.sha }}"
@@ -115,8 +116,8 @@ jobs:
           tags: |
             ${{ steps.meta.outputs.image }}
 
-          cache-from: type=registry,ref=${{ env.REGISTRY }}/${OWNER}/${{ matrix.image_name }}:buildcache
-          cache-to: type=registry,ref=${{ env.REGISTRY }}/${OWNER}/${{ matrix.image_name }}:buildcache,mode=max
+          cache-from: type=registry,ref=${{ steps.meta.outputs.registry_image }}/${{ matrix.image_name }}:buildcache
+          cache-to: type=registry,ref=${{ steps.meta.outputs.registry_image }}/${{ matrix.image_name }}:buildcache,mode=max
 
           provenance: false
 
