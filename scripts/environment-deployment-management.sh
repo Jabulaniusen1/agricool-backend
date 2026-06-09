@@ -130,6 +130,7 @@ case $1 in
         # Push Farmer and Impact dashboards views
         $DOCKER_COMPOSE_CMD run --rm impact_dashboard_web python create_view.py -v analytics_crate_movements
         $DOCKER_COMPOSE_CMD run --rm impact_dashboard_web python create_view.py -v create_relevant_checkins_view
+        $DOCKER_COMPOSE_CMD run --rm impact_dashboard_scheduler python init_tables.py
 
         # We should be ready to now rollout the rest of the dependencies
         exec $DOCKER_COMPOSE_CMD up -d;
