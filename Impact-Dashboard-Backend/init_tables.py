@@ -1,6 +1,6 @@
 from utils import setup_connection
 
-with open("sql_queries/init_tables.sql", "r") as f:
+with open("schema/init_tables.sql", "r") as f:
     sql = f.read()
 
  
