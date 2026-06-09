@@ -27,6 +27,7 @@ COPY indicator_reporter.py /scheduler/
 COPY dataProcessor.py .
 COPY compute_co2.py .
 COPY queries_data.json .
+COPY init_tables.py .
 COPY utils.py .
 COPY ./sql_queries ./sql_queries
 COPY ./impact_queries ./impact_queries
