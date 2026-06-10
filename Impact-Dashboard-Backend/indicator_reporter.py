@@ -842,13 +842,14 @@ def main() -> None:
 
     try:
         if args.view == "aggregated-comparison":
-            try:
-                latest_date = get_latest_date(cursor, "cooling_unit_metrics")
-            except Exception:
-                print(
-                    "INFO: The cooling_unit_metrics table is empty, starting from 2022-10-01"
-                )
-                latest_date = datetime(2022, 9, 30).date()
+            # Pass the intended backfill start as the default so that when the
+            # table is empty (MAX returns NULL → None), we start from 2022-10-01
+            # rather than date.min (year 1 AD).
+            backfill_default = datetime(2022, 9, 30).date()
+            latest_date = get_latest_date(cursor, "cooling_unit_metrics", backfill_default)
+            print(
+                f"INFO: Starting aggregated-comparison backfill from {latest_date + timedelta(days=1)}"
+            )
 
             start_date = latest_date + timedelta(days=1)
             current_date = date.today()
