@@ -15,6 +15,8 @@ RUN apt-get update --fix-missing && apt-get -y install dos2unix cron
 # Copy scheduler script and cron job
 COPY indicator_reporter.py /scheduler/
 COPY utils.py .
+COPY create_tables.py .
+COPY create_tables.sql .
 COPY ./sql_queries ./sql_queries
 
 COPY cron/crontab /etc/cron.d/crontab
