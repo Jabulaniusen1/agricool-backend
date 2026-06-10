@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS company_metrics (
     report_date DATE,
     company_id INT4 PRIMARY KEY,
     comp_name VARCHAR(255),
+    comp_logo TEXT,
     comp_country BPCHAR(2),
     comp_cap_tons NUMERIC,
     comp_cap_num_crates INT4,
