@@ -127,13 +127,6 @@ def extract_data(
                 merged_df = pd.concat([merged_df, df], axis=1, join='outer')
 
     merged_df = merged_df.copy()
-    print("Non-empty dfs:")
-    for k, v in dfs.items():
-        if not v.empty:
-            print(k, list(v.columns))
-
-    print("Merged DF columns before reset:")
-    print(list(merged_df.columns))
     merged_df.reset_index(inplace=True)
     if fill_in_columns == "Check-in":
         changing_cols = ["crates_in", "operations_in", "kg_in"]
@@ -175,6 +168,9 @@ def extract_data(
 
     # Drop nan rows based on the farmer_id and gender column to remove any deleted user data
     merged_df = merged_df[(~pd.isna(merged_df['gender']))]
+    if "farmer_id" not in merged_df.columns:
+        print("WARNING: No farmer data returned for this date")
+        return pd.DataFrame()
     merged_df = merged_df[(~pd.isna(merged_df['farmer_id']))]
 
     return merged_df
@@ -342,6 +338,10 @@ def main() -> None:
         while start_date <= current_date:
             set_date_args(args, start_date)
             indicator_df = extract_data(conn, args)
+            if indicator_df.empty:
+                start_date += timedelta(days=1)
+                continue
+                
             replace_nans(indicator_df, list(indicator_df.columns))
             aggregated_indicator_df = data_aggregation(
                 indicator_df
