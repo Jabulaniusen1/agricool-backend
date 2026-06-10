@@ -1,7 +1,5 @@
-create table farmer_metrics
-(
-    id                     serial
-        primary key,
+CREATE TABLE IF NOT EXISTS farmer_metrics (
+    id                     serial primary key,
     date                   date      not null,
     report_date            date      not null,
     farmer_id              integer   not null,
