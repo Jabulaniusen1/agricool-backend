@@ -127,6 +127,13 @@ def extract_data(
                 merged_df = pd.concat([merged_df, df], axis=1, join='outer')
 
     merged_df = merged_df.copy()
+    print("Non-empty dfs:")
+    for k, v in dfs.items():
+        if not v.empty:
+            print(k, list(v.columns))
+
+    print("Merged DF columns before reset:")
+    print(list(merged_df.columns))
     merged_df.reset_index(inplace=True)
     if fill_in_columns == "Check-in":
         changing_cols = ["crates_in", "operations_in", "kg_in"]
