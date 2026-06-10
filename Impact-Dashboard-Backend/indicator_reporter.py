@@ -312,6 +312,21 @@ def extract_data(
         ]:
             df = dfs[df_to_merge["name"]]
             merged_df = pd.merge(merged_df, df, on=df_to_merge["on"], how="left")
+
+        # If occupancy_company returned no rows, add a zero-filled fallback so
+        # company_aggregation() can always find 'average_company_room_occupancy'.
+        if "average_company_room_occupancy" not in merged_df.columns:
+            merged_df = merged_df.copy()
+            merged_df["average_company_room_occupancy"] = 0
+
+        # If crates_movement returned no rows, add zero-filled fallbacks so
+        # company_aggregation() can always find 'company_total_revenue' and
+        # 'company_total_revenue_usd'.
+        if "company_total_revenue" not in merged_df.columns:
+            merged_df = merged_df.copy()
+            merged_df["company_total_revenue"] = 0
+            merged_df["company_total_revenue_usd"] = 0
+
         return merged_df
 
     # Check if active user columns are empty
@@ -325,6 +340,19 @@ def extract_data(
         merged_df["room_beneficiary"] = 0
         merged_df["room_beneficiary_male"] = 0
         merged_df["room_beneficiary_female"] = 0
+
+    # If the occupancy_room query returned no rows, add a zero-filled fallback so
+    # cooling_units_aggregation() can always find the 'occupancy_room' column.
+    if "occupancy_room" not in merged_df.columns:
+        merged_df = merged_df.copy()
+        merged_df["occupancy_room"] = 0
+
+    # If the cooling_unit_revenue query returned no rows, add zero-filled fallbacks so
+    # cooling_units_aggregation() can always find 'revenue_room' and 'revenue_room_usd'.
+    if "revenue_room" not in merged_df.columns:
+        merged_df = merged_df.copy()
+        merged_df["revenue_room"] = 0
+        merged_df["revenue_room_usd"] = 0
 
     if fill_in_columns == "Check-in":
         changing_cols = ["crates_in", "operations_in", "kg_in"]
