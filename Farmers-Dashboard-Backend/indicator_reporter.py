@@ -162,6 +162,10 @@ def extract_data(
 
     merged_df = merged_df.assign(date=date_object)
 
+    if "gender" not in merged_df.columns:
+        merged_df = merged_df.copy()
+        merged_df["gender"] = "ot"
+
     # Drop nan rows based on the farmer_id and gender column to remove any deleted user data
     merged_df = merged_df[(~pd.isna(merged_df['gender']))]
     merged_df = merged_df[(~pd.isna(merged_df['farmer_id']))]
